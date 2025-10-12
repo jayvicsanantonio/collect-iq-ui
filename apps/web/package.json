@@ -1,0 +1,11 @@
+{
+  "name": "@collect-iq/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'TODO: next dev'",
+    "build": "echo 'TODO: next build'",
+    "start": "echo 'TODO: next start'"
+  }
+}
+

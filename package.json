@@ -1,0 +1,14 @@
+{
+  "name": "collect-iq",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "echo 'TODO: lint workspace'",
+    "typecheck": "echo 'TODO: typecheck workspace'"
+  }
+}
+
