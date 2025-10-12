@@ -19,11 +19,8 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Activate pnpm 9
-        run: corepack prepare pnpm@9 --activate
+      - name: Install pnpm (npm global)
+        run: npm i -g pnpm@9
 
       - name: Verify pnpm
         run: pnpm --version
