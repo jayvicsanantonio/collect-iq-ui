@@ -28,11 +28,10 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        run: pnpm -w install --frozen-lockfile=false
+        run: pnpm -w install --frozen-lockfile
 
       - name: Lint
         run: pnpm -w lint
 
       - name: Typecheck
         run: pnpm -w typecheck
-
