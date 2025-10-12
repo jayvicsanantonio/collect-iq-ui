@@ -1,11 +1,20 @@
-# Web App (Next.js)
+# Web App (Next.js 14)
 
-This is the placeholder for the Next.js application.
+Next.js 14 App Router application for Collect IQ.
 
-- Scripts are placeholders for now.
-- Add Next.js and related deps later.
+Commands:
 
 ```bash
+# start dev server
 pnpm --filter @collect-iq/web dev
+
+# build production output
+pnpm --filter @collect-iq/web build
+
+# start production server
+pnpm --filter @collect-iq/web start
 ```
 
+Routes:
+- `/` – placeholder homepage
+- `/health` – static health check

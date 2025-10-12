@@ -1,0 +1,6 @@
+/* Minimal global styles */
+html, body, #__next { height: 100%; }
+body { margin: 0; color: #111; background: #fff; }
+a { color: #0070f3; text-decoration: none; }
+a:hover { text-decoration: underline; }
+

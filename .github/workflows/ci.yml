@@ -24,8 +24,8 @@ jobs:
       - name: Verify pnpm
         run: pnpm --version
 
-      - name: Install dependencies
-        run: pnpm install -w --frozen-lockfile
+      - name: Install dependencies (all workspaces)
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm -w lint
