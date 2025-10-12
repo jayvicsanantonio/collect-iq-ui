@@ -1,0 +1,10 @@
+{
+  "name": "@collect-iq/infra",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "synth": "echo 'TODO: cdk synth'",
+    "deploy": "echo 'TODO: cdk deploy'"
+  }
+}
+
