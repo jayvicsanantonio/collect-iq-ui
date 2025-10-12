@@ -17,17 +17,6 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
-  ignorePatterns: [
-    'node_modules/',
-    'dist/',
-    'build/',
-    'coverage/',
-    '.next/',
-    'out/',
-    '*.config.js',
-    '*.config.cjs',
-    '*.config.mjs',
-  ],
   overrides: [
     {
       files: ['**/*.ts', '**/*.tsx'],
