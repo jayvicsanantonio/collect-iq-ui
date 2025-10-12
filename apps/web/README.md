@@ -6,13 +6,13 @@ Commands:
 
 ```bash
 # start dev server
-pnpm --filter apps/web dev
+pnpm --filter @collect-iq/web dev
 
 # build production output
-pnpm --filter apps/web build
+pnpm --filter @collect-iq/web build
 
 # start production server
-pnpm --filter apps/web start
+pnpm --filter @collect-iq/web start
 ```
 
 Routes:
