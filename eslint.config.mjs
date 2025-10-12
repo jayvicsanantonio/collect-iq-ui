@@ -5,6 +5,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-plugin-prettier';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import nextPlugin from '@next/eslint-plugin-next';
 
 export default [
   {
@@ -32,6 +33,20 @@ export default [
     plugins: { prettier },
     rules: {
       'prettier/prettier': 'error',
+    },
+  },
+  // Next.js rules for the web app
+  {
+    files: ['apps/web/**/*.{js,jsx,ts,tsx}'],
+    plugins: { '@next/next': nextPlugin },
+    settings: {
+      next: {
+        rootDir: ['apps/web'],
+      },
+    },
+    rules: {
+      // Apply Next's core web vitals ruleset
+      ...nextPlugin.configs['core-web-vitals']?.rules,
     },
   },
 ];
