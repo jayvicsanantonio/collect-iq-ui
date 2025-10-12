@@ -17,6 +17,8 @@ export default [
       'lib/**',
       'coverage/**',
       '.next/**',
+      '**/.next/**',
+      'apps/*/.next/**',
       'out/**',
       '.turbo/**',
       '.eslintcache',
