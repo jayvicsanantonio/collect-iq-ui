@@ -11,11 +11,7 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./apps/web/*"]
-    }
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "types/**/*.d.ts",
