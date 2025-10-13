@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx --no-error-on-unmatched-pattern",
-    "typecheck": "tsc -p tsconfig.base.json --noEmit",
+    "typecheck": "pnpm --filter @collect-iq/web typecheck",
     "web:dev": "pnpm --filter @collect-iq/web dev",
     "web:build": "pnpm --filter @collect-iq/web build",
     "web:start": "pnpm --filter @collect-iq/web start"
