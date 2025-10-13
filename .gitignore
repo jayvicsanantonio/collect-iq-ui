@@ -33,7 +33,6 @@ package-lock.json
 yarn.lock
 dist/
 build/
-lib/
 tmp/
 temp/
 .cache/
