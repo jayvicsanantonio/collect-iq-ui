@@ -1,6 +1,13 @@
 // CollectIQ Home Page - Demonstrating brand tokens and components
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function HomePage() {
@@ -17,9 +24,7 @@ export default function HomePage() {
           <h1 className="text-5xl font-bold bg-gradient-to-r from-[var(--color-vault-blue)] to-[var(--color-holo-cyan)] bg-clip-text text-transparent font-[var(--font-display)]">
             CollectIQ
           </h1>
-          <p className="text-xl text-[var(--muted-foreground)]">
-            Your vault just leveled up
-          </p>
+          <p className="text-xl text-[var(--muted-foreground)]">Your vault just leveled up</p>
         </header>
 
         {/* Button Showcase */}
@@ -47,8 +52,18 @@ export default function HomePage() {
           <Card className="hover:scale-[1.02] transition-transform">
             <CardHeader>
               <div className="inline-flex items-center justify-center rounded-full bg-[var(--color-vault-blue)] p-3 mb-4 w-12 h-12">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
               <CardTitle className="text-xl">Vault Blue</CardTitle>
@@ -60,15 +75,27 @@ export default function HomePage() {
               </p>
             </CardContent>
             <CardFooter>
-              <code className="text-xs font-[var(--font-mono)] text-[var(--color-vault-blue)]">#1A73E8</code>
+              <code className="text-xs font-[var(--font-mono)] text-[var(--color-vault-blue)]">
+                #1A73E8
+              </code>
             </CardFooter>
           </Card>
 
           <Card className="hover:scale-[1.02] transition-transform">
             <CardHeader>
               <div className="inline-flex items-center justify-center rounded-full bg-[var(--color-holo-cyan)] p-3 mb-4 w-12 h-12">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
                 </svg>
               </div>
               <CardTitle className="text-xl">Holo Cyan</CardTitle>
@@ -80,15 +107,27 @@ export default function HomePage() {
               </p>
             </CardContent>
             <CardFooter>
-              <code className="text-xs font-[var(--font-mono)] text-[var(--color-holo-cyan)]">#00C6FF</code>
+              <code className="text-xs font-[var(--font-mono)] text-[var(--color-holo-cyan)]">
+                #00C6FF
+              </code>
             </CardFooter>
           </Card>
 
           <Card className="hover:scale-[1.02] transition-transform">
             <CardHeader>
               <div className="inline-flex items-center justify-center rounded-full bg-[var(--color-emerald-glow)] p-3 mb-4 w-12 h-12">
-                <svg className="w-6 h-6 text-[var(--color-carbon-gray)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-6 h-6 text-[var(--color-carbon-gray)]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <CardTitle className="text-xl">Emerald Glow</CardTitle>
@@ -100,7 +139,9 @@ export default function HomePage() {
               </p>
             </CardContent>
             <CardFooter>
-              <code className="text-xs font-[var(--font-mono)] text-[var(--color-emerald-glow)]">#00E676</code>
+              <code className="text-xs font-[var(--font-mono)] text-[var(--color-emerald-glow)]">
+                #00E676
+              </code>
             </CardFooter>
           </Card>
         </div>
@@ -120,7 +161,10 @@ export default function HomePage() {
             </p>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="border-white text-white hover:bg-white hover:text-[var(--color-vault-blue)]">
+            <Button
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-[var(--color-vault-blue)]"
+            >
               Learn More
             </Button>
           </CardFooter>

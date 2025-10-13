@@ -22,8 +22,7 @@ const buttonVariants = cva(
           'bg-[var(--color-emerald-glow)] text-[var(--color-carbon-gray)] hover:opacity-90 shadow-md',
         warning:
           'bg-[var(--color-amber-pulse)] text-[var(--color-carbon-gray)] hover:opacity-90 shadow-md',
-        error:
-          'bg-[var(--color-crimson-red)] text-white hover:opacity-90 shadow-md',
+        error: 'bg-[var(--color-crimson-red)] text-white hover:opacity-90 shadow-md',
       },
       size: {
         sm: 'h-9 px-4 text-sm',
@@ -36,7 +35,7 @@ const buttonVariants = cva(
       variant: 'primary',
       size: 'md',
     },
-  }
+  },
 );
 
 export interface ButtonProps
@@ -48,13 +47,9 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, ...props }, ref) => {
     return (
-      <button
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
+      <button className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
     );
-  }
+  },
 );
 Button.displayName = 'Button';
 
