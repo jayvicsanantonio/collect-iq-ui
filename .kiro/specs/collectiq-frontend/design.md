@@ -8,12 +8,20 @@ The application follows a progressive workflow architecture where each screen bu
 
 Key design principles:
 
-- **Authentication-first**: All user data is scoped and protected via Amazon Cognito JWT tokens
+- **Authentication-first**: All user data is scoped and protected via Amazon Cognito JWT tokens using Hosted UI
 - **Real-time feedback**: Progressive loading states and optimistic UI updates
 - **Accessibility**: WCAG 2.2 AA compliance with keyboard-first navigation
 - **Performance**: Core Web Vitals targets (LCP < 2.5s, CLS < 0.1, INP < 200ms)
 - **Mobile-optimized**: Native camera integration and touch-friendly interfaces
 - **Secure by default**: HTTP-only cookies, strict CSP, no client-side token storage
+
+**Authentication Approach**: The application uses Amazon Cognito's Hosted UI for all authentication flows (sign in, sign up, password reset, email verification). This approach provides:
+
+- Production-ready, secure authentication UI maintained by AWS
+- Built-in support for MFA, social sign-in, and custom branding
+- Reduced frontend complexity (no custom auth forms to build/maintain)
+- OAuth 2.0 with PKCE for enhanced security
+- Automatic handling of edge cases (rate limiting, account lockout, etc.)
 
 ## Architecture
 
@@ -50,7 +58,8 @@ Key design principles:
 apps/web/
 ├── app/                          # Next.js App Router
 │   ├── (public)/                 # Public route group
-│   │   └── auth/                 # Authentication pages
+│   │   └── auth/                 # Authentication routes
+│   │       └── callback/         # OAuth callback handler
 │   ├── (protected)/              # Protected route group
 │   │   ├── upload/               # Card upload flow
 │   │   ├── vault/                # Collection vault
@@ -62,8 +71,7 @@ apps/web/
 ├── components/
 │   ├── auth/                     # Authentication components
 │   │   ├── AuthGuard.tsx         # Route protection wrapper
-│   │   ├── SessionExpiredModal.tsx
-│   │   └── SignInForm.tsx
+│   │   └── SessionExpiredModal.tsx
 │   ├── cards/                    # Card-related components
 │   │   ├── AuthenticityBadge.tsx
 │   │   ├── CardGrid.tsx
@@ -114,7 +122,8 @@ apps/web/
 
 **Authentication**
 
-- Amazon Cognito for user management
+- Amazon Cognito Hosted UI for sign in/sign up/password reset
+- OAuth 2.0 authorization code flow with PKCE
 - JWT tokens stored in secure HTTP-only cookies
 - Session management with automatic refresh
 
@@ -157,7 +166,8 @@ interface AuthGuardProps {
 
 // Wraps protected routes, handles session verification
 // Shows loading spinner while checking auth status
-// Redirects to /auth if unauthenticated
+// Redirects to Cognito Hosted UI if unauthenticated
+// Preserves intended destination in state parameter
 ```
 
 **SessionExpiredModal**
@@ -170,7 +180,22 @@ interface SessionExpiredModalProps {
 }
 
 // Displays when JWT expires
+// Re-authenticate redirects to Cognito Hosted UI
 // Preserves user context for replay after re-auth
+```
+
+**OAuth Callback Handler**
+
+```typescript
+interface OAuthCallbackProps {
+  code: string;
+  state: string;
+}
+
+// Handles OAuth callback from Cognito Hosted UI at /auth/callback
+// Exchanges authorization code for tokens via backend API
+// Validates state parameter for CSRF protection
+// Redirects to intended destination after successful auth
 ```
 
 #### 2. Upload Components
@@ -736,19 +761,47 @@ Based on 8px grid:
 
 ### Authentication Security
 
+**OAuth 2.0 Flow with Cognito Hosted UI**
+
+The application uses Amazon Cognito's Hosted UI with OAuth 2.0 authorization code flow with PKCE (Proof Key for Code Exchange):
+
+1. **Initiate Authentication**: User clicks sign in → redirect to Cognito Hosted UI
+   - Generate code verifier (random string)
+   - Generate code challenge (SHA256 hash of verifier)
+   - Build authorization URL with state parameter (contains intended destination)
+   - Redirect to: `https://{domain}/oauth2/authorize?response_type=code&client_id={id}&redirect_uri={uri}&state={state}&code_challenge={challenge}&code_challenge_method=S256`
+
+2. **User Authenticates**: User signs in/signs up via Hosted UI
+   - Cognito handles all UI, validation, and security
+   - Supports email verification, password reset, MFA
+   - No custom authentication forms needed
+
+3. **OAuth Callback**: Cognito redirects to `/auth/callback?code={code}&state={state}`
+   - Validate state parameter matches original request (CSRF protection)
+   - Exchange authorization code for tokens via backend API
+   - Backend validates code with code verifier
+   - Receive access token, ID token, refresh token
+
+4. **Store Tokens**: Backend sets HTTP-only cookies
+   - Access token (1 hour expiry)
+   - Refresh token (30 days expiry)
+   - ID token (user info)
+
+5. **Redirect**: Navigate to intended destination from state parameter
+
 **Token Storage**
 
 - JWT stored in HTTP-only cookies
 - SameSite=Lax to prevent CSRF
 - Secure flag in production
-- Never store tokens in localStorage
+- Never store tokens in localStorage or sessionStorage
 
 **Session Management**
 
 - Short-lived access tokens (1 hour)
-- Automatic silent refresh
-- Session expiry modal preserves context
-- Logout clears all cookies
+- Automatic silent refresh using refresh token
+- Session expiry modal preserves context and redirects to Hosted UI
+- Logout calls Cognito logout endpoint and clears all cookies
 
 ### Content Security Policy
 
@@ -759,9 +812,12 @@ Content-Security-Policy:
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https:;
   font-src 'self';
-  connect-src 'self' https://api.collectiq.com;
+  connect-src 'self' https://api.collectiq.com https://*.amazoncognito.com;
   frame-ancestors 'none';
+  form-action 'self' https://*.amazoncognito.com;
 ```
+
+Note: The CSP allows connections to Cognito domains for OAuth redirects and token exchange.
 
 ### Input Validation
 
@@ -848,8 +904,11 @@ pnpm start
 **Required**
 
 - `NEXT_PUBLIC_REGION`: AWS region
-- `NEXT_PUBLIC_COGNITO_USER_POOL_ID`: Cognito user pool
-- `NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID`: Cognito client
+- `NEXT_PUBLIC_COGNITO_USER_POOL_ID`: Cognito user pool ID
+- `NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID`: Cognito app client ID
+- `NEXT_PUBLIC_COGNITO_DOMAIN`: Cognito Hosted UI domain (e.g., collectiq.auth.us-east-1.amazoncognito.com)
+- `NEXT_PUBLIC_OAUTH_REDIRECT_URI`: OAuth callback URL (e.g., https://app.collectiq.com/auth/callback)
+- `NEXT_PUBLIC_OAUTH_LOGOUT_URI`: Post-logout redirect URL (e.g., https://app.collectiq.com)
 - `NEXT_PUBLIC_API_BASE`: API base URL
 
 **Optional**

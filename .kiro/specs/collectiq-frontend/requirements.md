@@ -16,13 +16,15 @@ This specification defines the functional and non-functional requirements for th
 
 #### Acceptance Criteria
 
-1. WHEN a user visits the application without authentication THEN the system SHALL redirect them to the /auth route
-2. WHEN a user successfully authenticates via Amazon Cognito THEN the system SHALL issue a JWT token stored in a secure HTTP-only cookie
-3. WHEN a user's session expires THEN the system SHALL display a session-expired modal with re-authentication option
-4. WHEN a user signs out THEN the system SHALL clear the session cookie and redirect to /auth
-5. IF a user attempts to access a protected route (/upload, /vault, /cards/:id) without authentication THEN the system SHALL redirect to /auth with a ?next parameter preserving the intended destination
-6. WHEN a user completes email verification THEN the system SHALL allow full access to the application
-7. WHEN a user requests password reset THEN the system SHALL provide a secure reset flow via email
+1. WHEN a user visits the application without authentication THEN the system SHALL redirect them to Amazon Cognito's Hosted UI
+2. WHEN a user successfully authenticates via Amazon Cognito Hosted UI THEN the system SHALL receive authorization code and exchange it for JWT tokens stored in secure HTTP-only cookies
+3. WHEN a user's session expires THEN the system SHALL display a session-expired modal with re-authentication option that redirects to Hosted UI
+4. WHEN a user signs out THEN the system SHALL clear the session cookies, call Cognito logout endpoint, and redirect to Hosted UI
+5. IF a user attempts to access a protected route (/upload, /vault, /cards/:id) without authentication THEN the system SHALL redirect to Cognito Hosted UI with a state parameter preserving the intended destination
+6. WHEN a user completes email verification via Cognito Hosted UI THEN the system SHALL allow full access to the application
+7. WHEN a user requests password reset THEN the system SHALL use Cognito Hosted UI's built-in password reset flow
+8. WHEN a user signs up via Cognito Hosted UI THEN the system SHALL handle the OAuth callback and create the user session
+9. WHEN the OAuth callback is received THEN the system SHALL validate the state parameter to prevent CSRF attacks
 
 ### Requirement 2: Card Upload & Image Capture
 
@@ -169,14 +171,15 @@ This specification defines the functional and non-functional requirements for th
 
 1. WHEN an API error occurs THEN the system SHALL parse RFC 7807 ProblemDetails format
 2. WHEN displaying errors THEN the system SHALL show user-friendly messages with specific remediation guidance
-3. WHEN a 401 error occurs THEN the system SHALL redirect to /auth
+3. WHEN a 401 error occurs THEN the system SHALL redirect to Cognito Hosted UI
 4. WHEN a 403 error occurs THEN the system SHALL display "You don't have access to this resource"
 5. WHEN a 413 error occurs THEN the system SHALL display "Image too large. Please upload a file under 12 MB"
 6. WHEN a 415 error occurs THEN the system SHALL display "Unsupported file type. Please use JPG, PNG, or HEIC"
 7. WHEN a 429 error occurs THEN the system SHALL display a rate limit dialog with countdown timer
 8. WHEN a 5xx error occurs THEN the system SHALL display a retry button with exponential backoff
-9. WHEN an error is displayed THEN the system SHALL always provide an actionable next step
-10. WHEN operations succeed THEN the system SHALL display toast notifications confirming the action
+9. WHEN an OAuth error occurs (access_denied, invalid_grant) THEN the system SHALL display a user-friendly error message with option to retry authentication
+10. WHEN an error is displayed THEN the system SHALL always provide an actionable next step
+11. WHEN operations succeed THEN the system SHALL display toast notifications confirming the action
 
 ### Requirement 12: Security & Data Protection
 
@@ -234,7 +237,7 @@ This specification defines the functional and non-functional requirements for th
 1. WHEN unit tests run THEN the system SHALL test formatters, guards, API client, Zod parsers, and components with logic
 2. WHEN integration tests run THEN the system SHALL test the complete upload flow from presign to finalization
 3. WHEN integration tests run THEN the system SHALL test vault list pagination and error states
-4. WHEN E2E tests run THEN the system SHALL test authentication redirect to /auth
+4. WHEN E2E tests run THEN the system SHALL test authentication redirect to Cognito Hosted UI
 5. WHEN E2E tests run THEN the system SHALL test the happy path: upload → identify → valuation → save
 6. WHEN E2E tests run THEN the system SHALL test session expiry modal behavior
 7. WHEN E2E tests run THEN the system SHALL verify Safari browser compatibility

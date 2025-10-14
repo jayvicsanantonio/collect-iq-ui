@@ -39,47 +39,48 @@
   - _Requirements: 13.1, 13.2, 13.3_
 
 - [ ] 3. Authentication infrastructure
-- [ ] 3.1 Set up Cognito integration
+- [ ] 3.1 Set up Cognito Hosted UI integration
   - Install AWS Amplify or Cognito SDK
-  - Create Cognito configuration with environment variables
-  - Implement auth helper functions in lib/auth.ts
+  - Create Cognito configuration with environment variables (User Pool ID, Client ID, Domain, Redirect URIs)
+  - Configure OAuth 2.0 settings (authorization code flow with PKCE)
+  - Implement auth helper functions in lib/auth.ts (generateCodeVerifier, generateCodeChallenge, buildHostedUIUrl)
   - Create session management utilities (getSession, refreshSession, clearSession)
   - Implement JWT token parsing and validation
   - Set up HTTP-only cookie handling for token storage
-  - _Requirements: 1.2, 12.1_
+  - _Requirements: 1.2, 1.8, 1.9, 12.1_
 
-- [ ] 3.2 Create authentication components
-  - Create SignInForm component with email/password fields
-  - Create SignUpForm component with validation
-  - Create EmailVerification component
-  - Create PasswordReset component
+- [ ] 3.2 Create OAuth callback handler
+  - Create /auth/callback route to handle OAuth redirects
+  - Implement authorization code exchange for tokens
+  - Validate state parameter to prevent CSRF attacks
+  - Store tokens in HTTP-only cookies
+  - Extract and redirect to intended destination from state
+  - Handle OAuth errors (access_denied, invalid_grant, etc.)
   - Create SessionExpiredModal component
-  - Implement form validation with Zod schemas
-  - Add loading and error states to all forms
-  - _Requirements: 1.1, 1.6, 1.7_
+  - _Requirements: 1.2, 1.8, 1.9_
 
 - [ ] 3.3 Implement AuthGuard and route protection
   - Create AuthGuard component with session verification
   - Implement loading spinner for auth status check
-  - Add redirect logic with ?next parameter preservation
+  - Add redirect logic to Cognito Hosted UI with state parameter preserving intended destination
   - Create route groups: (public) and (protected)
   - Implement middleware for server-side auth checks
   - Test redirect flows for authenticated and unauthenticated users
-  - _Requirements: 1.1, 1.5_
+  - _Requirements: 1.1, 1.5, 1.9_
 
-- [ ] 3.4 Build authentication pages
-  - Create /auth/signin page
-  - Create /auth/signup page
-  - Create /auth/verify-email page
-  - Create /auth/reset-password page
-  - Implement responsive layouts (two-column desktop, single-column mobile)
-  - Add authentication flow navigation
-  - _Requirements: 1.1, 1.6, 1.7_
+- [ ] 3.4 Implement sign out functionality
+  - Create sign out handler that clears cookies
+  - Call Cognito logout endpoint to invalidate session
+  - Redirect to Cognito Hosted UI or landing page after logout
+  - Handle sign out errors gracefully
+  - _Requirements: 1.4_
 
 - [ ]\* 3.5 Write authentication tests
-  - Unit tests for auth helper functions
-  - Integration tests for sign in/sign up flows
-  - E2E tests for authentication redirect behavior
+  - Unit tests for auth helper functions (code verifier, code challenge, URL building)
+  - Unit tests for state parameter validation
+  - Integration tests for OAuth callback flow
+  - E2E tests for authentication redirect to Hosted UI
+  - E2E tests for OAuth callback and redirect to intended destination
   - Test session expiry and refresh logic
   - _Requirements: 15.4, 15.5_
 
@@ -411,7 +412,7 @@
   - _Requirements: 11.2, 11.9_
 
 - [ ] 11.3 Implement error states for all flows
-  - Add 401 redirect to /auth
+  - Add 401 redirect to Cognito Hosted UI
   - Add 403 forbidden message
   - Add 404 not found message
   - Add 413 image too large error
