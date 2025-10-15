@@ -103,8 +103,8 @@ infra/terraform/
 │   ├── rekognition_access/       # IAM policies for Rekognition
 │   ├── bedrock_access/           # IAM policies for Bedrock
 │   ├── cloudwatch_dashboards/    # Monitoring dashboards
-│   ├── xray/                     # Distributed tracing
-│   └── ssm_secrets/              # External API keys
+│   ├── ssm_secrets/              # External API keys
+│   └── xray/                     # Distributed tracing
 ├── envs/
 │   ├── dev/
 │   │   ├── main.tf

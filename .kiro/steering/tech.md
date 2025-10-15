@@ -3,8 +3,9 @@
 ## Build System
 
 - **Package Manager**: pnpm 9+ with workspace support
+- **Build Orchestration**: Turborepo (monorepo task runner)
 - **Monorepo Structure**: pnpm workspaces (`apps/*`, `services/*`, `packages/*`, `infra/*`)
-- **TypeScript**: v5.9.3 in non-strict mode
+- **TypeScript**: v5.x (latest) in non-strict mode
 - **Node.js**: v20+
 
 ## Frontend Stack
@@ -14,13 +15,14 @@
 - **UI Components**: shadcn/ui (built on Radix UI primitives)
 - **Data Fetching**: SWR for client-side caching
 - **Validation**: Zod schemas for runtime type safety
+- **Charts**: Recharts (lazy-loaded for performance)
 - **Testing**: Vitest + React Testing Library + Playwright + axe-core
 
 ## Backend Stack
 
 - **Compute**: AWS Lambda (Node.js 20)
 - **Orchestration**: AWS Step Functions + EventBridge
-- **AI/ML**: Amazon Bedrock (Claude 3.5 Sonnet) + Amazon Rekognition
+- **AI/ML**: Amazon Bedrock (Claude 4.0 Sonnet) + Amazon Rekognition
 - **Database**: Amazon DynamoDB (single-table design)
 - **Storage**: Amazon S3 with presigned URLs
 - **Authentication**: Amazon Cognito with Hosted UI

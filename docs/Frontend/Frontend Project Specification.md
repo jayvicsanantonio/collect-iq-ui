@@ -10,7 +10,7 @@ Scope: This specification defines the frontend architecture, coding standards, U
 
 • Styling: Tailwind CSS + shadcn/ui + Radix primitives
 
-• Auth: Amazon Cognito (Hosted UI or Amplify Auth UI), JWT-backed session via secure HTTP-only cookie
+• Auth: Amazon Cognito (Hosted UI), JWT-backed session via secure HTTP-only cookie
 
 • Data: Typed API client (fetch) + Zod for runtime validation; SWR for client caching; edge-safe code paths
 

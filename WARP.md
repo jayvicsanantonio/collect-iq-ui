@@ -37,6 +37,7 @@ collect-iq/
 │       │   ├── utils/
 │       │   └── tests/
 │       ├── esbuild.mjs
+│       ├── vitest.config.ts
 │       ├── tsconfig.json
 │       └── package.json
 ├── packages/

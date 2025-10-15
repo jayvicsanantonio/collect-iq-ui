@@ -44,8 +44,8 @@ utils/ (problem.ts, log.ts, tracing.ts, constants.ts)
 tests/ (unit/, integration/, e2e/)  
 index.ts  
 esbuild.mjs  
-jest.config.ts  
-tsconfig.json  
+vitest.config.ts  
+tsconfig.json
 package.json  
 infra/terraform/ owned by DevOps; Backend supplies IAM needs & env var contracts.
 

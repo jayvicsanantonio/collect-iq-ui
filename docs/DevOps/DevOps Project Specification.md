@@ -30,8 +30,8 @@ eventbridge_bus/ \# Domain event bus + rules + DLQs
 rekognition_access/ \# IAM policies/endpoints/quotas notes  
 bedrock_access/ \# Bedrock model permissions & quotas  
 cloudwatch_dashboards/ \# KPIs  
-xray/ \# Tracing  
 ssm_secrets/ \# External API keys  
+xray/ \# Tracing  
 envs/  
 dev/  
 prod/

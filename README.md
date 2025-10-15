@@ -199,7 +199,7 @@ Global Secondary Indexes:
 
 - **Compute**: AWS Lambda (Node.js 20)
 - **Orchestration**: AWS Step Functions + EventBridge
-- **AI/ML**: Amazon Bedrock (Claude 3.5 Sonnet) + Amazon Rekognition
+- **AI/ML**: Amazon Bedrock (Claude 4.0 Sonnet) + Amazon Rekognition
 - **Database**: Amazon DynamoDB (single-table design)
 - **Storage**: Amazon S3 with presigned URLs
 - **Authentication**: Amazon Cognito with Hosted UI
@@ -216,7 +216,7 @@ Global Secondary Indexes:
 ### Code Quality
 
 - **Linting**: ESLint v9 (flat config) + Prettier
-- **Type checking**: TypeScript 5.9
+- **Type checking**: TypeScript 5.x
 - **Testing**: 90%+ code coverage target
 - **Security**: Automated dependency scanning
 - **Performance**: Lighthouse CI with Web Vitals targets (LCP < 2.5s, CLS < 0.1, INP < 200ms)
@@ -315,6 +315,7 @@ collect-iq/
 │       │   ├── utils/
 │       │   └── tests/
 │       ├── esbuild.mjs
+│       ├── vitest.config.ts
 │       ├── tsconfig.json
 │       └── package.json
 ├── packages/

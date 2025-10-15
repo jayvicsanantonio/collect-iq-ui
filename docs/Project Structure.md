@@ -155,7 +155,7 @@ services/
     │   └── index.ts
     │
     ├── esbuild.mjs
-    ├── jest.config.ts
+    ├── vitest.config.ts
     ├── tsconfig.json
     └── package.json
 ```
@@ -203,7 +203,6 @@ packages/
 │   ├── prettier/
 │   ├── vitest/
 │   ├── tsconfig/
-│   ├── jest/
 │   └── index.ts
 │
 └── telemetry/           # Logging and monitoring utilities
