@@ -93,6 +93,9 @@ importers:
       '@collectiq/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@smithy/node-http-handler':
+        specifier: ^4.4.1
+        version: 4.4.1
       uuid:
         specifier: ^10.0.0
         version: 10.0.0

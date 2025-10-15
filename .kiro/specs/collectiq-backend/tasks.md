@@ -26,14 +26,14 @@
     - Test ownership enforcement with matching and mismatched userIds
     - _Requirements: 13.1_
 
-- [ ] 3. Implement DynamoDB store layer
-  - [ ] 3.1 Create DynamoDB client wrapper
+- [x] 3. Implement DynamoDB store layer
+  - [x] 3.1 Create DynamoDB client wrapper
     - Initialize DynamoDB DocumentClient in services/backend/src/store with configuration
     - Implement connection pooling and retry logic
     - Create helper functions for PK/SK generation (USER#{sub}, CARD#{cardId})
     - _Requirements: 3.1, 10.5_
 
-  - [ ] 3.2 Implement card CRUD operations
+  - [x] 3.2 Implement card CRUD operations
     - Write createCard function in services/backend/src/store with conditional writes for idempotency
     - Write listCards function using GSI1 (userId#createdAt) with pagination
     - Write getCard function with ownership verification
@@ -41,7 +41,7 @@
     - Write deleteCard function (soft or hard delete based on config)
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-  - [ ] 3.3 Implement pricing snapshot storage
+  - [x] 3.3 Implement pricing snapshot storage
     - Write savePricingSnapshot function in services/backend/src/store with SK=PRICE#{iso8601}
     - Set TTL attribute for automatic expiration (300 seconds)
     - Write getPricingSnapshot function to retrieve cached results
