@@ -40,7 +40,7 @@ function getConfig() {
       'image/heic',
     ]),
     MAX_UPLOAD_MB: getEnvNumber('MAX_UPLOAD_MB', 12),
-    KMS_KEY_ID: process.env.KMS_KEY_ID, // Optional: for SSE-KMS
+    KMS_KEY_ID: getEnvVar('KMS_KEY_ID'),
   };
 }
 
@@ -96,7 +96,7 @@ export async function handler(
     // Generate S3 key: uploads/{sub}/{uuid}-{sanitizedFilename}
     const fileUuid = uuidv4();
     const sanitized = sanitizeFilename(request.filename);
-    const s3Key = `uploads/${userId}/${fileUuid}_${sanitized}`;
+    const s3Key = `uploads/${userId}/${fileUuid}-${sanitized}`;
 
     logger.debug('Generated S3 key', {
       requestId,
@@ -112,14 +112,8 @@ export async function handler(
       ContentType: request.contentType,
       ContentLength: request.sizeBytes,
       // Server-side encryption
-      ...(config.KMS_KEY_ID
-        ? {
-            ServerSideEncryption: 'aws:kms',
-            SSEKMSKeyId: config.KMS_KEY_ID,
-          }
-        : {
-            ServerSideEncryption: 'AES256',
-          }),
+      ServerSideEncryption: 'aws:kms',
+      SSEKMSKeyId: config.KMS_KEY_ID,
       // Metadata for tracking
       Metadata: {
         'uploaded-by': userId,
@@ -130,6 +124,12 @@ export async function handler(
     // Generate presigned URL
     const uploadUrl = await getSignedUrl(s3Client, command, {
       expiresIn: PRESIGN_EXPIRATION_SECONDS,
+      hoistableHeaders: new Set([
+        'x-amz-server-side-encryption',
+        'x-amz-server-side-encryption-aws-kms-key-id',
+        'x-amz-meta-uploaded-by',
+        'x-amz-meta-original-filename',
+      ]),
     });
 
     const response: PresignResponse = {
