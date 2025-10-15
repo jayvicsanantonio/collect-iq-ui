@@ -3,13 +3,7 @@
  * Implements CRUD operations for card entities in DynamoDB
  */
 
-import {
-  PutCommand,
-  GetCommand,
-  QueryCommand,
-  UpdateCommand,
-  DeleteCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { PutCommand, QueryCommand, UpdateCommand, DeleteCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardSchema } from '@collectiq/shared';
 import {
@@ -18,7 +12,7 @@ import {
   generateUserPK,
   generateCardSK,
 } from './dynamodb-client.js';
-import { NotFoundError, ConflictError, InternalServerError } from '../utils/errors.js';
+import { NotFoundError, ConflictError, InternalServerError, ForbiddenError } from '../utils/errors.js';
 import { enforceCardOwnership } from '../auth/ownership.js';
 import { logger } from '../utils/logger.js';
 
@@ -67,6 +61,90 @@ interface PaginationOptions {
 interface ListCardsResult {
   items: Card[];
   nextCursor?: string;
+}
+
+/**
+ * Fetch a card item by its cardId using the configured lookup strategy
+ *
+ * Prefers a GSI (default name CardIdIndex) but falls back to a scan when the
+ * index is unavailable. The scan path is primarily for local development and
+ * should not be relied on at production scale.
+ */
+async function fetchCardItemById(
+  cardId: string,
+  requestId?: string,
+): Promise<CardItem | null> {
+  const client = getDynamoDBClient();
+  const tableName = getTableName();
+  const indexName = process.env.CARD_ID_INDEX_NAME || 'CardIdIndex';
+
+  logger.debug('Fetching card by ID', {
+    operation: 'fetchCardItemById',
+    cardId,
+    indexName,
+    requestId,
+  });
+
+  try {
+    const result = await client.send(
+      new QueryCommand({
+        TableName: tableName,
+        IndexName: indexName,
+        KeyConditionExpression: 'cardId = :cardId',
+        ExpressionAttributeValues: {
+          ':cardId': cardId,
+        },
+        Limit: 1,
+      }),
+    );
+
+    const item = result.Items?.[0] as CardItem | undefined;
+    if (item && item.entityType === 'CARD') {
+      return item;
+    }
+  } catch (error) {
+    if (isValidationException(error)) {
+      logger.warn('CardIdIndex not available; falling back to scan lookup', {
+        operation: 'fetchCardItemById',
+        cardId,
+        indexName,
+        requestId,
+        validationError:
+          error instanceof Error
+            ? { name: error.name, message: error.message }
+            : { message: String(error) },
+      });
+    } else {
+      throw error;
+    }
+  }
+
+  const fallback = await client.send(
+    new ScanCommand({
+      TableName: tableName,
+      FilterExpression: '#entityType = :entityType AND cardId = :cardId',
+      ExpressionAttributeNames: {
+        '#entityType': 'entityType',
+      },
+      ExpressionAttributeValues: {
+        ':entityType': 'CARD',
+        ':cardId': cardId,
+      },
+      Limit: 1,
+    }),
+  );
+
+  const fallbackItem = fallback.Items?.[0] as CardItem | undefined;
+  return fallbackItem ?? null;
+}
+
+function isValidationException(error: unknown): boolean {
+  return (
+    !!error &&
+    typeof error === 'object' &&
+    'name' in error &&
+    (error as { name?: string }).name === 'ValidationException'
+  );
 }
 
 /**
@@ -308,25 +386,11 @@ export async function getCard(userId: string, cardId: string, requestId?: string
   });
 
   try {
-    const client = getDynamoDBClient();
-    const tableName = getTableName();
+    const item = await fetchCardItemById(cardId, requestId);
 
-    const result = await client.send(
-      new GetCommand({
-        TableName: tableName,
-        Key: {
-          PK: generateUserPK(userId),
-          SK: generateCardSK(cardId),
-        },
-        ConsistentRead: true,
-      }),
-    );
-
-    if (!result.Item) {
+    if (!item) {
       throw new NotFoundError(`Card ${cardId} not found`, requestId || '');
     }
-
-    const item = result.Item as CardItem;
 
     // Check if card is soft-deleted
     if (item.deletedAt) {
@@ -338,7 +402,7 @@ export async function getCard(userId: string, cardId: string, requestId?: string
 
     return itemToCard(item);
   } catch (error) {
-    if (error instanceof NotFoundError) {
+    if (error instanceof NotFoundError || error instanceof ForbiddenError) {
       throw error;
     }
     logger.error('Failed to get card', error instanceof Error ? error : new Error(String(error)), {

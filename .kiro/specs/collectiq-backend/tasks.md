@@ -73,8 +73,8 @@
     - Test S3 key format
     - _Requirements: 13.1_
 
-- [ ] 5. Implement cards CRUD API handlers
-  - [ ] 5.1 Create cards_create handler
+- [x] 5. Implement cards CRUD API handlers
+  - [x] 5.1 Create cards_create handler
     - Create handler in services/backend/src/handlers/cards_create.ts
     - Extract userId from JWT claims using auth module
     - Validate request body with Zod schema from packages/shared
@@ -84,7 +84,7 @@
     - Handle errors with RFC 7807 format from utils
     - _Requirements: 3.1, 9.1_
 
-  - [ ] 5.2 Create cards_list handler
+  - [x] 5.2 Create cards_list handler
     - Create handler in services/backend/src/handlers/cards_list.ts
     - Extract userId from JWT claims using auth module
     - Parse query parameters (limit, cursor)
@@ -92,7 +92,7 @@
     - Return 200 OK with items array and nextCursor
     - _Requirements: 3.2, 11.1_
 
-  - [ ] 5.3 Create cards_get handler
+  - [x] 5.3 Create cards_get handler
     - Create handler in services/backend/src/handlers/cards_get.ts
     - Extract userId from JWT claims using auth module
     - Extract cardId from path parameters
@@ -101,7 +101,7 @@
     - Return 404 if card not found
     - _Requirements: 3.3, 11.1_
 
-  - [ ] 5.4 Create cards_delete handler
+  - [x] 5.4 Create cards_delete handler
     - Create handler in services/backend/src/handlers/cards_delete.ts
     - Extract userId from JWT claims using auth module
     - Extract cardId from path parameters

@@ -11,7 +11,8 @@ import { z } from 'zod';
 
 export const AuthContextSchema = z.object({
   sub: z.string().describe('Cognito user ID'),
-  email: z.string().email(),
+  email: z.string().email().optional(),
+  username: z.string().optional(),
   groups: z.array(z.string()).optional(),
   iat: z.number(),
   exp: z.number(),

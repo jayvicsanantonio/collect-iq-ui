@@ -39,10 +39,22 @@ export function extractJwtClaims(event: APIGatewayProxyEventV2WithJWT): AuthCont
   }
 
   try {
+    const sub = getStringClaim(claims, 'sub');
+    if (!sub) {
+      throw new Error('Missing sub claim');
+    }
+
+    const rawEmail = getStringClaim(claims, 'email');
+    const username =
+      getStringClaim(claims, 'cognito:username') ?? getStringClaim(claims, 'username');
+    const email =
+      rawEmail ?? (username && username.includes('@') ? username : undefined);
+
     // Parse claims into AuthContext structure
     const authContext = {
-      sub: claims.sub,
-      email: claims.email,
+      sub,
+      email,
+      username,
       groups: claims['cognito:groups'] ? parseGroups(claims['cognito:groups']) : undefined,
       iat: parseTimestamp(claims.iat),
       exp: parseTimestamp(claims.exp),
@@ -95,6 +107,17 @@ function parseTimestamp(timestamp: unknown): number {
     return parsed;
   }
   throw new Error(`Timestamp must be number or string, got ${typeof timestamp}`);
+}
+
+/**
+ * Safely extract a string claim from the JWT claims collection
+ */
+function getStringClaim(
+  claims: Record<string, string | number | string[]>,
+  key: string,
+): string | undefined {
+  const value = claims[key];
+  return typeof value === 'string' ? value : undefined;
 }
 
 /**

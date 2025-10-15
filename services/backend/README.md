@@ -104,6 +104,12 @@ Common types and Zod schemas are defined in `packages/shared` and can be importe
 import { Card, CardSchema, PricingResult, AuthContext, FeatureEnvelope } from '@collectiq/shared';
 ```
 
+## Authentication
+
+- API Gateway JWT authorizers should validate Cognito **access tokens** produced by the Hosted UI; the backend derives the authenticated user from those claims.
+- Cognito access tokens do not always include an `email` claim, so `AuthContext.email` is optional. When present, the backend also exposes `AuthContext.username` (typically `cognito:username`) for auditing.
+- Downstream handlers should guard on the presence of `authContext.email` instead of assuming it is defined.
+
 ## Environment Variables
 
 Required environment variables for Lambda functions:
@@ -119,6 +125,7 @@ MAX_UPLOAD_MB=12
 CACHE_TTL_SECONDS=300
 IDEMPOTENCY_TTL_SECONDS=600
 BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+CARD_ID_INDEX_NAME=CardIdIndex # optional GSI for cardId lookups; falls back to scan if unset
 ```
 
 ## Development Workflow

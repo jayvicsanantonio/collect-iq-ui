@@ -1,6 +1,10 @@
 /**
  * Handler exports
- * Central export point for all Lambda handlers
+ * Centralized exports for all Lambda handlers
  */
 
-export { handler as uploadPresignHandler } from './upload_presign.js';
+export * from './upload_presign.js';
+export * from './cards_create.js';
+export * from './cards_list.js';
+export * from './cards_get.js';
+export * from './cards_delete.js';
