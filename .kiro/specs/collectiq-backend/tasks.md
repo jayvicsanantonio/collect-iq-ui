@@ -257,8 +257,8 @@
     - Test Bedrock prompt formatting
     - _Requirements: 13.1_
 
-- [ ] 9. Implement Bedrock integration service
-  - [ ] 9.1 Create BedrockService class
+- [x] 9. Implement Bedrock integration service
+  - [x] 9.1 Create BedrockService class
     - Create service in services/backend/src/adapters/bedrock_service.ts
     - Initialize Bedrock Runtime client
     - Implement invokeValuation method
@@ -266,21 +266,21 @@
     - Add retry logic (3 attempts with exponential backoff)
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-  - [ ] 9.2 Create valuation prompt and parser
+  - [x] 9.2 Create valuation prompt and parser
     - Write system prompt for valuation agent
     - Format ValuationContext into user message
     - Parse Bedrock response to extract ValuationSummary
     - Validate response with Zod schema
     - _Requirements: 8.2_
 
-  - [ ] 9.3 Create authenticity prompt and parser
+  - [x] 9.3 Create authenticity prompt and parser
     - Write system prompt for authenticity agent
     - Format AuthenticityContext into user message
     - Parse Bedrock response to extract AuthenticityResult
     - Validate response with Zod schema
     - _Requirements: 8.4_
 
-  - [ ] 9.4 Implement fallback handling
+  - [x] 9.4 Implement fallback handling
     - If Bedrock fails after retries, return signals-only result
     - Set reduced confidence flag
     - Log Bedrock errors for monitoring
