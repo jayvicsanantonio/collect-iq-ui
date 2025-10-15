@@ -116,15 +116,15 @@
     - Test 404 handling
     - _Requirements: 13.2_
 
-- [ ] 6. Implement pricing adapters
-  - [ ] 6.1 Create PriceSource interface and base adapter
+- [x] 6. Implement pricing adapters
+  - [x] 6.1 Create PriceSource interface and base adapter
     - Define PriceSource interface in services/backend/src/adapters with fetchComps and isAvailable methods
     - Create base adapter class with rate limiting and circuit breaker logic
     - Implement exponential backoff for retries
     - Track failure rate and open circuit after 5 consecutive failures
     - _Requirements: 4.4, 4.6_
 
-  - [ ] 6.2 Implement eBay pricing adapter
+  - [x] 6.2 Implement eBay pricing adapter
     - Create adapter in services/backend/src/adapters/ebay_adapter.ts
     - Set up eBay API authentication using EBAY_APP_ID from Secrets Manager
     - Implement fetchComps to query eBay Finding API
@@ -132,7 +132,7 @@
     - Handle pagination to fetch multiple pages of results
     - _Requirements: 4.1_
 
-  - [ ] 6.3 Implement TCGPlayer pricing adapter
+  - [x] 6.3 Implement TCGPlayer pricing adapter
     - Create adapter in services/backend/src/adapters/tcgplayer_adapter.ts
     - Set up TCGPlayer API authentication using public/private keys from Secrets Manager
     - Implement fetchComps to query TCGPlayer pricing API
@@ -140,14 +140,14 @@
     - Handle API-specific condition mappings
     - _Requirements: 4.1_
 
-  - [ ] 6.4 Implement PriceCharting adapter
+  - [x] 6.4 Implement PriceCharting adapter
     - Create adapter in services/backend/src/adapters/pricecharting_adapter.ts
     - Set up PriceCharting API authentication using API key from Secrets Manager
     - Implement fetchComps to query PriceCharting API
     - Parse response and map to RawComp format
     - _Requirements: 4.1_
 
-  - [ ] 6.5 Create pricing normalization and fusion logic
+  - [x] 6.5 Create pricing normalization and fusion logic
     - Create pricing service in services/backend/src/adapters/pricing_service.ts
     - Write normalize function to standardize conditions (Poor, Good, Excellent, Near Mint, Mint)
     - Convert all prices to USD
@@ -157,7 +157,7 @@
     - Calculate volatility (coefficient of variation)
     - _Requirements: 4.2, 4.3_
 
-  - [ ] 6.6 Implement PricingService orchestrator
+  - [x] 6.6 Implement PricingService orchestrator
     - Create fetchAllComps function that calls all available sources in parallel
     - Aggregate results from multiple sources
     - Call normalize and fuse functions
