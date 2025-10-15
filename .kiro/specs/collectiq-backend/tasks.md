@@ -179,15 +179,15 @@
     - Test caching behavior
     - _Requirements: 13.2_
 
-- [ ] 7. Implement Rekognition feature extraction
-  - [ ] 7.1 Create RekognitionAdapter
+- [x] 7. Implement Rekognition feature extraction
+  - [x] 7.1 Create RekognitionAdapter
     - Create adapter in services/backend/src/adapters/rekognition_adapter.ts
     - Initialize Rekognition client
     - Implement detectText function to extract OCR blocks
     - Parse Rekognition response and map to OCRBlock format
     - _Requirements: 5.1, 5.2_
 
-  - [ ] 7.2 Implement visual feature extraction
+  - [x] 7.2 Implement visual feature extraction
     - Download image from S3 for pixel analysis
     - Compute border ratios (top, bottom, left, right)
     - Calculate border symmetry score
@@ -195,13 +195,13 @@
     - Compute holographic pixel variance
     - _Requirements: 5.3, 6.1_
 
-  - [ ] 7.3 Implement font and quality metrics
+  - [x] 7.3 Implement font and quality metrics
     - Extract font metrics from OCR blocks (kerning, alignment)
     - Compute blur score using image analysis
     - Detect glare using brightness analysis
     - _Requirements: 6.2_
 
-  - [ ] 7.4 Create FeatureEnvelope builder
+  - [x] 7.4 Create FeatureEnvelope builder
     - Aggregate all extracted features into FeatureEnvelope structure
     - Include image metadata (dimensions, format, size)
     - Return complete FeatureEnvelope for downstream agents
