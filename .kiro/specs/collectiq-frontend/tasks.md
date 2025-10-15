@@ -10,8 +10,8 @@
   - Set up folder structure following the design specification
   - _Requirements: 15.1, 15.2_
 
-- [ ] 2. Design system foundation
-- [ ] 2.1 Implement core design tokens and CSS variables
+- [x] 2. Design system foundation
+- [x] 2.1 Implement core design tokens and CSS variables
   - Create globals.css with @theme directive for Tailwind v4
   - Define color tokens (Vault Blue, Holo Cyan, Carbon Gray, etc.)
   - Set up typography tokens (Inter, Space Grotesk, JetBrains Mono)
@@ -20,7 +20,7 @@
   - Implement light/dark mode CSS variables
   - _Requirements: 13.4, 13.5, 13.6, 13.7, 13.8_
 
-- [ ] 2.2 Create base UI components (shadcn/ui)
+- [x] 2.2 Create base UI components (shadcn/ui)
   - Install and configure shadcn/ui CLI
   - Create Button component with all variants (primary, secondary, gradient, outline, ghost)
   - Create Card component with sub-components (CardHeader, CardTitle, CardDescription, CardContent, CardFooter)
@@ -31,7 +31,7 @@
   - Create Tooltip component
   - _Requirements: 13.4, 13.5, 13.6_
 
-- [ ] 2.3 Implement theme toggle and dark mode support
+- [x] 2.3 Implement theme toggle and dark mode support
   - Create ThemeProvider context with localStorage persistence
   - Create ThemeToggle component
   - Implement prefers-color-scheme detection

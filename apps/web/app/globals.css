@@ -55,9 +55,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Light Mode (Default) */
+/* Light Mode (Default) - Very Light for Rainbow Visibility */
 :root {
-  --background: var(--color-cloud-silver);
+  --background: #ffffff;
   --foreground: var(--color-carbon-gray);
   --card: #ffffff;
   --card-foreground: var(--color-carbon-gray);
@@ -79,44 +79,44 @@ body {
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: var(--color-carbon-gray);
+    --background: #0a0a0a;
     --foreground: #f5f7fa;
-    --card: var(--color-graphite-gray);
+    --card: #1a1a1a;
     --card-foreground: #f5f7fa;
-    --primary: var(--color-vault-blue);
+    --primary: #4a9eff;
     --primary-foreground: #ffffff;
     --secondary: var(--color-holo-cyan);
-    --secondary-foreground: #ffffff;
-    --muted: #374151;
-    --muted-foreground: #9ca3af;
-    --accent: var(--color-holo-cyan);
-    --accent-foreground: #ffffff;
+    --secondary-foreground: #000000;
+    --muted: #2a2a2a;
+    --muted-foreground: #a1a1aa;
+    --accent: #2a2a2a;
+    --accent-foreground: #f5f7fa;
     --destructive: var(--color-crimson-red);
     --destructive-foreground: #ffffff;
-    --border: #374151;
-    --input: #374151;
+    --border: #3a3a3a;
+    --input: #2a2a2a;
     --ring: var(--color-holo-cyan);
   }
 }
 
-/* Dark mode class override */
+/* Dark mode class override - Very Dark */
 .dark {
-  --background: var(--color-carbon-gray);
+  --background: #000000;
   --foreground: #f5f7fa;
-  --card: var(--color-graphite-gray);
+  --card: #1a1a1a;
   --card-foreground: #f5f7fa;
-  --primary: var(--color-vault-blue);
+  --primary: #4a9eff;
   --primary-foreground: #ffffff;
   --secondary: var(--color-holo-cyan);
-  --secondary-foreground: #ffffff;
-  --muted: #374151;
-  --muted-foreground: #9ca3af;
-  --accent: var(--color-holo-cyan);
-  --accent-foreground: #ffffff;
+  --secondary-foreground: #000000;
+  --muted: #2a2a2a;
+  --muted-foreground: #a1a1aa;
+  --accent: #2a2a2a;
+  --accent-foreground: #f5f7fa;
   --destructive: var(--color-crimson-red);
   --destructive-foreground: #ffffff;
-  --border: #374151;
-  --input: #374151;
+  --border: #3a3a3a;
+  --input: #2a2a2a;
   --ring: var(--color-holo-cyan);
 }
 
@@ -135,4 +135,74 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Button Variants */
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+.btn-secondary:hover {
+  opacity: 0.9;
+}
+
+.btn-gradient {
+  background: linear-gradient(to right, var(--color-vault-blue), var(--color-holo-cyan));
+  color: white;
+}
+.btn-gradient:hover {
+  opacity: 0.9;
+}
+
+.btn-outline {
+  border: 1px solid var(--border);
+  background-color: transparent;
+}
+.btn-outline:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.btn-ghost {
+  background-color: transparent;
+}
+.btn-ghost:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.btn-destructive {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+}
+.btn-destructive:hover {
+  opacity: 0.9;
+}
+
+.btn-link {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.btn-link:hover {
+  text-decoration: none;
+}
+
+/* Card Styles */
+.card-base {
+  border-color: var(--border);
+  background-color: var(--card);
+  color: var(--card-foreground);
+}
+
+.card-description {
+  color: var(--muted-foreground);
 }

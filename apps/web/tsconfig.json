@@ -23,6 +23,7 @@
       "@/*": ["./src/*"],
       "@/components/*": ["./components/*"],
       "@/lib/*": ["./lib/*"],
+      "@/hooks/*": ["./hooks/*"],
       "@/styles/*": ["./styles/*"],
       "@/app/*": ["./app/*"],
       "@collectiq/shared": ["../../packages/shared/src/index.ts"]
