@@ -3,7 +3,13 @@
  * Implements CRUD operations for card entities in DynamoDB
  */
 
-import { PutCommand, QueryCommand, UpdateCommand, DeleteCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  PutCommand,
+  QueryCommand,
+  UpdateCommand,
+  DeleteCommand,
+  ScanCommand,
+} from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardSchema } from '@collectiq/shared';
 import {
@@ -12,7 +18,12 @@ import {
   generateUserPK,
   generateCardSK,
 } from './dynamodb-client.js';
-import { NotFoundError, ConflictError, InternalServerError, ForbiddenError } from '../utils/errors.js';
+import {
+  NotFoundError,
+  ConflictError,
+  InternalServerError,
+  ForbiddenError,
+} from '../utils/errors.js';
 import { enforceCardOwnership } from '../auth/ownership.js';
 import { logger } from '../utils/logger.js';
 
@@ -70,10 +81,7 @@ interface ListCardsResult {
  * index is unavailable. The scan path is primarily for local development and
  * should not be relied on at production scale.
  */
-async function fetchCardItemById(
-  cardId: string,
-  requestId?: string,
-): Promise<CardItem | null> {
+async function fetchCardItemById(cardId: string, requestId?: string): Promise<CardItem | null> {
   const client = getDynamoDBClient();
   const tableName = getTableName();
   const indexName = process.env.CARD_ID_INDEX_NAME || 'CardIdIndex';

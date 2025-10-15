@@ -47,8 +47,7 @@ export function extractJwtClaims(event: APIGatewayProxyEventV2WithJWT): AuthCont
     const rawEmail = getStringClaim(claims, 'email');
     const username =
       getStringClaim(claims, 'cognito:username') ?? getStringClaim(claims, 'username');
-    const email =
-      rawEmail ?? (username && username.includes('@') ? username : undefined);
+    const email = rawEmail ?? (username && username.includes('@') ? username : undefined);
 
     // Parse claims into AuthContext structure
     const authContext = {
