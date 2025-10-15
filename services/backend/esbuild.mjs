@@ -1,3 +1,6 @@
+/* eslint-env node */
+/* global process, console */
+
 import * as esbuild from 'esbuild';
 import { glob } from 'glob';
 import path from 'path';
