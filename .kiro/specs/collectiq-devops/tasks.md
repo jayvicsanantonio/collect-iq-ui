@@ -185,7 +185,7 @@
 
 - [ ] 5. Configure Lambda functions
 - [ ] 5.1 Deploy upload_presign Lambda
-  - Use lambda_fn module with function code from backend
+  - Use lambda_fn module with function code from services/backend/src/handlers/upload_presign
   - Set memory to 512MB, timeout to 30 seconds
   - Grant s3:PutObject permission (scoped to uploads/ prefix)
   - Set environment variables: BUCKET_UPLOADS, MAX_UPLOAD_MB, ALLOWED_UPLOAD_MIME
@@ -193,23 +193,23 @@
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
 - [ ] 5.2 Deploy cards CRUD Lambdas
-  - Deploy cards_create Lambda with dynamodb:PutItem permission
-  - Deploy cards_list Lambda with dynamodb:Query permission (GSI1)
-  - Deploy cards_get Lambda with dynamodb:GetItem permission
-  - Deploy cards_delete Lambda with dynamodb:DeleteItem permission
+  - Deploy cards_create Lambda from services/backend/src/handlers/cards_create with dynamodb:PutItem permission
+  - Deploy cards_list Lambda from services/backend/src/handlers/cards_list with dynamodb:Query permission (GSI1)
+  - Deploy cards_get Lambda from services/backend/src/handlers/cards_get with dynamodb:GetItem permission
+  - Deploy cards_delete Lambda from services/backend/src/handlers/cards_delete with dynamodb:DeleteItem permission
   - Set environment variables: DDB_TABLE, COGNITO_USER_POOL_ID
   - Create API Gateway integrations for all functions
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
 - [ ] 5.3 Deploy cards_revalue Lambda
-  - Use lambda_fn module with function code
+  - Use lambda_fn module with function code from services/backend/src/handlers/cards_revalue
   - Grant states:StartExecution permission for Step Functions
   - Set environment variables: STEP_FUNCTIONS_ARN, DDB_TABLE
   - Create API Gateway integration
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
 - [ ] 5.4 Deploy rekognition_extract Lambda
-  - Use lambda_fn module with function code
+  - Use lambda_fn module with function code from services/backend/src/orchestration/rekognition_extract
   - Set memory to 1024MB, timeout to 5 minutes
   - Attach rekognition_access IAM policy
   - Grant s3:GetObject permission for uploads bucket
@@ -217,14 +217,14 @@
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
 - [ ] 5.5 Deploy pricing_agent Lambda
-  - Use lambda_fn module with function code
+  - Use lambda_fn module with function code from services/backend/src/agents/pricing_agent
   - Set memory to 1024MB, timeout to 5 minutes
   - Attach ssm_secrets IAM policy for API keys
   - Set environment variables: EBAY_SECRET_ARN, TCGPLAYER_SECRET_ARN, PRICECHARTING_SECRET_ARN, DDB_TABLE
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 12.1, 12.2, 12.3, 12.4, 12.5_
 
 - [ ] 5.6 Deploy authenticity_agent Lambda
-  - Use lambda_fn module with function code
+  - Use lambda_fn module with function code from services/backend/src/agents/authenticity_agent
   - Set memory to 1024MB, timeout to 5 minutes
   - Attach bedrock_access IAM policy
   - Grant s3:GetObject permission for authentic-samples bucket
@@ -232,14 +232,14 @@
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7_
 
 - [ ] 5.7 Deploy aggregator Lambda
-  - Use lambda_fn module with function code
+  - Use lambda_fn module with function code from services/backend/src/orchestration/aggregator
   - Grant dynamodb:UpdateItem permission
   - Grant events:PutEvents permission for EventBridge
   - Set environment variables: DDB_TABLE, EVENT_BUS_NAME
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
 - [ ] 5.8 Deploy error_handler Lambda
-  - Use lambda_fn module with function code
+  - Use lambda_fn module with function code from services/backend/src/orchestration/error_handler
   - Grant sqs:SendMessage permission for DLQ
   - Set environment variables: DLQ_URL, DDB_TABLE
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
@@ -300,12 +300,12 @@
 
 - [ ] 8. Set up CI/CD pipelines
 - [ ] 8.1 Create backend CI/CD pipeline
-  - Create GitHub Actions workflow for backend
+  - Create GitHub Actions workflow for services/backend
   - Add lint job (ESLint)
   - Add typecheck job (tsc)
   - Add unit test job (Vitest)
   - Add integration test job (LocalStack)
-  - Add package job (esbuild Lambda functions)
+  - Add package job (esbuild Lambda functions from services/backend/src)
   - Add deploy job (upload artifacts to S3, update Lambda functions)
   - Add smoke test job (verify /healthz endpoint)
   - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7_
@@ -344,7 +344,7 @@
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6_
 
 - [ ] 9.2 Update Lambda functions to retrieve secrets
-  - Modify pricing_agent Lambda to retrieve API keys from Secrets Manager
+  - Modify pricing_agent Lambda (services/backend/src/agents/pricing_agent) to retrieve API keys from Secrets Manager
   - Implement in-memory caching for secrets (Lambda execution lifetime)
   - Handle secret rotation gracefully
   - Test secret retrieval and caching

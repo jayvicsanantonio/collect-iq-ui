@@ -276,8 +276,8 @@ pnpm web:start
 ### Infrastructure Deployment
 
 ```bash
-# Navigate to infrastructure package
-cd packages/infra
+# Navigate to infrastructure
+cd infra/terraform
 
 # Initialize Terraform
 terraform init
@@ -303,25 +303,103 @@ collect-iq/
 │       │   └── api/         # API route handlers
 │       ├── components/      # React components (auth, cards, upload, vault, ui)
 │       └── lib/             # API client, auth helpers, schemas, utilities
+├── services/
+│   └── backend/             # AWS Lambda + Step Functions backend (TypeScript)
+│       ├── src/
+│       │   ├── handlers/
+│       │   ├── agents/
+│       │   ├── orchestration/
+│       │   ├── adapters/
+│       │   ├── store/
+│       │   ├── auth/
+│       │   ├── utils/
+│       │   └── tests/
+│       ├── esbuild.mjs
+│       ├── tsconfig.json
+│       └── package.json
 ├── packages/
-│   └── infra/               # Terraform modules for AWS infrastructure
+│   ├── shared/              # Shared types/schemas
+│   ├── config/              # Shared build/lint/test configuration
+│   └── telemetry/           # Logging/metrics utilities
+├── infra/
+│   └── terraform/
 │       ├── modules/
-│       │   ├── amplify/     # Frontend hosting
-│       │   ├── api/         # API Gateway + Lambda
-│       │   ├── auth/        # Cognito configuration
-│       │   ├── storage/     # DynamoDB + S3
-│       │   └── ai/          # Bedrock + Rekognition
-│       └── environments/    # Dev, staging, production configs
+│       │   ├── amplify_hosting/
+│       │   ├── api_gateway_http/
+│       │   ├── cognito_user_pool/
+│       │   ├── s3_uploads/
+│       │   ├── dynamodb_collectiq/
+│       │   ├── lambda_fn/
+│       │   ├── step_functions/
+│       │   ├── eventbridge_bus/
+│       │   ├── rekognition_access/
+│       │   ├── bedrock_access/
+│       │   ├── cloudwatch_dashboards/
+│       │   ├── ssm_secrets/
+│       │   └── xray/
+│       └── envs/
+│           ├── dev/
+│           └── prod/
 ├── docs/                    # Comprehensive project specifications
 │   ├── Frontend/            # UI flows, wireframes, component specs
 │   ├── Backend/             # API contracts, Lambda handlers, data models
 │   ├── DevOps/              # Terraform modules, CI/CD, cost optimization
 │   └── Project Specification.md
 ├── .kiro/specs/             # Granular requirements, design, and tasks
-├── types/                   # Global TypeScript type definitions
 ├── WARP.md                  # Developer guide for Warp AI terminal
 ├── AGENTS.md                # Repository coding standards and guidelines
 └── README.md                # This file
+```
+
+### Workspace configuration examples
+
+pnpm-workspace.yaml
+
+```yaml
+packages:
+  - 'apps/*'
+  - 'services/*'
+  - 'packages/*'
+  - 'infra/*'
+```
+
+turbo.json
+
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "lint": { "outputs": [] },
+    "typecheck": { "outputs": [] },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": [".coverage/**"]
+    },
+    "dev": { "cache": false, "persistent": true }
+  }
+}
+```
+
+tsconfig.base.json
+
+```json
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "Bundler",
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@collectiq/shared/*": ["packages/shared/src/*"],
+      "@collectiq/config/*": ["packages/config/src/*"]
+    }
+  }
+}
 ```
 
 ---

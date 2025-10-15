@@ -26,22 +26,27 @@ Purpose: Define the backend architecture and implementation using AWS Lambda beh
 
 # 3. Repository & Code Layout
 
-packages/backend/  
+services/backend/  
 src/  
-handlers/ (apiGateway proxy)  
+handlers/ (API Gateway handlers)  
 upload_presign.ts  
 cards_create.ts  
 cards_list.ts  
 cards_get.ts  
 cards_delete.ts  
 cards_revalue.ts  
-adapters/ (eBay, TCGPlayer, PriceCharting, Rekognition, Bedrock)  
-auth/  
-pricing/  
-authenticity/  
-store/  
-utils/  
-tests/  
+agents/ (pricing_agent.ts, authenticity_agent.ts, aggregator.ts)  
+orchestration/ (revalue.asl.json, orchestrator.ts)  
+adapters/ (rekognition.ts, bedrock.ts, pricing/{ebay.ts, tcgplayer.ts, pricecharting.ts})  
+store/ (ddb.ts, queries.ts, models.ts)  
+auth/ (jwt.ts)  
+utils/ (problem.ts, log.ts, tracing.ts, constants.ts)  
+tests/ (unit/, integration/, e2e/)  
+index.ts  
+esbuild.mjs  
+jest.config.ts  
+tsconfig.json  
+package.json  
 infra/terraform/ owned by DevOps; Backend supplies IAM needs & env var contracts.
 
 # 4. Environment & Configuration

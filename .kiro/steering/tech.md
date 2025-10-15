@@ -3,7 +3,7 @@
 ## Build System
 
 - **Package Manager**: pnpm 9+ with workspace support
-- **Monorepo Structure**: pnpm workspaces (`apps/*`, `packages/*`)
+- **Monorepo Structure**: pnpm workspaces (`apps/*`, `services/*`, `packages/*`, `infra/*`)
 - **TypeScript**: v5.9.3 in non-strict mode
 - **Node.js**: v20+
 
@@ -55,7 +55,7 @@ pnpm typecheck            # TypeScript type checking
 pnpm web:build            # Build Next.js for production
 pnpm web:start            # Start production server
 
-# Infrastructure (from packages/infra)
+# Infrastructure (from infra/terraform)
 terraform init            # Initialize Terraform
 terraform plan            # Preview infrastructure changes
 terraform apply           # Apply infrastructure changes

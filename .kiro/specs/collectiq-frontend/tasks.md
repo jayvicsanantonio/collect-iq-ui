@@ -1,10 +1,11 @@
 # Implementation Plan
 
 - [ ] 1. Project setup and configuration
-  - Initialize Next.js 14 project with TypeScript and App Router
+  - Initialize Next.js 14 project in apps/web with TypeScript and App Router
   - Configure Tailwind CSS v4 with @theme directive
-  - Set up ESLint, Prettier, and Husky pre-commit hooks
-  - Configure path aliases in tsconfig.json (@/components, @/lib, etc.)
+  - Set up ESLint, Prettier, and Husky pre-commit hooks (using packages/config)
+  - Configure path aliases in tsconfig.json (@/components, @/lib, @collectiq/shared, etc.)
+  - Add dependency on packages/shared for shared types and schemas
   - Create environment variable configuration with validation
   - Set up folder structure following the design specification
   - _Requirements: 15.1, 15.2_
@@ -86,31 +87,32 @@
 
 - [ ] 4. API client and data layer
 - [ ] 4.1 Create typed API client
-  - Implement base API client in lib/api.ts with fetch wrapper
+  - Implement base API client in apps/web/lib/api.ts with fetch wrapper
+  - Import types and schemas from @collectiq/shared
   - Add automatic credential inclusion (cookies)
   - Implement request/response interceptors
-  - Add ProblemDetails error parsing
+  - Add ProblemDetails error parsing using ProblemDetailsSchema from @collectiq/shared
   - Implement exponential backoff retry logic for GET requests
   - Add request ID tracking for traceability
   - _Requirements: 11.1, 11.2_
 
-- [ ] 4.2 Define Zod schemas
-  - Create schemas in lib/schemas.ts mirroring backend types
-  - Define CardSchema with all fields
-  - Define ValuationDataSchema
-  - Define AuthenticityDetailsSchema
-  - Define ProblemDetailsSchema
+- [ ] 4.2 Set up shared schemas
+  - Ensure packages/shared is set up with Zod schemas (may already exist from backend setup)
+  - Verify CardSchema, ValuationDataSchema, AuthenticityDetailsSchema, ProblemDetailsSchema are defined
+  - Import schemas from @collectiq/shared in API client
   - Add schema validation to API client responses
+  - Use TypeScript types exported from schemas (Card, ValuationData, etc.)
   - _Requirements: 11.1_
 
 - [ ] 4.3 Implement API endpoints
-  - Implement getPresignedUrl() for S3 upload
-  - Implement createCard() for card creation
+  - Implement getPresignedUrl() for S3 upload in apps/web/lib/api.ts
+  - Implement createCard() for card creation using Card type from @collectiq/shared
   - Implement getCards() with pagination support
   - Implement getCard() for single card retrieval
   - Implement deleteCard() for card deletion
   - Implement refreshValuation() for valuation updates
-  - Add TypeScript types for all request/response payloads
+  - Use TypeScript types from @collectiq/shared for all request/response payloads
+  - Validate all responses with Zod schemas from @collectiq/shared
   - _Requirements: 2.4, 5.8, 6.9, 7.6_
 
 - [ ] 4.4 Set up SWR for data fetching
@@ -122,15 +124,16 @@
   - _Requirements: 6.9_
 
 - [ ]\* 4.5 Write API client tests
-  - Unit tests for API client methods
-  - Test error handling and ProblemDetails parsing
+  - Unit tests for API client methods in apps/web/lib/api.ts
+  - Test error handling and ProblemDetails parsing using schemas from @collectiq/shared
   - Test retry logic with exponential backoff
-  - Test Zod schema validation
+  - Test Zod schema validation with schemas from @collectiq/shared
   - Mock API responses for integration tests
   - _Requirements: 15.1_
 
 - [ ] 5. Upload flow implementation
 - [ ] 5.1 Create UploadDropzone component
+  - Create component in apps/web/components/upload/UploadDropzone.tsx
   - Implement drag-and-drop area with visual feedback
   - Add file picker integration
   - Implement file type validation (JPG, PNG, HEIC)
@@ -141,6 +144,7 @@
   - _Requirements: 2.1, 2.2, 2.3_
 
 - [ ] 5.2 Create CameraCapture component
+  - Create component in apps/web/components/upload/CameraCapture.tsx
   - Implement getUserMedia API integration
   - Add camera permission request handling
   - Create permission helper dialog
@@ -151,6 +155,7 @@
   - _Requirements: 2.6, 2.7_
 
 - [ ] 5.3 Create UploadProgress component
+  - Create component in apps/web/components/upload/UploadProgress.tsx
   - Implement progress bar with percentage display
   - Add thumbnail preview of uploading image
   - Create cancel button with abort functionality
@@ -159,8 +164,8 @@
   - _Requirements: 2.8, 2.9_
 
 - [ ] 5.4 Implement upload workflow
-  - Create /upload page with UploadDropzone
-  - Implement presigned URL request flow
+  - Create apps/web/app/(protected)/upload/page.tsx with UploadDropzone
+  - Implement presigned URL request flow using API client
   - Add direct S3 upload with progress tracking
   - Create object URLs for image previews
   - Implement cleanup on unmount (revoke object URLs)
@@ -398,6 +403,8 @@
 
 - [ ] 11. Error handling and user feedback
 - [ ] 11.1 Create ProblemDetails error handler
+  - Create error handler in apps/web/lib/errors.ts
+  - Use ProblemDetails type and schema from @collectiq/shared
   - Implement error parsing utility
   - Create error mapping for common status codes
   - Generate user-friendly messages with remediation
@@ -589,7 +596,7 @@
   - _Requirements: 12.3_
 
 - [ ] 15.4 Implement input validation
-  - Mirror backend Zod schemas for client validation
+  - Use Zod schemas from @collectiq/shared for client-side validation
   - Validate file types and sizes before upload
   - Sanitize user input in forms
   - Prevent XSS attacks
@@ -611,7 +618,8 @@
 
 - [ ] 16. Analytics and telemetry
 - [ ] 16.1 Implement event tracking
-  - Create analytics utility in lib/analytics.ts
+  - Create analytics utility in apps/web/lib/analytics.ts
+  - Consider using telemetry utilities from packages/telemetry if applicable
   - Implement upload_started event
   - Implement upload_succeeded event
   - Implement analyze_started event
@@ -643,8 +651,8 @@
 
 - [ ] 17. Testing and quality assurance
 - [ ]\* 17.1 Write unit tests
-  - Test utility functions (formatters, validators)
-  - Test Zod schema parsing
+  - Test utility functions (formatters, validators) in apps/web/lib
+  - Test Zod schema parsing using schemas from @collectiq/shared
   - Test API client methods
   - Test component logic and hooks
   - Test auth guards
