@@ -213,21 +213,21 @@
     - Test font metrics extraction
     - _Requirements: 13.1_
 
-- [ ] 8. Implement authenticity detection agent
-  - [ ] 8.1 Create visual hash computation
+- [x] 8. Implement authenticity detection agent
+  - [x] 8.1 Create visual hash computation
     - Create utility in services/backend/src/utils/phash.ts
     - Implement perceptual hashing (pHash) algorithm
     - Download image from S3 and compute hash
     - Return hash string for comparison
     - _Requirements: 6.1_
 
-  - [ ] 8.2 Implement reference hash comparison
+  - [x] 8.2 Implement reference hash comparison
     - Load authentic reference hashes from S3 (authentic-samples/ bucket)
     - Compare computed hash with reference hashes using Hamming distance
     - Return visualHashConfidence score (0-1)
     - _Requirements: 6.1_
 
-  - [ ] 8.3 Compute authenticity signals
+  - [x] 8.3 Compute authenticity signals
     - Calculate textMatchConfidence from OCR validation
     - Calculate holoPatternConfidence from holographic analysis
     - Calculate borderConsistency from border metrics
@@ -235,14 +235,14 @@
     - Aggregate into AuthenticitySignals structure
     - _Requirements: 6.3, 6.7_
 
-  - [ ] 8.4 Integrate Bedrock for authenticity judgment
+  - [x] 8.4 Integrate Bedrock for authenticity judgment
     - Create Bedrock prompt with FeatureEnvelope and AuthenticitySignals
     - Invoke Bedrock Converse API with Claude 3 Sonnet
     - Parse response to extract authenticityScore, fakeDetected, and rationale
     - Set fakeDetected=true if score < 0.85
     - _Requirements: 6.4, 6.5, 6.6_
 
-  - [ ] 8.5 Create AuthenticityAgent Lambda handler
+  - [x] 8.5 Create AuthenticityAgent Lambda handler
     - Create handler in services/backend/src/agents/authenticity_agent.ts
     - Accept input with features (FeatureEnvelope) and cardMeta
     - Call visual hash computation and comparison
