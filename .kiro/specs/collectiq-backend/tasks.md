@@ -342,8 +342,8 @@
     - Test DLQ routing
     - _Requirements: 13.2_
 
-- [ ] 11. Implement revalue orchestration handler
-  - [ ] 11.1 Create cards_revalue Lambda handler
+- [x] 11. Implement revalue orchestration handler
+  - [x] 11.1 Create cards_revalue Lambda handler
     - Create handler in services/backend/src/handlers/cards_revalue.ts
     - Extract userId from JWT claims using auth module
     - Extract cardId from path parameters
