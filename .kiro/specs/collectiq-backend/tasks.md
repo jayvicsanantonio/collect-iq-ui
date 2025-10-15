@@ -9,14 +9,14 @@
   - Set up package.json with dependencies and scripts
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 2. Implement authentication module
-  - [ ] 2.1 Create JWT claims extraction utility
+- [x] 2. Implement authentication module
+  - [x] 2.1 Create JWT claims extraction utility
     - Write function in services/backend/src/auth to parse API Gateway authorizer context
     - Extract sub, email, groups from JWT claims
     - Handle missing or malformed claims with proper errors
     - _Requirements: 1.1, 1.4_
 
-  - [ ] 2.2 Implement ownership enforcement
+  - [x] 2.2 Implement ownership enforcement
     - Create enforceOwnership function in services/backend/src/auth that compares userId with resource owner
     - Throw 403 ProblemDetails when ownership check fails
     - _Requirements: 1.3_
