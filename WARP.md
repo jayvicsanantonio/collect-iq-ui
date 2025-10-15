@@ -19,14 +19,45 @@ CollectIQ is an AI-powered collector assistant for Pokémon TCG cards built as a
 collect-iq/
 ├── apps/web/              # Next.js 14 (App Router) frontend
 │   ├── app/
-│   │   ├── (public)/      # Public routes (auth, landing)
-│   │   ├── (protected)/   # Protected routes (upload, vault, cards)
-│   │   └── api/           # API route handlers (if needed)
-│   ├── components/        # React components (auth, cards, upload, vault, ui)
-│   └── lib/               # API client, auth helpers, schemas, utilities
-├── packages/infra/        # Terraform IaC (Amplify, API Gateway, Cognito, DynamoDB, S3, Step Functions)
-├── docs/                  # Project specifications (Frontend, Backend, DevOps)
-├── .kiro/specs/          # Detailed requirements, design, and tasks for each workstream
+│   │   ├── (public)/      # Unauthenticated routes (landing, auth callback)
+│   │   ├── (protected)/   # JWT-protected routes (upload, vault, cards)
+│   │   └── api/           # API route handlers
+│   ├── components/        # React components organized by feature
+│   │   ├── auth/          # Authentication components (AuthGuard, SessionExpiredModal)
+│   │   ├── cards/         # Card display and management
+│   │   ├── upload/        # Image upload UI (UploadDropzone, CameraCapture)
+│   │   ├── vault/         # Collection vault
+│   │   └── ui/            # shadcn/ui reusable components
+│   └── lib/               # Utilities and helpers
+│       ├── api/           # API client functions
+│       ├── auth/          # Auth helpers
+│       ├── schemas/       # Zod validation schemas
+│       └── utils/         # Shared utilities
+├── packages/infra/        # Terraform IaC with modular design
+│   ├── modules/           # Self-contained Terraform modules
+│   │   ├── amplify/       # Frontend hosting
+│   │   ├── api/           # API Gateway + Lambda
+│   │   ├── auth/          # Cognito configuration
+│   │   ├── storage/       # DynamoDB + S3
+│   │   └── ai/            # Bedrock + Rekognition
+│   └── environments/      # Dev, staging, production configs
+├── docs/                  # Comprehensive project specifications
+│   ├── Frontend/          # UI flows, wireframes, component specs
+│   ├── Backend/           # API contracts, Lambda handlers, data models
+│   ├── DevOps/            # Terraform modules, CI/CD, cost optimization
+│   ├── Project Specification.md
+│   ├── Hackathon - Product Requirements.md
+│   ├── Venture - Product Requirements.md
+│   └── Market Opportunity.md
+├── .kiro/
+│   ├── specs/             # Granular requirements, design, and tasks
+│   │   ├── collectiq-frontend/
+│   │   ├── collectiq-backend/
+│   │   └── collectiq-devops/
+│   └── steering/          # AI assistant guidance rules
+│       ├── product.md     # Product overview and user flows
+│       ├── structure.md   # Project structure conventions
+│       └── tech.md        # Technology stack details
 └── types/                # Global TypeScript type definitions
 ```
 
@@ -97,10 +128,16 @@ Tests are named `*.test.ts[x]` and colocated with source or in `tests/` director
 
 - **API Gateway (HTTP API)** with JWT authorizer validates Cognito tokens
 - **Lambda Functions**: Thin handlers for upload presign, cards CRUD, workflow triggers
-- **Step Functions**: Orchestrates multi-step AI workflows (Rekognition → Bedrock agents → DynamoDB)
-- **DynamoDB**: Single-table design with user-scoped partitions (`PK: USER#{sub}`, `SK: CARD#{cardId}`)
-- **S3**: Presigned uploads scoped to `uploads/{sub}/{uuid}`
+- **Step Functions**: Orchestrates multi-step AI workflows
+  - RekognitionExtract task: Visual feature extraction (OCR, holo patterns, borders)
+  - Parallel execution: Pricing Agent + Authenticity Agent (both using Bedrock)
+  - Aggregator task: Merge results, persist to DynamoDB, emit EventBridge events
+- **DynamoDB**: Single-table design with user-scoped partitions
+  - `PK: USER#{sub}`, `SK: CARD#{cardId}` or `PRICE#{ISO8601}`
+  - GSI1: userId (vault queries), GSI2: set#rarity (analytics)
+- **S3**: Presigned uploads scoped to `uploads/{sub}/{uuid}` (expire in 60 seconds)
 - **Bedrock + Rekognition**: AI agents for identification, valuation, and authenticity detection
+- **EventBridge**: Event-driven coordination between agents
 
 ### Multi-Agent Pattern
 
@@ -216,7 +253,15 @@ Comprehensive project specs are located in:
 - `docs/Frontend/Frontend Project Specification.md` — UI flows, wireframes, component specs
 - `docs/Backend/Backend Project Specification.md` — API contracts, Lambda handlers, DynamoDB schema
 - `docs/DevOps/DevOps Project Specification.md` — Terraform modules, CI/CD, AWS cost optimization
+- `docs/Market Opportunity.md` — Industry analysis, competitive landscape, market sizing
 - `.kiro/specs/` — Granular requirements, design decisions, and task breakdowns per workstream
+  - `collectiq-frontend/` — Frontend requirements, design, tasks
+  - `collectiq-backend/` — Backend requirements, design, tasks
+  - `collectiq-devops/` — DevOps requirements, design, tasks
+- `.kiro/steering/` — AI assistant guidance rules
+  - `product.md` — Product overview, core features, user flows
+  - `structure.md` — Project structure conventions, data flow architecture
+  - `tech.md` — Technology stack, common commands, environment variables
 
 Always consult these documents when:
 
@@ -224,6 +269,38 @@ Always consult these documents when:
 - Understanding data models (see Backend design)
 - Modifying auth flows (see Frontend auth section)
 - Provisioning infrastructure (see DevOps Terraform modules)
+- Following coding conventions (see steering documents)
+
+## Task Tracking
+
+**CRITICAL**: When completing any frontend, backend, or DevOps task, update the appropriate task file:
+
+- **Frontend tasks**: `.kiro/specs/collectiq-frontend/tasks.md`
+- **Backend tasks**: `.kiro/specs/collectiq-backend/tasks.md`
+- **DevOps tasks**: `.kiro/specs/collectiq-devops/tasks.md`
+
+### How to Update Task Status
+
+1. Open the appropriate task file for your workstream
+2. Locate the task you completed
+3. Mark the task as completed (update status/checkbox)
+4. Add completion notes:
+   - Date completed
+   - Implementation details
+   - Any deviations from the original spec
+   - Links to relevant PRs or commits
+
+### Example Task Update
+
+```markdown
+- [x] FE-T1.2: Implement AuthGuard component
+  - Status: Completed (2025-10-15)
+  - Implementation: Created `components/auth/AuthGuard.tsx` with session verification
+  - Deviations: Added optional `fallback` prop for custom loading states
+  - PR: #123
+```
+
+**Always update task completion status before closing a pull request.**
 
 ## Debugging Tips
 
