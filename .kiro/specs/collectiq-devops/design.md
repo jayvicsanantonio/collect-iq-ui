@@ -6,6 +6,8 @@ The CollectIQ DevOps infrastructure is a fully serverless, multi-region AWS arch
 
 The architecture follows AWS Well-Architected Framework principles with emphasis on operational excellence, security, reliability, performance efficiency, and cost optimization. The system scales automatically from hackathon prototype (~$50/month, 100k API calls) to production growth stage (50k+ users, 10M+ API calls, ~$1,500-2,000/month).
 
+The infrastructure supports a pnpm workspace monorepo with backend services in `services/backend/`, frontend in `apps/web/`, and shared packages in `packages/` (shared types/schemas, config, telemetry). Lambda functions are built from the backend service code and deployed with esbuild bundling.
+
 Key design principles:
 
 - **Infrastructure as Code**: All resources defined in Terraform with modular, reusable components
@@ -101,8 +103,8 @@ infra/terraform/
 │   ├── rekognition_access/       # IAM policies for Rekognition
 │   ├── bedrock_access/           # IAM policies for Bedrock
 │   ├── cloudwatch_dashboards/    # Monitoring dashboards
-│   ├── xray/                     # Distributed tracing
-│   └── ssm_secrets/              # External API keys
+│   ├── ssm_secrets/              # External API keys
+│   └── xray/                     # Distributed tracing
 ├── envs/
 │   ├── dev/
 │   │   ├── main.tf
@@ -116,6 +118,19 @@ infra/terraform/
 │       └── terraform.tfvars
 └── backend.tf                    # S3 + DynamoDB state backend
 ```
+
+### Monorepo Integration
+
+The infrastructure integrates with the pnpm workspace monorepo structure:
+
+- **Backend Services** (`services/backend/`): Lambda function source code organized by handlers, agents, orchestration, adapters, store, auth, and utils
+- **Frontend Application** (`apps/web/`): Next.js application deployed via AWS Amplify
+- **Shared Packages** (`packages/`):
+  - `packages/shared/`: Shared TypeScript types and Zod schemas used across frontend and backend
+  - `packages/config/`: Build, lint, and test configuration shared across workspace
+  - `packages/telemetry/`: Logging and metrics utilities that may be bundled into Lambda functions
+
+Lambda functions built with esbuild will automatically bundle dependencies from `packages/shared/` and `packages/telemetry/` as needed, ensuring consistent types and utilities across the application.
 
 ### 1. AWS Amplify Hosting Module
 
@@ -270,6 +285,8 @@ module "cognito" {
 **Key Resources:** `aws_lambda_function`, `aws_iam_role`, `aws_lambda_alias`, `aws_cloudwatch_log_group`
 
 **Features:** esbuild packaging, X-Ray tracing, environment variables, least-privilege IAM
+
+**Source Code:** Lambda functions are built from `services/backend/src/handlers/` and `services/backend/src/agents/` directories. Shared code from `packages/shared/` may be bundled into Lambda functions during the esbuild process.
 
 ### 7. Step Functions Module
 
@@ -551,7 +568,7 @@ name: Backend CI/CD
 on:
   push:
     branches: [main, develop]
-    paths: ['packages/backend/**']
+    paths: ['services/backend/**', 'packages/shared/**', 'packages/telemetry/**']
 
 jobs:
   test:
@@ -561,7 +578,8 @@ jobs:
     - Integration tests (LocalStack)
 
   package:
-    - Build Lambda functions with esbuild
+    - Build Lambda functions with esbuild from services/backend/src
+    - Bundle dependencies from packages/shared and packages/telemetry
     - Upload artifacts to S3
 
   deploy:
@@ -599,8 +617,8 @@ jobs:
 
 **Frontend Pipeline (Amplify):**
 
-- Auto-triggered on git push
-- Build Next.js app
+- Auto-triggered on git push to apps/web/\*\*
+- Build Next.js app from apps/web/
 - Deploy to Amplify
 - PR previews for feature branches
 

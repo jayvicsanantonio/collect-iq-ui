@@ -1,21 +1,23 @@
 # Implementation Plan
 
 - [ ] 1. Set up project structure and shared utilities
-  - Create packages/backend directory with TypeScript configuration
-  - Set up esbuild configuration for Lambda bundling
-  - Create shared utilities: logger, error handling (RFC 7807), validation helpers
-  - Configure Zod schemas for common types (Card, PricingResult, AuthContext)
+  - Create services/backend directory with TypeScript configuration (tsconfig.json extending tsconfig.base.json)
+  - Create subdirectories: src/handlers, src/agents, src/orchestration, src/adapters, src/store, src/auth, src/utils, src/tests
+  - Set up esbuild.mjs configuration for Lambda bundling with tree-shaking
+  - Create shared utilities in src/utils: logger, error handling (RFC 7807), validation helpers
+  - Configure Zod schemas in packages/shared for common types (Card, PricingResult, AuthContext) that can be shared with frontend
+  - Set up package.json with dependencies and scripts
   - _Requirements: 9.1, 9.2, 9.3_
 
 - [ ] 2. Implement authentication module
   - [ ] 2.1 Create JWT claims extraction utility
-    - Write function to parse API Gateway authorizer context
+    - Write function in services/backend/src/auth to parse API Gateway authorizer context
     - Extract sub, email, groups from JWT claims
     - Handle missing or malformed claims with proper errors
     - _Requirements: 1.1, 1.4_
 
   - [ ] 2.2 Implement ownership enforcement
-    - Create enforceOwnership function that compares userId with resource owner
+    - Create enforceOwnership function in services/backend/src/auth that compares userId with resource owner
     - Throw 403 ProblemDetails when ownership check fails
     - _Requirements: 1.3_
 
@@ -26,13 +28,13 @@
 
 - [ ] 3. Implement DynamoDB store layer
   - [ ] 3.1 Create DynamoDB client wrapper
-    - Initialize DynamoDB DocumentClient with configuration
+    - Initialize DynamoDB DocumentClient in services/backend/src/store with configuration
     - Implement connection pooling and retry logic
     - Create helper functions for PK/SK generation (USER#{sub}, CARD#{cardId})
     - _Requirements: 3.1, 10.5_
 
   - [ ] 3.2 Implement card CRUD operations
-    - Write createCard function with conditional writes for idempotency
+    - Write createCard function in services/backend/src/store with conditional writes for idempotency
     - Write listCards function using GSI1 (userId#createdAt) with pagination
     - Write getCard function with ownership verification
     - Write updateCard function with conditional expressions
@@ -40,7 +42,7 @@
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
   - [ ] 3.3 Implement pricing snapshot storage
-    - Write savePricingSnapshot function with SK=PRICE#{iso8601}
+    - Write savePricingSnapshot function in services/backend/src/store with SK=PRICE#{iso8601}
     - Set TTL attribute for automatic expiration (300 seconds)
     - Write getPricingSnapshot function to retrieve cached results
     - _Requirements: 4.5_
@@ -53,7 +55,8 @@
 
 - [ ] 4. Implement S3 upload presign handler
   - [ ] 4.1 Create presign Lambda handler
-    - Parse and validate PresignRequest with Zod schema
+    - Create handler in services/backend/src/handlers/upload_presign.ts
+    - Parse and validate PresignRequest with Zod schema from packages/shared
     - Validate MIME type against ALLOWED_UPLOAD_MIME environment variable
     - Validate file size against MAX_UPLOAD_MB limit
     - Generate S3 key: uploads/{sub}/{uuid}-{sanitizedFilename}
@@ -72,33 +75,37 @@
 
 - [ ] 5. Implement cards CRUD API handlers
   - [ ] 5.1 Create cards_create handler
-    - Extract userId from JWT claims
-    - Validate request body with Zod schema
+    - Create handler in services/backend/src/handlers/cards_create.ts
+    - Extract userId from JWT claims using auth module
+    - Validate request body with Zod schema from packages/shared
     - Generate cardId (UUID)
-    - Call CardService.create with userId and card data
+    - Call CardService.create from store module with userId and card data
     - Return 201 Created with card object
-    - Handle errors with RFC 7807 format
+    - Handle errors with RFC 7807 format from utils
     - _Requirements: 3.1, 9.1_
 
   - [ ] 5.2 Create cards_list handler
-    - Extract userId from JWT claims
+    - Create handler in services/backend/src/handlers/cards_list.ts
+    - Extract userId from JWT claims using auth module
     - Parse query parameters (limit, cursor)
-    - Call CardService.list with userId and pagination params
+    - Call CardService.list from store module with userId and pagination params
     - Return 200 OK with items array and nextCursor
     - _Requirements: 3.2, 11.1_
 
   - [ ] 5.3 Create cards_get handler
-    - Extract userId from JWT claims
+    - Create handler in services/backend/src/handlers/cards_get.ts
+    - Extract userId from JWT claims using auth module
     - Extract cardId from path parameters
-    - Call CardService.get with userId and cardId
+    - Call CardService.get from store module with userId and cardId
     - Return 200 OK with card object
     - Return 404 if card not found
     - _Requirements: 3.3, 11.1_
 
   - [ ] 5.4 Create cards_delete handler
-    - Extract userId from JWT claims
+    - Create handler in services/backend/src/handlers/cards_delete.ts
+    - Extract userId from JWT claims using auth module
     - Extract cardId from path parameters
-    - Call CardService.delete with userId and cardId
+    - Call CardService.delete from store module with userId and cardId
     - Return 204 No Content on success
     - Return 404 if card not found
     - _Requirements: 3.4_
@@ -111,13 +118,14 @@
 
 - [ ] 6. Implement pricing adapters
   - [ ] 6.1 Create PriceSource interface and base adapter
-    - Define PriceSource interface with fetchComps and isAvailable methods
+    - Define PriceSource interface in services/backend/src/adapters with fetchComps and isAvailable methods
     - Create base adapter class with rate limiting and circuit breaker logic
     - Implement exponential backoff for retries
     - Track failure rate and open circuit after 5 consecutive failures
     - _Requirements: 4.4, 4.6_
 
   - [ ] 6.2 Implement eBay pricing adapter
+    - Create adapter in services/backend/src/adapters/ebay_adapter.ts
     - Set up eBay API authentication using EBAY_APP_ID from Secrets Manager
     - Implement fetchComps to query eBay Finding API
     - Parse eBay response and map to RawComp format
@@ -125,6 +133,7 @@
     - _Requirements: 4.1_
 
   - [ ] 6.3 Implement TCGPlayer pricing adapter
+    - Create adapter in services/backend/src/adapters/tcgplayer_adapter.ts
     - Set up TCGPlayer API authentication using public/private keys from Secrets Manager
     - Implement fetchComps to query TCGPlayer pricing API
     - Parse TCGPlayer response and map to RawComp format
@@ -132,12 +141,14 @@
     - _Requirements: 4.1_
 
   - [ ] 6.4 Implement PriceCharting adapter
+    - Create adapter in services/backend/src/adapters/pricecharting_adapter.ts
     - Set up PriceCharting API authentication using API key from Secrets Manager
     - Implement fetchComps to query PriceCharting API
     - Parse response and map to RawComp format
     - _Requirements: 4.1_
 
   - [ ] 6.5 Create pricing normalization and fusion logic
+    - Create pricing service in services/backend/src/adapters/pricing_service.ts
     - Write normalize function to standardize conditions (Poor, Good, Excellent, Near Mint, Mint)
     - Convert all prices to USD
     - Implement IQR outlier removal to filter extreme prices
@@ -170,6 +181,7 @@
 
 - [ ] 7. Implement Rekognition feature extraction
   - [ ] 7.1 Create RekognitionAdapter
+    - Create adapter in services/backend/src/adapters/rekognition_adapter.ts
     - Initialize Rekognition client
     - Implement detectText function to extract OCR blocks
     - Parse Rekognition response and map to OCRBlock format
@@ -203,6 +215,7 @@
 
 - [ ] 8. Implement authenticity detection agent
   - [ ] 8.1 Create visual hash computation
+    - Create utility in services/backend/src/utils/phash.ts
     - Implement perceptual hashing (pHash) algorithm
     - Download image from S3 and compute hash
     - Return hash string for comparison
@@ -230,6 +243,7 @@
     - _Requirements: 6.4, 6.5, 6.6_
 
   - [ ] 8.5 Create AuthenticityAgent Lambda handler
+    - Create handler in services/backend/src/agents/authenticity_agent.ts
     - Accept input with features (FeatureEnvelope) and cardMeta
     - Call visual hash computation and comparison
     - Compute authenticity signals
@@ -245,6 +259,7 @@
 
 - [ ] 9. Implement Bedrock integration service
   - [ ] 9.1 Create BedrockService class
+    - Create service in services/backend/src/adapters/bedrock_service.ts
     - Initialize Bedrock Runtime client
     - Implement invokeValuation method
     - Implement invokeAuthenticity method
@@ -280,6 +295,7 @@
 
 - [ ] 10. Implement Step Functions workflow
   - [ ] 10.1 Create RekognitionExtract Lambda
+    - Create handler in services/backend/src/orchestration/rekognition_extract.ts
     - Accept input with userId, cardId, s3Keys
     - Call RekognitionAdapter.extractFeatures for front image
     - If back image exists, extract features from back as well
@@ -287,6 +303,7 @@
     - _Requirements: 7.2, 7.3_
 
   - [ ] 10.2 Create PricingAgent Lambda
+    - Create handler in services/backend/src/agents/pricing_agent.ts
     - Accept input with cardMeta and features
     - Extract card name, set, condition from metadata
     - Call PricingService.fetchAllComps
@@ -295,12 +312,14 @@
     - _Requirements: 7.3, 8.2_
 
   - [ ] 10.3 Create AuthenticityAgent Lambda
+    - Handler already created in task 8.5 (services/backend/src/agents/authenticity_agent.ts)
     - Accept input with features (FeatureEnvelope) and cardMeta
     - Call AuthenticityAgent.analyze
     - Return AuthenticityResult
     - _Requirements: 7.3, 8.4_
 
   - [ ] 10.4 Create Aggregator Lambda
+    - Create handler in services/backend/src/orchestration/aggregator.ts
     - Accept input with agentResults (pricing and authenticity)
     - Merge results into single card update
     - Call CardService.update to persist results to DynamoDB
@@ -309,6 +328,7 @@
     - _Requirements: 7.4, 7.5_
 
   - [ ] 10.5 Create error handler Lambda
+    - Create handler in services/backend/src/orchestration/error_handler.ts
     - Accept input with error details
     - Persist partial results if available
     - Log error details for debugging
@@ -324,7 +344,8 @@
 
 - [ ] 11. Implement revalue orchestration handler
   - [ ] 11.1 Create cards_revalue Lambda handler
-    - Extract userId from JWT claims
+    - Create handler in services/backend/src/handlers/cards_revalue.ts
+    - Extract userId from JWT claims using auth module
     - Extract cardId from path parameters
     - Retrieve card from DynamoDB to get s3Keys
     - Check for in-flight executions (idempotency)
@@ -340,6 +361,7 @@
 
 - [ ] 12. Implement observability and logging
   - [ ] 12.1 Create structured logger utility
+    - Create logger in packages/telemetry for reuse across services
     - Implement JSON logger with requestId, userId, operation fields
     - Ensure no PII is logged
     - Add log level filtering (DEBUG, INFO, WARN, ERROR)
@@ -366,6 +388,7 @@
 
 - [ ] 13. Implement idempotency handling
   - [ ] 13.1 Create idempotency token storage
+    - Create utility in services/backend/src/utils/idempotency.ts
     - Write saveIdempotencyToken function to store token in DynamoDB
     - Use conditional writes to prevent race conditions
     - Set TTL to IDEMPOTENCY_TTL_SECONDS (600)
@@ -386,6 +409,7 @@
 
 - [ ] 14. Implement secrets management
   - [ ] 14.1 Create secrets retrieval utility
+    - Create utility in services/backend/src/utils/secrets.ts
     - Implement getSecret function using AWS Secrets Manager
     - Cache secrets in memory for Lambda execution lifetime
     - Handle secret rotation gracefully

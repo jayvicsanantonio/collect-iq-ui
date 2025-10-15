@@ -4,6 +4,8 @@
 
 The CollectIQ backend is a serverless, event-driven system built on AWS that provides authenticated APIs for Pokémon TCG card management, real-time pricing, and AI-powered authenticity detection. The architecture follows a multi-agent orchestration pattern where specialized Lambda functions coordinate through AWS Step Functions and EventBridge to deliver scalable, intelligent card valuation and verification services.
 
+The backend is part of a pnpm workspace monorepo, located in `services/backend/` with source code organized into `handlers/`, `agents/`, `orchestration/`, `adapters/`, `store/`, `auth/`, and `utils/` directories. It leverages shared packages from `packages/shared/` (types and schemas), `packages/config/` (build configuration), and `packages/telemetry/` (logging utilities).
+
 The system is designed with security-first principles, using Amazon Cognito for authentication, DynamoDB for user-scoped data storage, and AWS Bedrock + Rekognition for AI capabilities. All components are provisioned via Terraform and follow serverless best practices for cost optimization and automatic scaling.
 
 ## Architecture
@@ -112,6 +114,60 @@ The system is designed with security-first principles, using Amazon Cognito for 
 - Conditional writes for idempotency
 - TTL for cache and temporary data
 - Encrypted at rest with KMS
+
+## Project Structure
+
+The backend service follows this directory organization within the monorepo:
+
+```
+services/backend/
+├── src/
+│   ├── handlers/          # API Gateway Lambda handlers
+│   │   ├── upload_presign.ts
+│   │   ├── cards_create.ts
+│   │   ├── cards_list.ts
+│   │   ├── cards_get.ts
+│   │   ├── cards_delete.ts
+│   │   └── cards_revalue.ts
+│   ├── agents/            # AI agent Lambda functions
+│   │   ├── pricing_agent.ts
+│   │   └── authenticity_agent.ts
+│   ├── orchestration/     # Step Functions task handlers
+│   │   ├── rekognition_extract.ts
+│   │   ├── aggregator.ts
+│   │   └── error_handler.ts
+│   ├── adapters/          # External service integrations
+│   │   ├── rekognition_adapter.ts
+│   │   ├── bedrock_service.ts
+│   │   ├── pricing_service.ts
+│   │   ├── ebay_adapter.ts
+│   │   ├── tcgplayer_adapter.ts
+│   │   └── pricecharting_adapter.ts
+│   ├── store/             # DynamoDB data access layer
+│   │   ├── dynamodb_client.ts
+│   │   ├── card_service.ts
+│   │   └── pricing_cache.ts
+│   ├── auth/              # Authentication and authorization
+│   │   ├── jwt_claims.ts
+│   │   └── ownership.ts
+│   ├── utils/             # Shared utilities
+│   │   ├── logger.ts
+│   │   ├── errors.ts
+│   │   ├── validation.ts
+│   │   ├── phash.ts
+│   │   ├── idempotency.ts
+│   │   └── secrets.ts
+│   └── tests/             # Test files
+├── esbuild.mjs            # Lambda bundling configuration
+├── tsconfig.json          # TypeScript configuration
+└── package.json           # Dependencies and scripts
+```
+
+**Shared Packages:**
+
+- `packages/shared/`: TypeScript types and Zod schemas shared between frontend and backend (Card, PricingResult, AuthContext, etc.)
+- `packages/config/`: Shared build, lint, and test configuration
+- `packages/telemetry/`: Logging and metrics utilities that can be bundled into Lambda functions
 
 ## Components and Interfaces
 

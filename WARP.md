@@ -17,48 +17,107 @@ CollectIQ is an AI-powered collector assistant for Pokémon TCG cards built as a
 
 ```
 collect-iq/
-├── apps/web/              # Next.js 14 (App Router) frontend
-│   ├── app/
-│   │   ├── (public)/      # Unauthenticated routes (landing, auth callback)
-│   │   ├── (protected)/   # JWT-protected routes (upload, vault, cards)
-│   │   └── api/           # API route handlers
-│   ├── components/        # React components organized by feature
-│   │   ├── auth/          # Authentication components (AuthGuard, SessionExpiredModal)
-│   │   ├── cards/         # Card display and management
-│   │   ├── upload/        # Image upload UI (UploadDropzone, CameraCapture)
-│   │   ├── vault/         # Collection vault
-│   │   └── ui/            # shadcn/ui reusable components
-│   └── lib/               # Utilities and helpers
-│       ├── api/           # API client functions
-│       ├── auth/          # Auth helpers
-│       ├── schemas/       # Zod validation schemas
-│       └── utils/         # Shared utilities
-├── packages/infra/        # Terraform IaC with modular design
-│   ├── modules/           # Self-contained Terraform modules
-│   │   ├── amplify/       # Frontend hosting
-│   │   ├── api/           # API Gateway + Lambda
-│   │   ├── auth/          # Cognito configuration
-│   │   ├── storage/       # DynamoDB + S3
-│   │   └── ai/            # Bedrock + Rekognition
-│   └── environments/      # Dev, staging, production configs
-├── docs/                  # Comprehensive project specifications
-│   ├── Frontend/          # UI flows, wireframes, component specs
-│   ├── Backend/           # API contracts, Lambda handlers, data models
-│   ├── DevOps/            # Terraform modules, CI/CD, cost optimization
-│   ├── Project Specification.md
-│   ├── Hackathon - Product Requirements.md
-│   ├── Venture - Product Requirements.md
-│   └── Market Opportunity.md
-├── .kiro/
-│   ├── specs/             # Granular requirements, design, and tasks
-│   │   ├── collectiq-frontend/
-│   │   ├── collectiq-backend/
-│   │   └── collectiq-devops/
-│   └── steering/          # AI assistant guidance rules
-│       ├── product.md     # Product overview and user flows
-│       ├── structure.md   # Project structure conventions
-│       └── tech.md        # Technology stack details
-└── types/                # Global TypeScript type definitions
+├── apps/                   # User-facing applications
+│   └── web/                # Next.js 14 (App Router) frontend
+│       ├── app/
+│       │   ├── (public)/   # Unauthenticated routes (landing, auth callback)
+│       │   ├── (protected)/# JWT-protected routes (upload, vault, cards)
+│       │   └── api/        # API route handlers
+│       ├── components/     # Feature-organized components (auth, cards, upload, vault, ui)
+│       └── lib/            # API client, auth helpers, schemas, utils
+├── services/
+│   └── backend/            # AWS Lambda + Step Functions backend (TypeScript)
+│       ├── src/
+│       │   ├── handlers/
+│       │   ├── agents/
+│       │   ├── orchestration/
+│       │   ├── adapters/
+│       │   ├── store/
+│       │   ├── auth/
+│       │   ├── utils/
+│       │   └── tests/
+│       ├── esbuild.mjs
+│       ├── vitest.config.ts
+│       ├── tsconfig.json
+│       └── package.json
+├── packages/
+│   ├── shared/             # Shared types and schemas
+│   ├── config/             # Shared build/lint/test configuration
+│   └── telemetry/          # Logging/metrics utilities
+├── infra/
+│   └── terraform/
+│       ├── modules/
+│       │   ├── amplify_hosting/
+│       │   ├── api_gateway_http/
+│       │   ├── cognito_user_pool/
+│       │   ├── s3_uploads/
+│       │   ├── dynamodb_collectiq/
+│       │   ├── lambda_fn/
+│       │   ├── step_functions/
+│       │   ├── eventbridge_bus/
+│       │   ├── rekognition_access/
+│       │   ├── bedrock_access/
+│       │   ├── cloudwatch_dashboards/
+│       │   ├── ssm_secrets/
+│       │   └── xray/
+│       └── envs/
+│           ├── dev/
+│           └── prod/
+├── docs/                   # Specifications and diagrams
+├── scripts/                # Developer tools and local mocks
+├── .github/                # CI/CD workflows
+└── .kiro/                  # Kiro specs and steering docs
+```
+
+### Workspace configuration examples
+
+pnpm-workspace.yaml
+
+```yaml
+packages:
+  - 'apps/*'
+  - 'services/*'
+  - 'packages/*'
+  - 'infra/*'
+```
+
+turbo.json
+
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "lint": { "outputs": [] },
+    "typecheck": { "outputs": [] },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": [".coverage/**"]
+    },
+    "dev": { "cache": false, "persistent": true }
+  }
+}
+```
+
+tsconfig.base.json
+
+```json
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "Bundler",
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@collectiq/shared/*": ["packages/shared/src/*"],
+      "@collectiq/config/*": ["packages/config/src/*"]
+    }
+  }
+}
 ```
 
 **Important:** The frontend (`apps/web/`) may be in early stages. Key directories include `app/`, `components/`, and `lib/`.
@@ -150,7 +209,7 @@ Four specialized agents coordinate through Step Functions:
 
 ### Infrastructure as Code
 
-Terraform modules (in `packages/infra/`) provision all AWS resources:
+Terraform modules (in `infra/terraform/`) provision all AWS resources:
 
 - Amplify for Next.js deployment
 - API Gateway + Lambda + Step Functions

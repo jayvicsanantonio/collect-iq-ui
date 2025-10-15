@@ -13,31 +13,52 @@ collect-iq/
 │       │   ├── (protected)/ # JWT-protected routes (upload, vault, cards)
 │       │   └── api/         # API route handlers
 │       ├── components/      # React components
-│       │   ├── auth/        # Authentication components
-│       │   ├── cards/       # Card display and management
-│       │   ├── upload/      # Image upload UI
-│       │   ├── vault/       # Collection vault
-│       │   └── ui/          # shadcn/ui components
 │       └── lib/             # Utilities and helpers
-│           ├── api/         # API client functions
-│           ├── auth/        # Auth helpers
-│           ├── schemas/     # Zod validation schemas
-│           └── utils/       # Shared utilities
+│
+├── services/                # Backend services
+│   └── backend/             # AWS Lambda + Step Functions (TypeScript)
+│       ├── src/
+│       │   ├── handlers/
+│       │   ├── agents/
+│       │   ├── orchestration/
+│       │   ├── adapters/
+│       │   ├── store/
+│       │   ├── auth/
+│       │   ├── utils/
+│       │   └── tests/
+│       ├── esbuild.mjs
+│       ├── tsconfig.json
+│       └── package.json
 │
 ├── packages/                # Shared packages
-│   └── infra/               # Terraform infrastructure as code
+│   ├── shared/              # Shared types/schemas
+│   ├── config/              # Build/lint/test config
+│   └── telemetry/           # Logging/metrics utilities
+│
+├── infra/
+│   └── terraform/           # Terraform infrastructure as code
 │       ├── modules/
-│       │   ├── amplify/     # Frontend hosting
-│       │   ├── api/         # API Gateway + Lambda
-│       │   ├── auth/        # Cognito configuration
-│       │   ├── storage/     # DynamoDB + S3
-│       │   └── ai/          # Bedrock + Rekognition
-│       └── environments/    # Dev, staging, production configs
+│       │   ├── amplify_hosting/
+│       │   ├── api_gateway_http/
+│       │   ├── cognito_user_pool/
+│       │   ├── s3_uploads/
+│       │   ├── dynamodb_collectiq/
+│       │   ├── lambda_fn/
+│       │   ├── step_functions/
+│       │   ├── eventbridge_bus/
+│       │   ├── rekognition_access/
+│       │   ├── bedrock_access/
+│       │   ├── cloudwatch_dashboards/
+│       │   ├── ssm_secrets/
+│       │   └── xray/
+│       └── envs/
+│           ├── dev/
+│           └── prod/
 │
 ├── docs/                    # Comprehensive specifications
-│   ├── Frontend/            # UI flows, wireframes, component specs
-│   ├── Backend/             # API contracts, Lambda handlers, data models
-│   ├── DevOps/              # Terraform modules, CI/CD, cost optimization
+│   ├── Frontend/
+│   ├── Backend/
+│   ├── DevOps/
 │   ├── Project Specification.md
 │   ├── Hackathon - Product Requirements.md
 │   ├── Venture - Product Requirements.md
@@ -45,15 +66,9 @@ collect-iq/
 │
 ├── .kiro/                   # Kiro IDE configuration
 │   ├── specs/               # Granular requirements, design, and tasks
-│   └── steering/            # AI assistant guidance (this file)
-│
-├── types/                   # Global TypeScript definitions
-│   └── global.d.ts
+│   └── steering/            # AI assistant guidance
 │
 ├── .github/                 # GitHub Actions workflows
-├── node_modules/            # Root dependencies
-├── .pnpm-store/             # pnpm content-addressable store
-│
 ├── package.json             # Root workspace configuration
 ├── pnpm-workspace.yaml      # Workspace package definitions
 ├── tsconfig.base.json       # Base TypeScript configuration

@@ -7,7 +7,9 @@
   - `(public)/`: Unauthenticated routes (landing, auth callback)
   - `(protected)/`: JWT-protected routes requiring valid Cognito tokens (upload, vault, cards)
   - `api/`: Server-side API route handlers
-- `packages/infra`: Terraform IaC with modular design. Modules: `amplify/`, `api/`, `auth/`, `storage/`, `ai/`.
+- `services/backend`: AWS Lambda + Step Functions backend (TypeScript). Subdirs: `src/handlers`, `src/agents`, `src/orchestration`, `src/adapters`, `src/store`, `src/auth`, `src/utils`, `src/tests`.
+- `infra/terraform`: Terraform IaC. Modules under `infra/terraform/modules`: `amplify_hosting`, `api_gateway_http`, `cognito_user_pool`, `s3_uploads`, `dynamodb_collectiq`, `lambda_fn`, `step_functions`, `eventbridge_bus`, `rekognition_access`, `bedrock_access`, `cloudwatch_dashboards`, `ssm_secrets`, `xray`.
+- `packages/shared`: Shared types and schemas. Also `packages/config` and `packages/telemetry` for tooling/observability.
 - `docs/`: Authoritative specifications organized by domain (Frontend, Backend, DevOps, Project Specification, Market Opportunity).
 - `.kiro/specs/*`: Granular Frontend/Backend/DevOps requirements, design, and tasks. Keep synced when flows change.
 - `.kiro/steering/*`: AI assistant guidance rules (product overview, structure conventions, tech stack).
@@ -20,8 +22,59 @@
   - Required: Cognito User Pool ID/Client ID/Domain, DynamoDB table, S3 bucket, Bedrock model ID, AWS region.
 - Web dev: `pnpm web:dev` • Build: `pnpm web:build` • Start: `pnpm web:start`
 - Lint: `pnpm lint` (ESLint v9 + Prettier) • Types: `pnpm typecheck`
-- Infra: From `packages/infra/`: `terraform init` → `terraform plan` → `terraform apply`
-  - Terraform modules for Amplify, API Gateway, Cognito, DynamoDB, S3, Step Functions, Bedrock, Rekognition.
+- Infra: From `infra/terraform/`: `terraform init` → `terraform plan` → `terraform apply`
+  - Modules in `infra/terraform/modules`: `amplify_hosting`, `api_gateway_http`, `cognito_user_pool`, `s3_uploads`, `dynamodb_collectiq`, `lambda_fn`, `step_functions`, `eventbridge_bus`, `rekognition_access`, `bedrock_access`, `cloudwatch_dashboards`, `ssm_secrets`, `xray`.
+
+### Workspace configuration examples
+
+pnpm-workspace.yaml
+
+```yaml
+packages:
+  - 'apps/*'
+  - 'services/*'
+  - 'packages/*'
+  - 'infra/*'
+```
+
+turbo.json
+
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "lint": { "outputs": [] },
+    "typecheck": { "outputs": [] },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": [".coverage/**"]
+    },
+    "dev": { "cache": false, "persistent": true }
+  }
+}
+```
+
+tsconfig.base.json
+
+```json
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "Bundler",
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@collectiq/shared/*": ["packages/shared/src/*"],
+      "@collectiq/config/*": ["packages/config/src/*"]
+    }
+  }
+}
+```
 
 ## Coding Style & Naming Conventions
 

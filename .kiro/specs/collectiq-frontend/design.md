@@ -4,6 +4,8 @@
 
 The CollectIQ frontend is a modern, authentication-first web application built with Next.js 14 (App Router), React 18, and TypeScript. It provides collectors with a seamless experience for scanning, identifying, authenticating, and valuating Pokémon Trading Card Game cards through real-time AI-powered analysis.
 
+The frontend is part of a pnpm workspace monorepo, located in `apps/web/` with components organized by feature domain. It leverages shared packages from `packages/shared/` (TypeScript types and Zod schemas shared with the backend), `packages/config/` (build and lint configuration), and `packages/telemetry/` (logging utilities). This ensures type consistency between frontend and backend while maintaining clear separation of concerns.
+
 The application follows a progressive workflow architecture where each screen builds upon the previous step: authentication → upload → identification → authenticity analysis → valuation → vault storage → collection management. The design emphasizes immediate feedback, clear visual hierarchy, and accessible interactions across desktop and mobile devices.
 
 Key design principles:
@@ -52,6 +54,36 @@ Key design principles:
 └──────────────┘    └──────────────┘    └──────────────┘
 ```
 
+### Monorepo Integration
+
+The frontend is part of a pnpm workspace monorepo and integrates with shared packages:
+
+**Workspace Structure:**
+
+```
+collect-iq/
+├── apps/
+│   └── web/                      # Frontend application (this spec)
+├── services/
+│   └── backend/                  # Backend Lambda functions
+├── packages/
+│   ├── shared/                   # Shared types and Zod schemas
+│   ├── config/                   # Shared build/lint config
+│   └── telemetry/                # Logging utilities
+└── infra/
+    └── terraform/                # Infrastructure as code
+```
+
+**Package Dependencies:**
+
+The frontend (`apps/web/package.json`) depends on:
+
+- `@collectiq/shared`: For shared TypeScript types and Zod schemas
+- `@collectiq/config`: For ESLint and TypeScript configuration (optional)
+- `@collectiq/telemetry`: For logging utilities (optional)
+
+This ensures type consistency between frontend and backend while maintaining clear separation of concerns.
+
 ### Folder Structure
 
 ```
@@ -95,7 +127,6 @@ apps/web/
 ├── lib/
 │   ├── api.ts                    # Typed API client
 │   ├── auth.ts                   # Cognito helpers
-│   ├── schemas.ts                # Zod validation schemas
 │   ├── format.ts                 # Formatting utilities
 │   ├── guards.tsx                # Auth guards and HOCs
 │   └── utils.ts                  # General utilities
@@ -105,6 +136,17 @@ apps/web/
     ├── integration/              # Integration tests
     └── e2e/                      # Playwright E2E tests
 ```
+
+**Shared Packages (Monorepo):**
+
+The frontend imports shared code from the monorepo's `packages/` directory:
+
+- `packages/shared/`: TypeScript types and Zod schemas shared between frontend and backend
+  - Card types, ValuationData, AuthenticityDetails, ProblemDetails
+  - Ensures type consistency across the application
+  - Imported as `@collectiq/shared` in the frontend
+- `packages/config/`: Shared ESLint, Prettier, and TypeScript configuration
+- `packages/telemetry/`: Logging utilities that can be used in both frontend and backend
 
 ### Technology Stack
 
@@ -488,10 +530,32 @@ interface ProblemDetails {
 
 ### Zod Schemas
 
-All API responses are validated using Zod schemas that mirror backend types:
+All API responses are validated using Zod schemas imported from the shared package. These schemas are defined once in `packages/shared/` and used by both frontend and backend to ensure type consistency:
 
 ```typescript
-// lib/schemas.ts
+// Frontend usage
+import {
+  ValuationDataSchema,
+  CardSchema,
+  ProblemDetailsSchema,
+  type Card,
+  type ValuationData,
+  type ProblemDetails,
+} from '@collectiq/shared';
+
+// Validate API response
+const card = CardSchema.parse(apiResponse);
+
+// Use TypeScript types
+const handleCard = (card: Card) => {
+  // Type-safe card handling
+};
+```
+
+**Shared Schema Examples** (defined in `packages/shared/src/schemas.ts`):
+
+```typescript
+// packages/shared/src/schemas.ts
 import { z } from 'zod';
 
 export const ValuationDataSchema = z.object({
@@ -522,6 +586,10 @@ export const CardSchema = z.object({
   rarity: z.string(),
   // ... rest of fields
 });
+
+// Export TypeScript types
+export type ValuationData = z.infer<typeof ValuationDataSchema>;
+export type Card = z.infer<typeof CardSchema>;
 ```
 
 ## Error Handling
