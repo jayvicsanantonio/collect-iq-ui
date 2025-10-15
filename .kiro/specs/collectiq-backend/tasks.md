@@ -53,8 +53,8 @@
     - Test conditional writes and idempotency
     - _Requirements: 13.2_
 
-- [ ] 4. Implement S3 upload presign handler
-  - [ ] 4.1 Create presign Lambda handler
+- [x] 4. Implement S3 upload presign handler
+  - [x] 4.1 Create presign Lambda handler
     - Create handler in services/backend/src/handlers/upload_presign.ts
     - Parse and validate PresignRequest with Zod schema from packages/shared
     - Validate MIME type against ALLOWED_UPLOAD_MIME environment variable
