@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Project setup and configuration
+- [x] 1. Project setup and configuration
   - Initialize Next.js 14 project in apps/web with TypeScript and App Router
   - Configure Tailwind CSS v4 with @theme directive
   - Set up ESLint, Prettier, and Husky pre-commit hooks (using packages/config)
