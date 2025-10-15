@@ -293,8 +293,8 @@
     - Test fallback behavior
     - _Requirements: 13.1_
 
-- [ ] 10. Implement Step Functions workflow
-  - [ ] 10.1 Create RekognitionExtract Lambda
+- [x] 10. Implement Step Functions workflow
+  - [x] 10.1 Create RekognitionExtract Lambda
     - Create handler in services/backend/src/orchestration/rekognition_extract.ts
     - Accept input with userId, cardId, s3Keys
     - Call RekognitionAdapter.extractFeatures for front image
@@ -302,7 +302,7 @@
     - Return FeatureEnvelope in output
     - _Requirements: 7.2, 7.3_
 
-  - [ ] 10.2 Create PricingAgent Lambda
+  - [x] 10.2 Create PricingAgent Lambda
     - Create handler in services/backend/src/agents/pricing_agent.ts
     - Accept input with cardMeta and features
     - Extract card name, set, condition from metadata
@@ -311,14 +311,14 @@
     - Return PricingResult and ValuationSummary
     - _Requirements: 7.3, 8.2_
 
-  - [ ] 10.3 Create AuthenticityAgent Lambda
+  - [x] 10.3 Create AuthenticityAgent Lambda
     - Handler already created in task 8.5 (services/backend/src/agents/authenticity_agent.ts)
     - Accept input with features (FeatureEnvelope) and cardMeta
     - Call AuthenticityAgent.analyze
     - Return AuthenticityResult
     - _Requirements: 7.3, 8.4_
 
-  - [ ] 10.4 Create Aggregator Lambda
+  - [x] 10.4 Create Aggregator Lambda
     - Create handler in services/backend/src/orchestration/aggregator.ts
     - Accept input with agentResults (pricing and authenticity)
     - Merge results into single card update
@@ -327,7 +327,7 @@
     - Return final card object
     - _Requirements: 7.4, 7.5_
 
-  - [ ] 10.5 Create error handler Lambda
+  - [x] 10.5 Create error handler Lambda
     - Create handler in services/backend/src/orchestration/error_handler.ts
     - Accept input with error details
     - Persist partial results if available
