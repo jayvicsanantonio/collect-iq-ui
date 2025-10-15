@@ -359,22 +359,22 @@
     - Test 404 when card not found
     - _Requirements: 13.2_
 
-- [ ] 12. Implement observability and logging
-  - [ ] 12.1 Create structured logger utility
+- [x] 12. Implement observability and logging
+  - [x] 12.1 Create structured logger utility
     - Create logger in packages/telemetry for reuse across services
     - Implement JSON logger with requestId, userId, operation fields
     - Ensure no PII is logged
     - Add log level filtering (DEBUG, INFO, WARN, ERROR)
     - _Requirements: 9.2, 9.3_
 
-  - [ ] 12.2 Add CloudWatch metrics emission
+  - [x] 12.2 Add CloudWatch metrics emission
     - Emit custom metrics for API latency
     - Emit metrics for auth failures
     - Emit metrics for pricing source errors
     - Emit metrics for authenticity score distribution
     - _Requirements: 9.5_
 
-  - [ ] 12.3 Enable X-Ray tracing
+  - [x] 12.3 Enable X-Ray tracing
     - Add X-Ray SDK to all Lambda functions
     - Instrument AWS SDK calls
     - Add custom subsegments for business logic

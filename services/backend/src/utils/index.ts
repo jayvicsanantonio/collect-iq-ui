@@ -3,6 +3,8 @@
  */
 
 export * from './logger.js';
+export * from './metrics.js';
+export * from './tracing.js';
 export * from './errors.js';
 export * from './validation.js';
 export * from './secrets.js';
