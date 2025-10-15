@@ -21,6 +21,9 @@ Icon?
 .history/
 *.code-workspace
 
+# ----- Kiro hooks (local only) -----
+.kiro/hooks/response-completion-confetti.kiro.hook
+
 # ----- Node / pnpm monorepo -----
 node_modules/
 .pnpm-store/
