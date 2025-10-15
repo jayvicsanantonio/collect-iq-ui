@@ -13,6 +13,7 @@ export default [
       'node_modules/**',
       '.pnpm-store/**',
       'dist/**',
+      '**/dist/**',
       'build/**',
       'lib/**',
       'coverage/**',
