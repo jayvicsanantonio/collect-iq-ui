@@ -40,7 +40,7 @@ pnpm build:prod
 # Type checking
 pnpm typecheck
 
-# Run tests
+# Run unit tests
 pnpm test
 
 # Run tests in watch mode
@@ -48,6 +48,12 @@ pnpm test:watch
 
 # Run tests with coverage
 pnpm test:coverage
+
+# Run E2E tests
+pnpm test:e2e
+
+# Run E2E tests in watch mode
+pnpm test:e2e:watch
 
 # Lint code
 pnpm lint
@@ -150,7 +156,9 @@ The `esbuild.mjs` configuration:
 
 ## Testing
 
-Tests use Vitest with AWS SDK mocks. Example:
+### Unit Tests
+
+Unit tests use Vitest with AWS SDK mocks. Example:
 
 ```typescript
 import { describe, it, expect, vi } from 'vitest';
@@ -164,6 +172,20 @@ describe('Logger', () => {
   });
 });
 ```
+
+### End-to-End Tests
+
+E2E tests validate complete workflows against real AWS services in a test environment.
+
+**Setup**: See [E2E_TEST_SETUP.md](./E2E_TEST_SETUP.md) for detailed setup instructions.
+
+**Quick Start**:
+
+1. Copy `.env.test.example` to `.env.test`
+2. Fill in your test environment configuration
+3. Run `pnpm test:e2e`
+
+**Documentation**: See [src/tests/e2e/README.md](./src/tests/e2e/README.md) for detailed E2E test documentation.
 
 ## Next Steps
 

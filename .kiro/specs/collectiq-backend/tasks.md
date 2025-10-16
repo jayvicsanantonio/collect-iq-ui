@@ -450,8 +450,8 @@
     - Set security headers (HSTS, X-Content-Type-Options)
     - _Requirements: 12.3_
 
-- [ ] 16. Write end-to-end tests
-  - [ ] 16.1 Create E2E test suite setup
+- [-] 16. Write end-to-end tests
+  - [x] 16.1 Create E2E test suite setup
     - Set up test Cognito user pool
     - Create test user and obtain JWT token
     - Configure test environment variables
