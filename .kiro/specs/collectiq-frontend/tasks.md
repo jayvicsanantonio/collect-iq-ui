@@ -76,7 +76,7 @@
   - Handle sign out errors gracefully
   - _Requirements: 1.4_
 
-- [ ]\* 3.5 Write authentication tests
+- [x] 3.5 Write authentication tests
   - Unit tests for auth helper functions (code verifier, code challenge, URL building)
   - Unit tests for state parameter validation
   - Integration tests for OAuth callback flow
@@ -123,7 +123,7 @@
   - Implement cache invalidation on mutations
   - _Requirements: 6.9_
 
-- [ ]\* 4.5 Write API client tests
+- [x] 4.5 Write API client tests
   - Unit tests for API client methods in apps/web/lib/api.ts
   - Test error handling and ProblemDetails parsing using schemas from @collectiq/shared
   - Test retry logic with exponential backoff
@@ -131,8 +131,8 @@
   - Mock API responses for integration tests
   - _Requirements: 15.1_
 
-- [ ] 5. Upload flow implementation
-- [ ] 5.1 Create UploadDropzone component
+- [x] 5. Upload flow implementation
+- [x] 5.1 Create UploadDropzone component
   - Create component in apps/web/components/upload/UploadDropzone.tsx
   - Implement drag-and-drop area with visual feedback
   - Add file picker integration
@@ -143,7 +143,7 @@
   - Create mobile-optimized version with tap-to-upload
   - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 5.2 Create CameraCapture component
+- [x] 5.2 Create CameraCapture component
   - Create component in apps/web/components/upload/CameraCapture.tsx
   - Implement getUserMedia API integration
   - Add camera permission request handling
@@ -154,7 +154,7 @@
   - Add camera preview with capture button
   - _Requirements: 2.6, 2.7_
 
-- [ ] 5.3 Create UploadProgress component
+- [x] 5.3 Create UploadProgress component
   - Create component in apps/web/components/upload/UploadProgress.tsx
   - Implement progress bar with percentage display
   - Add thumbnail preview of uploading image
@@ -163,7 +163,7 @@
   - Implement error state display
   - _Requirements: 2.8, 2.9_
 
-- [ ] 5.4 Implement upload workflow
+- [x] 5.4 Implement upload workflow
   - Create apps/web/app/(protected)/upload/page.tsx with UploadDropzone
   - Implement presigned URL request flow using API client
   - Add direct S3 upload with progress tracking
@@ -173,7 +173,7 @@
   - Handle upload errors with retry option
   - _Requirements: 2.4, 2.5, 2.8, 2.9, 2.10_
 
-- [ ] 5.5 Create first-run empty state
+- [x] 5.5 Create first-run empty state
   - Design hero layout for empty vault
   - Add "Let's scan your first card" headline
   - Create CTAs for camera and file upload
