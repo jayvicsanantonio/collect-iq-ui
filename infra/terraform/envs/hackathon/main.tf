@@ -23,16 +23,13 @@ locals {
 # VPC
 # ============================================================================
 module "vpc" {
-  source = "../../modules/vpc_new"
+  source = "../../modules/vpc"
 
-  vpc_name             = "collectiq"
+  project_name         = "collectiq"
   environment          = var.environment
   vpc_cidr             = "172.28.0.0/21"
-  create_igw           = true
-  create_natgw         = true
-  public_subnets_cidr  = ["172.28.0.0/24","172.28.1.0/24"]
-  private_subnets_cidr = ["172.28.2.0/24","172.28.3.0/24"]
-  availability_zones   = ["us-east-1a","us-east-1b"]
+  public_subnet_count  = 2
+  private_subnet_count = 2
 }
 
 ## ============================================================================

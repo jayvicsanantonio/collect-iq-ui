@@ -1,38 +1,27 @@
-variable "vpc_name" {
-  description = "Name for the VPC"
-}
-
-variable "vpc_cidr" {
-  description = "CIDR of the VPC"
-}
-
-variable "create_igw" {
-  description = "Set to true/false for the creation of Internet Gateway"
-  type 	      = bool
-  default     = false
-}
-
-variable "create_natgw" {
-  description = "Set to true/false for the creation of NAT Gateway"
-  type 	      = bool
-  default     = false
-}
-
-variable "public_subnets_cidr" {
-  description = "List of Public Subnets CIDR"
-  type = list
-}
-
-variable "private_subnets_cidr" {
-  description = "List of Private Subnets CIDR"
-  type = list
-}
-
-variable "availability_zones" {
-  description = "List of AZs"
-  type = list
+variable "project_name" {
+  description = "Name of the project"
+  type        = string
 }
 
 variable "environment" {
-  description = "Environment name"
+  description = "Environment name (e.g., hackathon, production)"
+  type        = string
+}
+
+variable "vpc_cidr" {
+  description = "CIDR block for VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "public_subnet_count" {
+  description = "Number of public subnets to create"
+  type        = number
+  default     = 2
+}
+
+variable "private_subnet_count" {
+  description = "Number of private subnets to create"
+  type        = number
+  default     = 2
 }

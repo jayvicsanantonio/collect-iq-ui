@@ -1,108 +1,123 @@
-## Create VPC
-resource "aws_vpc" "vpc" {
+resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
+  enable_dns_support   = true
+
   tags = {
-    Name = "${var.vpc_name}-${var.environment}"
+    Name        = "${var.project_name}-vpc"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
 
-## Create IGW
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
 
-resource "aws_internet_gateway" "igw" {
-  count = var.create_igw ? 1 : 0
-  vpc_id = aws_vpc.vpc.id
   tags = {
-    Name        = "${var.vpc_name}-igw"
+    Name        = "${var.project_name}-igw"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
 
-## Create NATGW
+resource "aws_eip" "nat" {
+  domain = "vpc"
 
-resource "aws_eip" "nat_eip" {
-  count = var.create_natgw ? 1 : 0
-  vpc        = true
-  depends_on = [aws_internet_gateway.igw]
-}
-
-resource "aws_nat_gateway" "natgw" {
-  count 	= var.create_natgw ? 1 : 0
-  allocation_id = aws_eip.nat_eip[0].id
-  subnet_id     = element(aws_subnet.public_subnet.*.id, 0)
-  depends_on    = [aws_internet_gateway.igw]
   tags = {
-    Name        = "${var.vpc_name}-natgw"
+    Name        = "${var.project_name}-nat-eip"
+    Environment = var.environment
+    Project     = var.project_name
   }
+
+  depends_on = [aws_internet_gateway.main]
 }
 
-## Create Public Subnets
+resource "aws_nat_gateway" "main" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public[0].id
 
-resource "aws_subnet" "public_subnet" {
-  count                   = length(var.public_subnets_cidr)
-  vpc_id 		  = aws_vpc.vpc.id
-  cidr_block              = element(var.public_subnets_cidr, count.index)
-  availability_zone       = element(var.availability_zones, count.index)
+  tags = {
+    Name        = "${var.project_name}-nat"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+
+  depends_on = [aws_internet_gateway.main]
+}
+
+resource "aws_subnet" "public" {
+  count                   = var.public_subnet_count
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(var.vpc_cidr, 4, count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
   map_public_ip_on_launch = true
+
   tags = {
-    Name        	  = "${var.vpc_name}-public-subnet-az${count.index + 1}"
+    Name        = "${var.project_name}-public-subnet-${count.index + 1}"
+    Environment = var.environment
+    Project     = var.project_name
+    Type        = "public"
   }
 }
 
-## Create Private Subnets
+resource "aws_subnet" "private" {
+  count             = var.private_subnet_count
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet(var.vpc_cidr, 4, count.index + var.public_subnet_count)
+  availability_zone = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
 
-resource "aws_subnet" "private_subnet" {
-  count                   = length(var.private_subnets_cidr)
-  vpc_id 		  = aws_vpc.vpc.id
-  cidr_block              = element(var.private_subnets_cidr, count.index)
-  availability_zone       = element(var.availability_zones, count.index)
-  map_public_ip_on_launch = false
   tags = {
-    Name        	  = "${var.vpc_name}-private-subnet-az${count.index + 1}"
+    Name        = "${var.project_name}-private-subnet-${count.index + 1}"
+    Environment = var.environment
+    Project     = var.project_name
+    Type        = "private"
   }
 }
 
-## Create Public Route Table, Routes, and Association
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
 
-resource "aws_route_table" "public_rtb" {
-  count = length(var.public_subnets_cidr)
-  vpc_id = aws_vpc.vpc.id
-  tags   = {
-    Name = "${var.vpc_name}-public-subnet-rtb-az${count.index + 1}"
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+
+  tags = {
+    Name        = "${var.project_name}-public-rt"
+    Environment = var.environment
+    Project     = var.project_name
+    Type        = "public"
   }
 }
 
-resource "aws_route" "public_internet_gateway" {
-  count 	         = length(var.public_subnets_cidr)
-  route_table_id         = aws_route_table.public_rtb[count.index].id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.igw[0].id
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main.id
+  }
+
+  tags = {
+    Name        = "${var.project_name}-private-rt"
+    Environment = var.environment
+    Project     = var.project_name
+    Type        = "private"
+  }
 }
 
 resource "aws_route_table_association" "public" {
-  count          = length(var.public_subnets_cidr)
-  subnet_id      = aws_subnet.public_subnet[count.index].id
-  route_table_id = aws_route_table.public_rtb[count.index].id
-}
-
-## Create Private Route Table, Routes, and Association
-
-resource "aws_route_table" "private_rtb" {
-  count = length(var.private_subnets_cidr)
-  vpc_id = aws_vpc.vpc.id
-  tags   = {
-    Name = "${var.vpc_name}-private-subnet-rtb-az${count.index + 1}"
-  }
-}
-
-resource "aws_route" "private_nat_gateway" {
-  count 		 = length(var.private_subnets_cidr)
-  route_table_id         = aws_route_table.private_rtb[count.index].id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.natgw[0].id
+  count          = var.public_subnet_count
+  subnet_id      = aws_subnet.public[count.index].id
+  route_table_id = aws_route_table.public.id
 }
 
 resource "aws_route_table_association" "private" {
-  count          = length(var.private_subnets_cidr)
-  subnet_id      = aws_subnet.private_subnet[count.index].id
-  route_table_id = aws_route_table.private_rtb[count.index].id
+  count          = var.private_subnet_count
+  subnet_id      = aws_subnet.private[count.index].id
+  route_table_id = aws_route_table.private.id
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
 }
