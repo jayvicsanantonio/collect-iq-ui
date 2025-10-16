@@ -188,8 +188,8 @@
   - Test error handling and retry logic
   - _Requirements: 15.2, 15.5_
 
-- [ ] 6. Card identification interface
-- [ ] 6.1 Create CandidateList component
+- [x] 6. Card identification interface
+- [x] 6.1 Create CandidateList component
   - Design card list layout with top-k results
   - Display card name, set, rarity for each candidate
   - Implement confidence bar visualization
@@ -198,7 +198,7 @@
   - Add loading skeleton state
   - _Requirements: 3.2, 3.3_
 
-- [ ] 6.2 Create identification page
+- [x] 6.2 Create identification page
   - Create /identify route (or modal)
   - Integrate CandidateList component
   - Add loading state while backend processes image

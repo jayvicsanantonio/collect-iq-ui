@@ -129,8 +129,9 @@ export default function UploadPage() {
 
         // Navigate to identification page with the S3 key
         setTimeout(() => {
-          const identifyUrl = `/identify?key=${encodeURIComponent(presignResponse.key)}`;
-          router.push(identifyUrl);
+          router.push(
+            `/identify?key=${encodeURIComponent(presignResponse.key)}`
+          );
         }, 500);
       } catch (error) {
         console.error('Upload error:', error);
