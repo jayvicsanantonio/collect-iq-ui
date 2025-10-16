@@ -5,42 +5,87 @@
  * Requirements: 9.4
  */
 
+import AWSXRay from 'aws-xray-sdk-core';
 import { logger } from './logger.js';
 
-/**
- * X-Ray subsegment interface
- * Note: In production, this would use aws-xray-sdk-core
- * For now, we provide a lightweight wrapper that can be enhanced
- */
-interface Subsegment {
-  name: string;
-  startTime: number;
-  annotations?: Record<string, string | number | boolean>;
-  metadata?: Record<string, unknown>;
+type AnnotationMap = Record<string, string | number | boolean>;
+type MetadataMap = Record<string, unknown>;
+
+type SegmentOrSubsegment = Exclude<ReturnType<typeof AWSXRay.getSegment>, undefined>;
+type XRaySubsegment = SegmentOrSubsegment extends {
+  addNewSubsegment: (...args: unknown[]) => infer R;
 }
+  ? R
+  : never;
 
 class TracingService {
   private enabled: boolean;
-  private activeSubsegments: Map<string, Subsegment>;
+  private activeSubsegments: Map<string, XRaySubsegment>;
 
   constructor() {
     this.enabled = process.env.XRAY_ENABLED !== 'false';
     this.activeSubsegments = new Map();
+
+    if (this.enabled) {
+      try {
+        AWSXRay.setContextMissingStrategy('LOG_ERROR');
+        if (typeof AWSXRay.capturePromise === 'function') {
+          AWSXRay.capturePromise();
+        }
+      } catch (error) {
+        this.enabled = false;
+        logger.warn('Failed to initialize AWS X-Ray SDK', {
+          operation: 'xray_init',
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
   }
 
   /**
    * Start a custom subsegment for business logic tracing
    */
-  startSubsegment(name: string, annotations?: Record<string, string | number | boolean>): string {
+  startSubsegment(name: string, annotations?: AnnotationMap): string {
     if (!this.enabled) {
       return name;
     }
 
-    const subsegment: Subsegment = {
-      name,
-      startTime: Date.now(),
-      annotations,
+    const segment = AWSXRay.getSegment();
+    if (!segment) {
+      logger.debug('AWS X-Ray segment unavailable; skipping subsegment start', {
+        operation: 'xray_subsegment_start',
+        subsegmentName: name,
+      });
+      return name;
+    }
+
+    const { addNewSubsegment } = segment as {
+      addNewSubsegment?: (subsegmentName: string) => XRaySubsegment;
     };
+
+    if (typeof addNewSubsegment !== 'function') {
+      logger.debug('Current X-Ray entity cannot create subsegments', {
+        operation: 'xray_subsegment_start',
+        subsegmentName: name,
+      });
+      return name;
+    }
+
+    const subsegment = addNewSubsegment(name);
+
+    if (annotations) {
+      for (const [key, value] of Object.entries(annotations)) {
+        try {
+          subsegment.addAnnotation(key, value);
+        } catch (error) {
+          logger.debug('Failed to add X-Ray annotation', {
+            operation: 'xray_annotation',
+            key,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+    }
 
     this.activeSubsegments.set(name, subsegment);
 
@@ -56,7 +101,7 @@ class TracingService {
   /**
    * End a custom subsegment
    */
-  endSubsegment(name: string, metadata?: Record<string, unknown>): void {
+  endSubsegment(name: string, metadata?: MetadataMap): void {
     if (!this.enabled) {
       return;
     }
@@ -70,17 +115,35 @@ class TracingService {
       return;
     }
 
-    const duration = Date.now() - subsegment.startTime;
+    if (metadata) {
+      for (const [key, value] of Object.entries(metadata)) {
+        try {
+          if (typeof subsegment.addMetadata === 'function') {
+            subsegment.addMetadata(key, value);
+          }
+        } catch (error) {
+          logger.debug('Failed to add X-Ray metadata', {
+            operation: 'xray_metadata',
+            key,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+    }
 
-    logger.debug('X-Ray subsegment ended', {
-      operation: 'xray_subsegment_end',
-      subsegmentName: name,
-      durationMs: duration,
-      annotations: subsegment.annotations,
-      metadata,
-    });
-
-    this.activeSubsegments.delete(name);
+    try {
+      if (typeof subsegment.close === 'function') {
+        subsegment.close();
+      }
+    } catch (error) {
+      logger.warn('Failed to close X-Ray subsegment', {
+        operation: 'xray_subsegment_end',
+        subsegmentName: name,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      this.activeSubsegments.delete(name);
+    }
   }
 
   /**
@@ -92,11 +155,20 @@ class TracingService {
       return;
     }
 
-    logger.debug('X-Ray annotation added', {
-      operation: 'xray_annotation',
-      key,
-      value,
-    });
+    const segment = AWSXRay.getSegment();
+    if (!segment) {
+      return;
+    }
+
+    try {
+      segment.addAnnotation(key, value);
+    } catch (error) {
+      logger.debug('Failed to add annotation to current X-Ray segment', {
+        operation: 'xray_annotation',
+        key,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   /**
@@ -108,29 +180,34 @@ class TracingService {
       return;
     }
 
-    logger.debug('X-Ray metadata added', {
-      operation: 'xray_metadata',
-      key,
-      valueType: typeof value,
-    });
+    const segment = AWSXRay.getSegment();
+    if (!segment) {
+      return;
+    }
+
+    try {
+      segment.addMetadata(key, value);
+    } catch (error) {
+      logger.debug('Failed to add metadata to current X-Ray segment', {
+        operation: 'xray_metadata',
+        key,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   /**
    * Wrap an async function with X-Ray tracing
    */
-  async trace<T>(
-    name: string,
-    fn: () => Promise<T>,
-    annotations?: Record<string, string | number | boolean>,
-  ): Promise<T> {
-    const subsegmentId = this.startSubsegment(name, annotations);
+  async trace<T>(name: string, fn: () => Promise<T>, annotations?: AnnotationMap): Promise<T> {
+    const subsegmentName = this.startSubsegment(name, annotations);
 
     try {
       const result = await fn();
-      this.endSubsegment(subsegmentId, { success: true });
+      this.endSubsegment(subsegmentName, { success: true });
       return result;
     } catch (error) {
-      this.endSubsegment(subsegmentId, {
+      this.endSubsegment(subsegmentName, {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
@@ -141,23 +218,44 @@ class TracingService {
   /**
    * Wrap a synchronous function with X-Ray tracing
    */
-  traceSync<T>(
-    name: string,
-    fn: () => T,
-    annotations?: Record<string, string | number | boolean>,
-  ): T {
-    const subsegmentId = this.startSubsegment(name, annotations);
+  traceSync<T>(name: string, fn: () => T, annotations?: AnnotationMap): T {
+    const subsegmentName = this.startSubsegment(name, annotations);
 
     try {
       const result = fn();
-      this.endSubsegment(subsegmentId, { success: true });
+      this.endSubsegment(subsegmentName, { success: true });
       return result;
     } catch (error) {
-      this.endSubsegment(subsegmentId, {
+      this.endSubsegment(subsegmentName, {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
+    }
+  }
+
+  /**
+   * Instrument an AWS SDK v3 client so calls emit X-Ray subsegments
+   */
+  captureAWSv3Client<T extends { middlewareStack: unknown }>(client: T): T {
+    if (!this.enabled) {
+      return client;
+    }
+
+    try {
+      const captureFn = (
+        AWSXRay as unknown as {
+          captureAWSv3Client?: (sdkClient: T) => T;
+        }
+      ).captureAWSv3Client;
+
+      return captureFn ? captureFn.call(AWSXRay, client) : client;
+    } catch (error) {
+      logger.warn('Failed to instrument AWS SDK client for X-Ray', {
+        operation: 'xray_capture_client',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return client;
     }
   }
 
@@ -176,7 +274,7 @@ export const tracing = new TracingService();
  * Decorator for tracing async methods
  * Usage: @traced('operationName')
  */
-export function traced(name: string, annotations?: Record<string, string | number | boolean>) {
+export function traced(name: string, annotations?: AnnotationMap) {
   return function (_target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 

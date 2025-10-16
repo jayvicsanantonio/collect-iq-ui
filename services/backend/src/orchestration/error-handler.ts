@@ -6,12 +6,14 @@
 import type { Handler } from 'aws-lambda';
 import { SQSClient, SendMessageCommand, type SendMessageCommandInput } from '@aws-sdk/client-sqs';
 import type { Card } from '@collectiq/shared';
-import { logger } from '../utils/logger.js';
+import { logger, tracing } from '../utils/index.js';
 import { updateCard, getCard } from '../store/card-service.js';
 
-const sqsClient = new SQSClient({
-  region: process.env.AWS_REGION || 'us-east-1',
-});
+const sqsClient = tracing.captureAWSv3Client(
+  new SQSClient({
+    region: process.env.AWS_REGION || 'us-east-1',
+  }),
+);
 
 /**
  * Input structure for Error Handler task
@@ -53,6 +55,10 @@ interface ErrorHandlerOutput {
  */
 export const handler: Handler<ErrorHandlerInput, ErrorHandlerOutput> = async (event) => {
   const { userId, cardId, requestId, error, partialResults } = event;
+
+  tracing.startSubsegment('error_handler', { userId, cardId, requestId });
+  tracing.addAnnotation('operation', 'workflow_error_handler');
+  tracing.addAnnotation('cardId', cardId);
 
   logger.error('Error Handler invoked', new Error(error.Error), {
     userId,
@@ -123,6 +129,14 @@ export const handler: Handler<ErrorHandlerInput, ErrorHandlerOutput> = async (ev
       dlqMessageId,
     });
 
+    tracing.endSubsegment('error_handler', {
+      success: true,
+      partialResultsPersisted,
+      dlqMessageId,
+      cardId,
+      userId,
+    });
+
     // Return success to Step Functions
     return {
       handled: true,
@@ -142,6 +156,15 @@ export const handler: Handler<ErrorHandlerInput, ErrorHandlerOutput> = async (ev
         originalError: error.Error,
       },
     );
+
+    tracing.endSubsegment('error_handler', {
+      success: false,
+      error: handlerError instanceof Error ? handlerError.message : String(handlerError),
+      partialResultsPersisted,
+      dlqMessageId,
+      cardId,
+      userId,
+    });
 
     return {
       handled: false,
@@ -168,7 +191,11 @@ async function persistPartialResults(
 ): Promise<boolean> {
   try {
     // Verify card exists and user owns it
-    await getCard(userId, cardId, requestId);
+    await tracing.trace('dynamodb_get_card', () => getCard(userId, cardId, requestId), {
+      userId,
+      cardId,
+      requestId,
+    });
 
     // Build update object from partial results
     const cardUpdate: Partial<Card> = {};
@@ -210,7 +237,15 @@ async function persistPartialResults(
 
     // Only update if we have data to persist
     if (Object.keys(cardUpdate).length > 0) {
-      await updateCard(userId, cardId, cardUpdate, requestId);
+      await tracing.trace(
+        'dynamodb_update_card',
+        () => updateCard(userId, cardId, cardUpdate, requestId),
+        {
+          userId,
+          cardId,
+          requestId,
+        },
+      );
 
       logger.info('Partial results persisted', {
         userId,
@@ -294,7 +329,11 @@ async function sendToDLQ(errorEvent: ErrorHandlerInput): Promise<string | undefi
     };
 
     const command = new SendMessageCommand(params);
-    const response = await sqsClient.send(command);
+    const response = await tracing.trace('sqs_send_dlq_message', () => sqsClient.send(command), {
+      cardId: errorEvent.cardId,
+      userId: errorEvent.userId,
+      requestId: errorEvent.requestId,
+    });
 
     logger.info('Message sent to DLQ', {
       messageId: response.MessageId,

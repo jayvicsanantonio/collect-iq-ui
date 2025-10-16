@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { RevalueRequestSchema } from '@collectiq/shared';
 import { getUserId, type APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
 import { getCard } from '../store/card-service.js';
-import { formatErrorResponse, BadRequestError } from '../utils/errors.js';
-import { logger } from '../utils/logger.js';
+import { formatErrorResponse, BadRequestError, UnauthorizedError } from '../utils/errors.js';
+import { logger, metrics, tracing } from '../utils/index.js';
 
 /**
  * Step Functions client singleton
@@ -24,9 +24,10 @@ const RevalueOptionsSchema = RevalueRequestSchema.omit({ cardId: true });
  */
 function getSFNClient(): SFNClient {
   if (!sfnClient) {
-    sfnClient = new SFNClient({
+    const client = new SFNClient({
       region: process.env.AWS_REGION || 'us-east-1',
     });
+    sfnClient = tracing.captureAWSv3Client(client);
   }
   return sfnClient;
 }
@@ -66,13 +67,18 @@ async function hasInFlightExecution(
     let nextToken: string | undefined;
 
     do {
-      const result = await client.send(
-        new ListExecutionsCommand({
-          stateMachineArn,
-          statusFilter: 'RUNNING',
-          maxResults: 100,
-          nextToken,
-        }),
+      const result = await tracing.trace(
+        'sfn_list_executions',
+        () =>
+          client.send(
+            new ListExecutionsCommand({
+              stateMachineArn,
+              statusFilter: 'RUNNING',
+              maxResults: 100,
+              nextToken,
+            }),
+          ),
+        { cardId, userId, requestId },
       );
 
       // Check if any running execution is for this card
@@ -117,10 +123,16 @@ async function hasInFlightExecution(
  */
 export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
   const requestId = event.requestContext.requestId;
+  const startTime = Date.now();
+
+  tracing.startSubsegment('cards_revalue_handler', { requestId });
 
   try {
     // Extract user ID from JWT claims
     const userId = getUserId(event as APIGatewayProxyEventV2WithJWT);
+
+    tracing.addAnnotation('userId', userId);
+    tracing.addAnnotation('operation', 'cards_revalue');
 
     // Extract cardId from path parameters
     const cardId = event.pathParameters?.id;
@@ -128,6 +140,8 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     if (!cardId) {
       throw new BadRequestError('Card ID is required in path', requestId);
     }
+
+    tracing.addAnnotation('cardId', cardId);
 
     // Parse optional request body to determine forceRefresh preference
     let forceRefresh = false;
@@ -152,7 +166,11 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     });
 
     // Retrieve card from DynamoDB to get s3Keys and verify ownership
-    const card = await getCard(userId, cardId, requestId);
+    const card = await tracing.trace(
+      'dynamodb_get_card',
+      () => getCard(userId, cardId, requestId),
+      { userId, requestId, cardId },
+    );
 
     // Verify card has required S3 keys
     if (!card.frontS3Key) {
@@ -168,6 +186,16 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
         cardId,
         executionArn: existingExecutionArn,
         requestId,
+      });
+
+      const latency = Date.now() - startTime;
+      await metrics.recordApiLatency('/cards/{id}/revalue', 'POST', latency);
+
+      tracing.endSubsegment('cards_revalue_handler', {
+        success: true,
+        cardId,
+        executionArn: existingExecutionArn,
+        reusedExecution: true,
       });
 
       return {
@@ -220,12 +248,17 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
       requestId,
     });
 
-    const result = await client.send(
-      new StartExecutionCommand({
-        stateMachineArn,
-        name: executionName,
-        input: JSON.stringify(executionInput),
-      }),
+    const result = await tracing.trace(
+      'sfn_start_execution',
+      () =>
+        client.send(
+          new StartExecutionCommand({
+            stateMachineArn,
+            name: executionName,
+            input: JSON.stringify(executionInput),
+          }),
+        ),
+      { userId, cardId, requestId, executionName },
     );
 
     logger.info('Step Functions execution started successfully', {
@@ -234,6 +267,15 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
       cardId,
       executionArn: result.executionArn,
       requestId,
+    });
+
+    const latency = Date.now() - startTime;
+    await metrics.recordApiLatency('/cards/{id}/revalue', 'POST', latency);
+
+    tracing.endSubsegment('cards_revalue_handler', {
+      success: true,
+      cardId,
+      executionArn: result.executionArn,
     });
 
     // Return 202 Accepted with execution ARN
@@ -249,6 +291,18 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
       }),
     };
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      await metrics.recordAuthFailure(error.detail);
+    }
+
+    const latency = Date.now() - startTime;
+    await metrics.recordApiLatency('/cards/{id}/revalue', 'POST', latency);
+
+    tracing.endSubsegment('cards_revalue_handler', {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+
     logger.error(
       'Failed to start revaluation',
       error instanceof Error ? error : new Error(String(error)),

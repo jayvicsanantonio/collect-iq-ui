@@ -16,12 +16,14 @@ import type {
   FeatureEnvelope,
   PricingResult,
 } from '@collectiq/shared';
-import { logger } from '../utils/logger.js';
+import { logger, metrics, tracing } from '../utils/index.js';
 import { z } from 'zod';
 
-const bedrockClient = new BedrockRuntimeClient({
-  region: process.env.AWS_REGION || 'us-east-1',
-});
+const bedrockClient = tracing.captureAWSv3Client(
+  new BedrockRuntimeClient({
+    region: process.env.AWS_REGION || 'us-east-1',
+  }),
+);
 
 /**
  * Bedrock configuration from environment
@@ -100,7 +102,11 @@ export class BedrockService {
         });
 
         const command = new ConverseCommand(input);
-        const response = await bedrockClient.send(command);
+        const response = await tracing.trace(
+          'bedrock_converse',
+          () => bedrockClient.send(command),
+          { modelId: input.modelId, attempt },
+        );
 
         logger.info('Bedrock invocation successful', {
           attempt,
@@ -282,6 +288,8 @@ Provide your analysis in the following JSON format:
     });
 
     try {
+      const startTime = Date.now();
+
       const input: ConverseCommandInput = {
         modelId: BEDROCK_CONFIG.modelId,
         messages: [
@@ -304,15 +312,16 @@ Provide your analysis in the following JSON format:
           temperature: BEDROCK_CONFIG.temperature,
         },
       };
-
       const response = await this.invokeWithRetry(input);
-
+      const latency = Date.now() - startTime;
+      const tokenCount = response.usage?.outputTokens ?? response.usage?.totalTokens ?? undefined;
       // Extract response text
       const responseText = response.output?.message?.content?.[0]?.text;
-
       if (!responseText) {
         throw new Error('Empty response from Bedrock');
       }
+
+      await metrics.recordBedrockInvocation('authenticity', latency, tokenCount);
 
       logger.debug('Bedrock authenticity response received', {
         responseLength: responseText.length,
@@ -382,6 +391,8 @@ Provide your analysis in the following JSON format:
     });
 
     try {
+      const startTime = Date.now();
+
       const input: ConverseCommandInput = {
         modelId: BEDROCK_CONFIG.modelId,
         messages: [
@@ -404,15 +415,16 @@ Provide your analysis in the following JSON format:
           temperature: BEDROCK_CONFIG.temperature,
         },
       };
-
       const response = await this.invokeWithRetry(input);
-
+      const latency = Date.now() - startTime;
+      const tokenCount = response.usage?.outputTokens ?? response.usage?.totalTokens ?? undefined;
       // Extract response text
       const responseText = response.output?.message?.content?.[0]?.text;
-
       if (!responseText) {
         throw new Error('Empty response from Bedrock');
       }
+
+      await metrics.recordBedrockInvocation('valuation', latency, tokenCount);
 
       logger.debug('Bedrock valuation response received', {
         responseLength: responseText.length,

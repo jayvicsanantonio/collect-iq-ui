@@ -7,7 +7,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda
 import { CreateCardRequestSchema } from '@collectiq/shared';
 import { getUserId, type APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
 import { createCard } from '../store/card-service.js';
-import { formatErrorResponse, BadRequestError } from '../utils/errors.js';
+import { formatErrorResponse, BadRequestError, UnauthorizedError } from '../utils/errors.js';
 import { logger, metrics, tracing } from '../utils/index.js';
 
 /**
@@ -89,6 +89,10 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
       body: JSON.stringify(card),
     };
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      await metrics.recordAuthFailure(error.detail);
+    }
+
     logger.error(
       'Failed to create card',
       error instanceof Error ? error : new Error(String(error)),
