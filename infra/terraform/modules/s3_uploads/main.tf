@@ -75,41 +75,41 @@ resource "aws_s3_bucket_cors_configuration" "uploads" {
 }
 
 # Lifecycle configuration
-resource "aws_s3_bucket_lifecycle_configuration" "uploads" {
-  bucket = aws_s3_bucket.uploads.id
-
-  # Transition uploads to Glacier after 90 days, delete after 365 days
-  rule {
-    id     = "uploads-lifecycle"
-    status = "Enabled"
-
-    filter {
-      prefix = "uploads/"
-    }
-
-    transition {
-      days          = var.glacier_transition_days
-      storage_class = "GLACIER"
-    }
-
-    expiration {
-      days = var.expiration_days
-    }
-
-    noncurrent_version_expiration {
-      noncurrent_days = 30
-    }
-  }
-
-  # Keep authentic-samples without expiration
-  rule {
-    id     = "authentic-samples-retention"
-    status = "Enabled"
-
-    filter {
-      prefix = "authentic-samples/"
-    }
-
-    # No transitions or expiration for reference samples
-  }
-}
+#resource "aws_s3_bucket_lifecycle_configuration" "uploads" {
+#  bucket = aws_s3_bucket.uploads.id
+#
+#  # Transition uploads to Glacier after 90 days, delete after 365 days
+#  rule {
+#    id     = "uploads-lifecycle"
+#    status = "Enabled"
+#
+#    filter {
+#      prefix = "uploads/"
+#    }
+#
+#    transition {
+#      days          = var.glacier_transition_days
+#      storage_class = "GLACIER"
+#    }
+#
+#    expiration {
+#      days = var.expiration_days
+#    }
+#
+#    noncurrent_version_expiration {
+#      noncurrent_days = 30
+#    }
+#  }
+#
+#  # Keep authentic-samples without expiration
+#  rule {
+#    id     = "authentic-samples-retention"
+#    status = "Enabled"
+#
+#    filter {
+#      prefix = "authentic-samples/"
+#    }
+#
+#    # No transitions or expiration for reference samples
+#  }
+#}
