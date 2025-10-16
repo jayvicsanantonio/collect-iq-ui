@@ -11,3 +11,5 @@ export * from './secrets.js';
 export * from './phash.js';
 export * from './reference-hash-comparison.js';
 export * from './authenticity-signals.js';
+export * from './idempotency.js';
+export * from './idempotency-middleware.js';

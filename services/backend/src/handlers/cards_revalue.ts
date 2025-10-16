@@ -10,7 +10,7 @@ import { RevalueRequestSchema } from '@collectiq/shared';
 import { getUserId, type APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
 import { getCard } from '../store/card-service.js';
 import { formatErrorResponse, BadRequestError, UnauthorizedError } from '../utils/errors.js';
-import { logger, metrics, tracing } from '../utils/index.js';
+import { logger, metrics, tracing, withIdempotency } from '../utils/index.js';
 
 /**
  * Step Functions client singleton
@@ -121,7 +121,9 @@ async function hasInFlightExecution(
  * @param event - API Gateway event with JWT claims
  * @returns 202 Accepted with execution ARN or error response
  */
-export async function handler(event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> {
+async function cardsRevalueHandler(
+  event: APIGatewayProxyEventV2,
+): Promise<APIGatewayProxyResultV2> {
   const requestId = event.requestContext.requestId;
   const startTime = Date.now();
 
@@ -315,3 +317,10 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     return formatErrorResponse(error, requestId);
   }
 }
+
+export const handler = withIdempotency(cardsRevalueHandler, {
+  operation: 'cards_revalue',
+  required: true,
+});
+
+export { cardsRevalueHandler };
