@@ -57,6 +57,19 @@ export const AuthenticitySignalsSchema = z.object({
 
 export type AuthenticitySignals = z.infer<typeof AuthenticitySignalsSchema>;
 
+/**
+ * Authenticity details for frontend display
+ */
+export const AuthenticityDetailsSchema = z.object({
+  visualHashConfidence: z.number().min(0).max(1),
+  textMatchConfidence: z.number().min(0).max(1),
+  holoPatternConfidence: z.number().min(0).max(1),
+  rationale: z.string(),
+  fakeDetected: z.boolean(),
+});
+
+export type AuthenticityDetails = z.infer<typeof AuthenticityDetailsSchema>;
+
 export const CardSchema = z.object({
   cardId: z.string().uuid(),
   userId: z.string(),
@@ -126,6 +139,31 @@ export const PricingResultSchema = z.object({
 });
 
 export type PricingResult = z.infer<typeof PricingResultSchema>;
+
+/**
+ * Valuation data for frontend display
+ */
+export const ValuationDataSchema = z.object({
+  low: z.number(),
+  median: z.number(),
+  high: z.number(),
+  trend: z.object({
+    direction: z.enum(['up', 'down', 'stable']),
+    percentage: z.number(),
+  }),
+  confidence: z.number().min(0).max(1),
+  compsCount: z.number(),
+  windowDays: z.number(),
+  sources: z.array(
+    z.object({
+      name: z.string(),
+      logo: z.string(),
+    }),
+  ),
+  lastUpdated: z.string(),
+});
+
+export type ValuationData = z.infer<typeof ValuationDataSchema>;
 
 export const RawCompSchema = z.object({
   source: z.string(),
@@ -258,3 +296,18 @@ export const RevalueResponseSchema = z.object({
 });
 
 export type RevalueResponse = z.infer<typeof RevalueResponseSchema>;
+
+// ============================================================================
+// Error Schemas (RFC 7807 ProblemDetails)
+// ============================================================================
+
+export const ProblemDetailsSchema = z.object({
+  type: z.string().describe('URI reference identifying the problem type'),
+  title: z.string().describe('Short, human-readable summary'),
+  status: z.number().describe('HTTP status code'),
+  detail: z.string().describe('Human-readable explanation'),
+  instance: z.string().optional().describe('URI reference to specific occurrence'),
+  requestId: z.string().optional().describe('Request ID for traceability'),
+});
+
+export type ProblemDetails = z.infer<typeof ProblemDetailsSchema>;

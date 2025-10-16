@@ -3,4 +3,4 @@
  * Export all schemas and types for use in frontend and backend
  */
 
-export * from './schemas.js';
+export * from './schemas';
