@@ -386,15 +386,15 @@
     - Add widgets for data storage metrics
     - _Requirements: 9.5_
 
-- [ ] 13. Implement idempotency handling
-  - [ ] 13.1 Create idempotency token storage
+- [x] 13. Implement idempotency handling
+  - [x] 13.1 Create idempotency token storage
     - Create utility in services/backend/src/utils/idempotency.ts
     - Write saveIdempotencyToken function to store token in DynamoDB
     - Use conditional writes to prevent race conditions
     - Set TTL to IDEMPOTENCY_TTL_SECONDS (600)
     - _Requirements: 10.1, 10.2, 10.4_
 
-  - [ ] 13.2 Create idempotency middleware
+  - [x] 13.2 Create idempotency middleware
     - Extract idempotency key from request headers
     - Check DynamoDB for existing token
     - Return cached result if token exists and not expired
