@@ -1,0 +1,19 @@
+# Example terraform.tfvars for hackathon environment
+# Copy this file to terraform.tfvars and update with your values
+
+aws_region   = "us-east-1"
+environment  = "hackathon"
+project_name = "collectiq"
+
+# GitHub repository URL for Amplify hosting
+# github_repo_url = "https://github.com/your-org/collect-iq"
+
+# Budget configuration
+budget_amount = 50
+
+# Lambda memory configuration (MB)
+lambda_memory_lightweight = 512
+lambda_memory_heavy       = 1024
+
+# Logging configuration
+log_level = "info"

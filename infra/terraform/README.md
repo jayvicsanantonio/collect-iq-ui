@@ -21,8 +21,7 @@ terraform/
 │   ├── ssm_secrets/
 │   └── prereq/        # S3 + DynamoDB for state management
 ├── envs/              # Environment-specific configurations
-│   ├── dev/           # Development environment
-│   └── prod/          # Production environment
+│   └── hackathon/     # Hackathon environment (single environment for this project)
 └── prereq/            # Bootstrap infrastructure (run first)
 ```
 
@@ -40,14 +39,17 @@ terraform apply
 This creates:
 
 - S3 bucket: `collectiq-tfstate` (with versioning and encryption)
-- DynamoDB table: `collectiq-tfstate-lock` (for state locking)
+- DynamoDB table: `collectiq-terraform-locks` (for state locking)
 
 ## Environment Setup
 
-### Development Environment
+### Hackathon Environment
+
+This project uses a single environment optimized for the hackathon:
 
 ```bash
-cd envs/dev
+cd envs/hackathon
+cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform plan
 terraform apply
@@ -55,37 +57,19 @@ terraform apply
 
 Configuration:
 
-- Domain: `dev.collectiq.com`
+- Domain: Amplify default domain (no custom domain)
 - Budget: $50/month
-- Lambda memory: 512MB
-- Debug logging: Enabled
-
-### Production Environment
-
-```bash
-cd envs/prod
-terraform init
-terraform plan
-terraform apply  # Requires manual approval
-```
-
-Configuration:
-
-- Domain: `app.collectiq.com`
-- Budget: $500/month
-- Lambda memory: 1024MB
-- Debug logging: Disabled
-- MFA: Enabled for Cognito
+- Lambda memory: 512MB (lightweight), 1024MB (heavy)
+- Log level: info
+- Billing: On-demand for cost efficiency
 
 ## State Management
 
 Terraform state is stored remotely in S3 with DynamoDB locking:
 
 - **Backend**: S3 bucket `collectiq-tfstate`
-- **State files**:
-  - Dev: `dev/terraform.tfstate`
-  - Prod: `prod/terraform.tfstate`
-- **Locking**: DynamoDB table `collectiq-tfstate-lock`
+- **State file**: `hackathon/terraform.tfstate`
+- **Locking**: DynamoDB table `collectiq-terraform-locks`
 - **Encryption**: Enabled (AES-256)
 - **Versioning**: Enabled for state recovery
 
@@ -96,9 +80,10 @@ All resources are automatically tagged with:
 ```hcl
 {
   Project     = "CollectIQ"
-  Environment = "dev" | "prod"
+  Environment = "hackathon"
   Owner       = "DevOps"
   ManagedBy   = "Terraform"
+  CostCenter  = "Engineering"
 }
 ```
 
@@ -149,9 +134,8 @@ When creating new modules:
 1. Create module directory in `modules/`
 2. Define `main.tf`, `variables.tf`, `outputs.tf`
 3. Document inputs and outputs in README
-4. Import module in environment `main.tf`
-5. Test in dev environment first
-6. Promote to prod after validation
+4. Import module in `envs/hackathon/main.tf`
+5. Test and validate before applying
 
 ## Security Best Practices
 
@@ -179,10 +163,10 @@ If state is corrupted:
 
 ```bash
 # List S3 versions
-aws s3api list-object-versions --bucket collectiq-tfstate --prefix dev/
+aws s3api list-object-versions --bucket collectiq-tfstate --prefix hackathon/
 
 # Download previous version
-aws s3api get-object --bucket collectiq-tfstate --key dev/terraform.tfstate --version-id <VERSION_ID> terraform.tfstate.backup
+aws s3api get-object --bucket collectiq-tfstate --key hackathon/terraform.tfstate --version-id <VERSION_ID> terraform.tfstate.backup
 
 # Restore state
 terraform state push terraform.tfstate.backup

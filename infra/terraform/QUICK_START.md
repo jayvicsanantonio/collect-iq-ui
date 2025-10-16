@@ -9,16 +9,10 @@ Quick reference for common Terraform operations.
 cd infra/terraform/prereq
 terraform init && terraform apply
 
-# 2. Initialize dev environment
-cd ../envs/dev
+# 2. Initialize hackathon environment
+cd ../envs/hackathon
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
-terraform init
-
-# 3. Initialize prod environment
-cd ../prod
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
+# Edit terraform.tfvars with your values (optional - defaults configured)
 terraform init
 ```
 
@@ -26,7 +20,7 @@ terraform init
 
 ```bash
 # Navigate to environment
-cd infra/terraform/envs/dev  # or prod
+cd infra/terraform/envs/hackathon
 
 # Format code
 terraform fmt -recursive
@@ -57,8 +51,8 @@ cd modules/my_module
 # Create module files
 touch main.tf variables.tf outputs.tf README.md
 
-# Test module in dev
-cd ../../envs/dev
+# Test module in hackathon environment
+cd ../../envs/hackathon
 # Add module block to main.tf
 terraform init
 terraform plan
@@ -111,11 +105,11 @@ terraform apply tfplan
 # List state versions in S3
 aws s3api list-object-versions \
   --bucket collectiq-tfstate \
-  --prefix dev/terraform.tfstate
+  --prefix hackathon/terraform.tfstate
 
 # Download state backup
 aws s3 cp \
-  s3://collectiq-tfstate/dev/terraform.tfstate \
+  s3://collectiq-tfstate/hackathon/terraform.tfstate \
   terraform.tfstate.backup
 
 # Restore state
@@ -134,8 +128,8 @@ export AWS_SECRET_ACCESS_KEY="your-secret-key"
 export AWS_DEFAULT_REGION="us-east-1"
 
 # Set Terraform variables
-export TF_VAR_environment="dev"
-export TF_VAR_custom_domain="dev.collectiq.com"
+export TF_VAR_environment="hackathon"
+export TF_VAR_project_name="collectiq"
 ```
 
 ## Useful Aliases
@@ -154,9 +148,8 @@ alias tfv='terraform validate'
 alias tfs='terraform show'
 alias tfsl='terraform state list'
 
-# Navigate to environments
-alias tfdev='cd ~/collect-iq/infra/terraform/envs/dev'
-alias tfprod='cd ~/collect-iq/infra/terraform/envs/prod'
+# Navigate to hackathon environment
+alias tfhack='cd ~/collect-iq/infra/terraform/envs/hackathon'
 ```
 
 ## Resource Targeting
@@ -188,7 +181,7 @@ terraform workspace select prod
 terraform workspace show
 ```
 
-Note: This project uses separate directories (`envs/dev`, `envs/prod`) instead of workspaces for clearer separation.
+Note: This project uses a single environment directory (`envs/hackathon`) optimized for the hackathon. Workspaces are not needed for this project.
 
 ## Output Management
 
@@ -242,7 +235,7 @@ Before applying changes:
 3. ✅ Verify resource replacements (marked with `-/+`)
 4. ✅ Ensure no unintended changes
 5. ✅ Backup state if making risky changes
-6. ✅ Test in dev before applying to prod
+6. ✅ Validate in a safe AWS account first
 
 ## Emergency Procedures
 
@@ -284,13 +277,13 @@ terraform apply -refresh-only
 1. **Always run `terraform plan` before `apply`**
 2. **Use version control for all Terraform code**
 3. **Never commit `.tfvars` or state files**
-4. **Test changes in dev before prod**
-5. **Use modules for reusable components**
-6. **Document all variables and outputs**
-7. **Enable state locking (already configured)**
-8. **Use consistent naming conventions**
-9. **Tag all resources appropriately**
-10. **Review security scans before merge**
+4. **Use modules for reusable components**
+5. **Document all variables and outputs**
+6. **Enable state locking (already configured)**
+7. **Use consistent naming conventions**
+8. **Tag all resources appropriately**
+9. **Review security scans before merge**
+10. **Monitor costs with AWS Budget alerts**
 
 ## Quick Reference Card
 

@@ -76,17 +76,17 @@ This creates:
 
 **Important**: This step only needs to be done once per AWS account.
 
-## Step 2: Initialize Development Environment
+## Step 2: Initialize Hackathon Environment
 
 ```bash
-# Navigate to dev environment
-cd ../envs/dev
+# Navigate to hackathon environment
+cd ../envs/hackathon
 
 # Copy example tfvars
 cp terraform.tfvars.example terraform.tfvars
 
-# Edit terraform.tfvars with your values
-# Update github_repo_url and custom_domain as needed
+# Edit terraform.tfvars with your values (optional - defaults are configured)
+# Update github_repo_url if you want to configure Amplify
 nano terraform.tfvars
 
 # Initialize Terraform with backend
@@ -98,38 +98,10 @@ terraform validate
 # Format code
 terraform fmt
 
-# Review the plan (should show no resources yet)
+# Review the plan (should show minimal resources)
 terraform plan
 
-# Apply (creates minimal resources for now)
-terraform apply
-```
-
-## Step 3: Initialize Production Environment
-
-```bash
-# Navigate to prod environment
-cd ../prod
-
-# Copy example tfvars
-cp terraform.tfvars.example terraform.tfvars
-
-# Edit terraform.tfvars with your values
-nano terraform.tfvars
-
-# Initialize Terraform with backend
-terraform init
-
-# Verify configuration
-terraform validate
-
-# Format code
-terraform fmt
-
-# Review the plan
-terraform plan
-
-# Apply (requires manual approval in CI/CD)
+# Apply (creates account ID data source and local variables)
 terraform apply
 ```
 
@@ -142,14 +114,13 @@ After initialization, verify the setup:
 aws s3 ls s3://collectiq-tfstate/
 
 # Should show:
-# dev/terraform.tfstate
-# prod/terraform.tfstate
+# hackathon/terraform.tfstate
 
 # Check DynamoDB table exists
 aws dynamodb describe-table --table-name collectiq-terraform-locks
 
 # Verify Terraform state
-cd envs/dev
+cd envs/hackathon
 terraform state list
 
 # Should show:
@@ -203,8 +174,8 @@ terraform init -reconfigure
 After completing the setup:
 
 1. **Create Terraform Modules**: Implement modules in `modules/` directory
-2. **Import Modules**: Add module blocks to `envs/dev/main.tf` and `envs/prod/main.tf`
-3. **Deploy Infrastructure**: Run `terraform apply` in each environment
+2. **Import Modules**: Add module blocks to `envs/hackathon/main.tf`
+3. **Deploy Infrastructure**: Run `terraform apply` in the hackathon environment
 4. **Configure CI/CD**: Set up GitHub Actions for automated validation and deployment
 
 ## State Management Best Practices
@@ -214,7 +185,7 @@ After completing the setup:
 3. **Always use state locking**: Prevents concurrent modifications
 4. **Enable versioning**: Allows state recovery if corrupted
 5. **Regular backups**: S3 versioning provides automatic backups
-6. **Separate environments**: Dev and prod have separate state files
+6. **Single environment**: Hackathon environment optimized for cost and simplicity
 
 ## Security Checklist
 
@@ -241,12 +212,8 @@ For questions or issues:
 To destroy all infrastructure:
 
 ```bash
-# Destroy prod environment
-cd envs/prod
-terraform destroy
-
-# Destroy dev environment
-cd ../dev
+# Destroy hackathon environment
+cd envs/hackathon
 terraform destroy
 
 # Destroy state management (LAST STEP - cannot be undone easily!)
