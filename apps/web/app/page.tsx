@@ -1,11 +1,33 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { SignInButton } from '@/components/auth/SignInButton';
+import { SignOutButton } from '@/components/auth/SignOutButton';
 import { Camera, Upload, Sparkles, Shield, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getSession } from '@/lib/auth';
+import type { UserSession } from '@/lib/auth';
 
 export default function HomePage() {
   const { toast } = useToast();
+  const [session, setSession] = useState<UserSession | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  async function checkAuth() {
+    try {
+      const currentSession = await getSession();
+      setSession(currentSession);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  }
 
   const handleUpload = () => {
     toast({
@@ -101,7 +123,27 @@ export default function HomePage() {
               IQ
             </span>
           </div>
-          <div style={{ marginTop: '8px', marginRight: '4px' }}>
+          <div
+            className="flex items-center gap-4"
+            style={{ marginTop: '8px', marginRight: '4px' }}
+          >
+            {!isCheckingAuth && (
+              <>
+                {session ? (
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-sm"
+                      style={{ color: 'var(--muted-foreground)' }}
+                    >
+                      {session.email}
+                    </span>
+                    <SignOutButton variant="link" size="sm" />
+                  </div>
+                ) : (
+                  <SignInButton variant="link" size="sm" destination="/vault" />
+                )}
+              </>
+            )}
             <ThemeToggle />
           </div>
         </div>

@@ -39,8 +39,8 @@
   - Test theme persistence across sessions
   - _Requirements: 13.1, 13.2, 13.3_
 
-- [ ] 3. Authentication infrastructure
-- [ ] 3.1 Set up Cognito Hosted UI integration
+- [x] 3. Authentication infrastructure
+- [x] 3.1 Set up Cognito Hosted UI integration
   - Install AWS Amplify or Cognito SDK
   - Create Cognito configuration with environment variables (User Pool ID, Client ID, Domain, Redirect URIs)
   - Configure OAuth 2.0 settings (authorization code flow with PKCE)
@@ -50,7 +50,7 @@
   - Set up HTTP-only cookie handling for token storage
   - _Requirements: 1.2, 1.8, 1.9, 12.1_
 
-- [ ] 3.2 Create OAuth callback handler
+- [x] 3.2 Create OAuth callback handler
   - Create /auth/callback route to handle OAuth redirects
   - Implement authorization code exchange for tokens
   - Validate state parameter to prevent CSRF attacks
@@ -60,7 +60,7 @@
   - Create SessionExpiredModal component
   - _Requirements: 1.2, 1.8, 1.9_
 
-- [ ] 3.3 Implement AuthGuard and route protection
+- [x] 3.3 Implement AuthGuard and route protection
   - Create AuthGuard component with session verification
   - Implement loading spinner for auth status check
   - Add redirect logic to Cognito Hosted UI with state parameter preserving intended destination
@@ -69,7 +69,7 @@
   - Test redirect flows for authenticated and unauthenticated users
   - _Requirements: 1.1, 1.5, 1.9_
 
-- [ ] 3.4 Implement sign out functionality
+- [x] 3.4 Implement sign out functionality
   - Create sign out handler that clears cookies
   - Call Cognito logout endpoint to invalidate session
   - Redirect to Cognito Hosted UI or landing page after logout
