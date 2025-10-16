@@ -25,54 +25,54 @@ locals {
 module "vpc" {
   source = "../../modules/vpc"
 
-  project_name         = "collectiq"
+  project_name         = var.project_name
   environment          = var.environment
   vpc_cidr             = "172.28.0.0/21"
   public_subnet_count  = 2
   private_subnet_count = 2
 }
 
-## ============================================================================
-## S3 Uploads Bucket
-## ============================================================================
-#module "s3_uploads" {
-#  source = "../../modules/s3_uploads"
-#
-#  bucket_name = "${local.name_prefix}-uploads-${local.account_id}"
-#
-#  enable_versioning = true
-#
-#  cors_allowed_origins = ["*"] # Will be restricted to Amplify domain after deployment
-#  cors_allowed_methods = ["PUT", "POST", "GET"]
-#  cors_allowed_headers = ["*"]
-#  cors_expose_headers  = ["ETag"]
-#  cors_max_age_seconds = 3000
-#
-#  glacier_transition_days = 90
-#  expiration_days         = 365
-#
-#  tags = local.common_tags
-#}
-#
-## ============================================================================
-## DynamoDB Table
-## ============================================================================
-#module "dynamodb_collectiq" {
-#  source = "../../modules/dynamodb_collectiq"
-#
-#  table_name   = "${local.name_prefix}-cards"
-#  billing_mode = "PAY_PER_REQUEST"
-#
-#  gsi1_name = "GSI1"
-#  gsi2_name = "GSI2"
-#
-#  enable_point_in_time_recovery = true
-#  enable_ttl                     = true
-#  ttl_attribute                  = "ttl"
-#
-#  tags = local.common_tags
-#}
-#
+# ============================================================================
+# S3 Uploads Bucket
+# ============================================================================
+module "s3_uploads" {
+  source = "../../modules/s3_uploads"
+
+  bucket_name = "${local.name_prefix}-uploads-${local.account_id}"
+
+  enable_versioning = true
+
+  cors_allowed_origins = ["*"] # Will be restricted to Amplify domain after deployment
+  cors_allowed_methods = ["PUT", "POST", "GET"]
+  cors_allowed_headers = ["*"]
+  cors_expose_headers  = ["ETag"]
+  cors_max_age_seconds = 3000
+
+  #glacier_transition_days = 90
+  #expiration_days         = 365
+
+  tags = local.common_tags
+}
+
+# ============================================================================
+# DynamoDB Table
+# ============================================================================
+module "dynamodb_collectiq" {
+  source = "../../modules/dynamodb_collectiq"
+
+  table_name   = "${local.name_prefix}-cards"
+  billing_mode = "PAY_PER_REQUEST"
+
+  gsi1_name = "GSI1"
+  gsi2_name = "GSI2"
+
+  enable_point_in_time_recovery = true
+  enable_ttl                     = true
+  ttl_attribute                  = "ttl"
+
+  tags = local.common_tags
+}
+
 ## ============================================================================
 ## Cognito User Pool
 ## ============================================================================
@@ -112,7 +112,7 @@ module "vpc" {
 #
 #  tags = local.common_tags
 #}
-#
+
 ## ============================================================================
 ## Secrets Manager
 ## ============================================================================
@@ -142,36 +142,36 @@ module "vpc" {
 #
 #  tags = local.common_tags
 #}
-#
+
 ## ============================================================================
 ## IAM Policies for AI Services
 ## ============================================================================
-#module "rekognition_access" {
-#  source = "../../modules/rekognition_access"
-#
-#  policy_name        = "${local.name_prefix}-rekognition-access"
-#  policy_description = "IAM policy for Rekognition and S3 access"
-#
-#  uploads_bucket_arn = module.s3_uploads.bucket_arn
-#  samples_bucket_arn = "" # Optional authentic samples bucket
-#
-#  tags = local.common_tags
-#}
-#
-#module "bedrock_access" {
-#  source = "../../modules/bedrock_access"
-#
-#  policy_name        = "${local.name_prefix}-bedrock-access"
-#  policy_description = "IAM policy for Bedrock model invocation"
-#
-#  model_ids = [
-#    "anthropic.claude-3-sonnet-20240229-v1:0",
-#    "anthropic.claude-3-5-sonnet-20240620-v1:0"
-#  ]
-#
-#  tags = local.common_tags
-#}
-#
+module "rekognition_access" {
+  source = "../../modules/rekognition_access"
+
+  policy_name        = "${local.name_prefix}-rekognition-access"
+  policy_description = "IAM policy for Rekognition and S3 access"
+
+  uploads_bucket_arn = module.s3_uploads.bucket_arn
+  samples_bucket_arn = "" # Optional authentic samples bucket
+
+  tags = local.common_tags
+}
+
+module "bedrock_access" {
+  source = "../../modules/bedrock_access"
+
+  policy_name        = "${local.name_prefix}-bedrock-access"
+  policy_description = "IAM policy for Bedrock model invocation"
+
+  model_ids = [
+    "anthropic.claude-3-sonnet-20240229-v1:0",
+    "anthropic.claude-3-5-sonnet-20240620-v1:0"
+  ]
+
+  tags = local.common_tags
+}
+
 ## ============================================================================
 ## API Gateway HTTP API
 ## ============================================================================
@@ -202,7 +202,7 @@ module "vpc" {
 #
 #  tags = local.common_tags
 #}
-#
+
 ## ============================================================================
 ## EventBridge Event Bus
 ## ============================================================================
@@ -220,7 +220,7 @@ module "vpc" {
 #
 #  tags = local.common_tags
 #}
-#
+
 ## ============================================================================
 ## AWS Budgets
 ## ============================================================================
@@ -256,7 +256,7 @@ module "vpc" {
 #    subscriber_email_addresses = [] # Add email addresses in terraform.tfvars
 #  }
 #}
-#
+
 ## ============================================================================
 ## Amplify Hosting (Frontend)
 ## ============================================================================

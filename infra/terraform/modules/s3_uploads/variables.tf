@@ -39,17 +39,17 @@ variable "cors_max_age_seconds" {
   default     = 3000
 }
 
-variable "glacier_transition_days" {
-  description = "Days before transitioning to Glacier"
-  type        = number
-  default     = 90
-}
+#variable "glacier_transition_days" {
+#  description = "Days before transitioning to Glacier"
+#  type        = number
+#  default     = 90
+#}
 
-variable "expiration_days" {
-  description = "Days before object expiration"
-  type        = number
-  default     = 365
-}
+#variable "expiration_days" {
+#  description = "Days before object expiration"
+#  type        = number
+#  default     = 365
+#}
 
 variable "tags" {
   description = "Tags to apply to resources"
