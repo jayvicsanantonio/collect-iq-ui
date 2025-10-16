@@ -215,8 +215,8 @@
   - Set environment variables: DLQ_URL, DDB_TABLE
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-- [ ] 5. Configure Step Functions workflow
-- [ ] 5.1 Create state machine ASL definition
+- [x] 5. Configure Step Functions workflow
+- [x] 5.1 Create state machine ASL definition
   - Define RekognitionExtract task pointing to rekognition_extract Lambda
   - Configure retry policy (3 attempts, backoff rate 2.0)
   - Define Parallel state with PricingAgent and AuthenticityAgent branches
@@ -225,7 +225,7 @@
   - Save ASL JSON to file
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9_
 
-- [ ] 5.2 Deploy Step Functions state machine
+- [x] 5.2 Deploy Step Functions state machine
   - Use step_functions module with ASL definition
   - Grant IAM permissions to invoke all task Lambdas
   - Enable CloudWatch Logs for execution history
