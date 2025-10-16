@@ -4,7 +4,7 @@
  * to prevent duplicate operations within a TTL window
  */
 
-import { PutCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { PutCommand, GetCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import {
   getDynamoDBClient,
   getTableName,
@@ -22,15 +22,19 @@ const DEFAULT_IDEMPOTENCY_TTL_SECONDS = 600;
 /**
  * Idempotency token item structure in DynamoDB
  */
-interface IdempotencyTokenItem {
+export type IdempotencyStatus = 'PENDING' | 'COMPLETED';
+
+export interface IdempotencyTokenItem {
   PK: string; // USER#{userId}
   SK: string; // IDEMPOTENCY#{idempotencyKey}
   entityType: 'IDEMPOTENCY';
   idempotencyKey: string;
   userId: string;
   operation: string;
-  result: unknown; // Cached operation result
+  status: IdempotencyStatus;
+  result?: unknown; // Cached operation result
   createdAt: string;
+  updatedAt?: string;
   ttl: number; // Unix timestamp for auto-deletion
 }
 
@@ -48,24 +52,24 @@ function generateIdempotencySK(idempotencyKey: string): string {
 }
 
 /**
- * Save an idempotency token with operation result
+ * Create a new idempotency token placeholder
  * Uses conditional write to prevent race conditions
  *
  * @param userId - Cognito user ID
  * @param idempotencyKey - Unique idempotency key from request
  * @param operation - Operation identifier (e.g., 'cards_create', 'cards_revalue')
- * @param result - Operation result to cache
  * @param requestId - Request ID for logging
  * @param ttlSeconds - TTL in seconds (default: 600)
+ * @param initialResult - Optional initial result payload
  * @throws ConflictError if token already exists (race condition detected)
  */
-export async function saveIdempotencyToken(
+export async function createIdempotencyToken(
   userId: string,
   idempotencyKey: string,
   operation: string,
-  result: unknown,
   requestId?: string,
   ttlSeconds?: number,
+  initialResult?: unknown,
 ): Promise<void> {
   const ttl =
     ttlSeconds || Number(process.env.IDEMPOTENCY_TTL_SECONDS) || DEFAULT_IDEMPOTENCY_TTL_SECONDS;
@@ -78,13 +82,14 @@ export async function saveIdempotencyToken(
     idempotencyKey,
     userId,
     operation,
-    result,
+    status: 'PENDING',
     createdAt: now,
     ttl: calculateTTL(ttl),
+    ...(initialResult !== undefined && { result: initialResult }),
   };
 
-  logger.debug('Saving idempotency token', {
-    operation: 'saveIdempotencyToken',
+  logger.debug('Creating idempotency token', {
+    operation: 'createIdempotencyToken',
     userId,
     idempotencyKey,
     operationType: operation,
@@ -101,13 +106,12 @@ export async function saveIdempotencyToken(
         TableName: tableName,
         Item: item,
         // Conditional write: fail if item already exists
-        // This prevents race conditions when multiple requests arrive simultaneously
         ConditionExpression: 'attribute_not_exists(PK) AND attribute_not_exists(SK)',
       }),
     );
 
-    logger.info('Idempotency token saved successfully', {
-      operation: 'saveIdempotencyToken',
+    logger.info('Idempotency token created successfully', {
+      operation: 'createIdempotencyToken',
       userId,
       idempotencyKey,
       operationType: operation,
@@ -120,9 +124,8 @@ export async function saveIdempotencyToken(
       'name' in err &&
       err.name === 'ConditionalCheckFailedException'
     ) {
-      // Token already exists - this is a duplicate request
       logger.warn('Idempotency token already exists (duplicate request detected)', {
-        operation: 'saveIdempotencyToken',
+        operation: 'createIdempotencyToken',
         userId,
         idempotencyKey,
         operationType: operation,
@@ -134,12 +137,11 @@ export async function saveIdempotencyToken(
         { userId, idempotencyKey, operation },
       );
     }
-    // Re-throw other errors
     logger.error(
-      'Failed to save idempotency token',
+      'Failed to create idempotency token',
       err instanceof Error ? err : new Error(String(err)),
       {
-        operation: 'saveIdempotencyToken',
+        operation: 'createIdempotencyToken',
         userId,
         idempotencyKey,
         operationType: operation,
@@ -147,6 +149,137 @@ export async function saveIdempotencyToken(
       },
     );
     throw err;
+  }
+}
+
+/**
+ * Mark an idempotency token as completed and persist result
+ *
+ * @param userId - Cognito user ID
+ * @param idempotencyKey - Unique idempotency key from request
+ * @param operation - Operation identifier
+ * @param result - Operation result to cache
+ * @param requestId - Request ID for logging
+ */
+export async function completeIdempotencyToken(
+  userId: string,
+  idempotencyKey: string,
+  operation: string,
+  result: unknown,
+  requestId?: string,
+): Promise<void> {
+  const now = new Date().toISOString();
+
+  logger.debug('Completing idempotency token', {
+    operation: 'completeIdempotencyToken',
+    userId,
+    idempotencyKey,
+    operationType: operation,
+    requestId,
+  });
+
+  try {
+    const client = getDynamoDBClient();
+    const tableName = getTableName();
+
+    await client.send(
+      new UpdateCommand({
+        TableName: tableName,
+        Key: {
+          PK: generateUserPK(userId),
+          SK: generateIdempotencySK(idempotencyKey),
+        },
+        UpdateExpression: 'SET #status = :status, #result = :result, #updatedAt = :updatedAt',
+        ExpressionAttributeNames: {
+          '#status': 'status',
+          '#result': 'result',
+          '#updatedAt': 'updatedAt',
+        },
+        ExpressionAttributeValues: {
+          ':status': 'COMPLETED',
+          ':result': result,
+          ':updatedAt': now,
+        },
+        ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)',
+      }),
+    );
+
+    logger.info('Idempotency token marked as completed', {
+      operation: 'completeIdempotencyToken',
+      userId,
+      idempotencyKey,
+      operationType: operation,
+      requestId,
+    });
+  } catch (err) {
+    logger.error(
+      'Failed to complete idempotency token',
+      err instanceof Error ? err : new Error(String(err)),
+      {
+        operation: 'completeIdempotencyToken',
+        userId,
+        idempotencyKey,
+        operationType: operation,
+        requestId,
+      },
+    );
+    throw err;
+  }
+}
+
+/**
+ * Delete an idempotency token (used when operation fails)
+ *
+ * @param userId - Cognito user ID
+ * @param idempotencyKey - Unique idempotency key from request
+ * @param operation - Operation identifier
+ * @param requestId - Request ID for logging
+ */
+export async function deleteIdempotencyToken(
+  userId: string,
+  idempotencyKey: string,
+  operation: string,
+  requestId?: string,
+): Promise<void> {
+  logger.debug('Deleting idempotency token', {
+    operation: 'deleteIdempotencyToken',
+    userId,
+    idempotencyKey,
+    operationType: operation,
+    requestId,
+  });
+
+  try {
+    const client = getDynamoDBClient();
+    const tableName = getTableName();
+
+    await client.send(
+      new DeleteCommand({
+        TableName: tableName,
+        Key: {
+          PK: generateUserPK(userId),
+          SK: generateIdempotencySK(idempotencyKey),
+        },
+      }),
+    );
+
+    logger.info('Idempotency token deleted', {
+      operation: 'deleteIdempotencyToken',
+      userId,
+      idempotencyKey,
+      operationType: operation,
+      requestId,
+    });
+  } catch (err) {
+    logger.warn('Failed to delete idempotency token', {
+      operation: 'deleteIdempotencyToken',
+      userId,
+      idempotencyKey,
+      operationType: operation,
+      requestId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    // Swallow delete errors to avoid blocking retries
   }
 }
 
@@ -162,7 +295,7 @@ export async function getIdempotencyToken(
   userId: string,
   idempotencyKey: string,
   requestId?: string,
-): Promise<unknown | null> {
+): Promise<IdempotencyTokenItem | null> {
   logger.debug('Retrieving idempotency token', {
     operation: 'getIdempotencyToken',
     userId,
@@ -223,16 +356,17 @@ export async function getIdempotencyToken(
       return null;
     }
 
-    logger.info('Idempotency token found (returning cached result)', {
+    logger.info('Idempotency token found', {
       operation: 'getIdempotencyToken',
       userId,
       idempotencyKey,
       operationType: item.operation,
       createdAt: item.createdAt,
+      status: item.status,
       requestId,
     });
 
-    return item.result;
+    return item;
   } catch (error) {
     logger.error(
       'Failed to retrieve idempotency token',

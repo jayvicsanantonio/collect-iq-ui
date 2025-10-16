@@ -5,7 +5,13 @@
 
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import type { APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
-import { extractIdempotencyKey, getIdempotencyToken, saveIdempotencyToken } from './idempotency.js';
+import {
+  extractIdempotencyKey,
+  getIdempotencyToken,
+  createIdempotencyToken,
+  completeIdempotencyToken,
+  deleteIdempotencyToken,
+} from './idempotency.js';
 import { logger } from './logger.js';
 
 /**
@@ -59,9 +65,10 @@ function defaultGetUserId(event: APIGatewayProxyEventV2): string {
  * This middleware:
  * 1. Extracts idempotency key from request headers
  * 2. Checks DynamoDB for existing token
- * 3. Returns cached result if token exists and not expired
- * 4. Executes handler if no token found
- * 5. Stores new token with result before returning
+ * 3. Returns cached result if a completed token exists
+ * 4. Rejects duplicate in-flight requests while the original completes
+ * 5. Stores a new token placeholder before executing the handler
+ * 6. Updates the token with the final result on success (or cleans up on failure)
  *
  * @param handler - Lambda handler function to wrap
  * @param options - Idempotency configuration options
@@ -85,10 +92,14 @@ export function withIdempotency(
   return async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     const requestId = event.requestContext.requestId;
     const getUserId = options.getUserId || defaultGetUserId;
+    let tokenCreated = false;
+    let handlerExecuted = false;
+    let idempotencyKey: string | null = null;
+    let userId: string | null = null;
 
     try {
       // Extract idempotency key from headers
-      const idempotencyKey = extractIdempotencyKey(event.headers);
+      idempotencyKey = extractIdempotencyKey(event.headers);
 
       // If no idempotency key provided
       if (!idempotencyKey) {
@@ -122,7 +133,6 @@ export function withIdempotency(
       }
 
       // Extract user ID
-      let userId: string;
       try {
         userId = getUserId(event);
       } catch (error) {
@@ -158,40 +168,93 @@ export function withIdempotency(
       });
 
       // Check for existing token
-      const cachedResult = await getIdempotencyToken(userId, idempotencyKey, requestId);
+      const existingToken = await getIdempotencyToken(userId, idempotencyKey, requestId);
 
-      if (cachedResult !== null) {
-        logger.info('Returning cached result from idempotency token', {
-          operation: 'withIdempotency',
-          operationType: options.operation,
-          userId,
-          idempotencyKey,
-          requestId,
-        });
+      if (existingToken) {
+        if (existingToken.status === 'COMPLETED') {
+          const cachedResult = existingToken.result;
+          logger.info('Returning cached result from completed idempotency token', {
+            operation: 'withIdempotency',
+            operationType: options.operation,
+            userId,
+            idempotencyKey,
+            requestId,
+          });
 
-        // Return cached result
-        // The cached result should be a complete APIGatewayProxyResultV2
-        if (isValidProxyResult(cachedResult)) {
-          return cachedResult as APIGatewayProxyResultV2;
+          if (isValidProxyResult(cachedResult)) {
+            return cachedResult as APIGatewayProxyResultV2;
+          }
+
+          if (cachedResult !== undefined) {
+            logger.warn('Cached result is not a valid proxy result, wrapping it', {
+              operation: 'withIdempotency',
+              operationType: options.operation,
+              userId,
+              idempotencyKey,
+              requestId,
+            });
+            return {
+              statusCode: 200,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(cachedResult),
+            };
+          }
+
+          logger.warn('Completed idempotency token missing cached result, returning 204', {
+            operation: 'withIdempotency',
+            operationType: options.operation,
+            userId,
+            idempotencyKey,
+            requestId,
+          });
+          return {
+            statusCode: 204,
+            headers: {},
+            body: '',
+          };
         }
 
-        // If cached result is not a valid proxy result, wrap it
-        logger.warn('Cached result is not a valid proxy result, wrapping it', {
+        logger.info('Idempotent request still in progress', {
           operation: 'withIdempotency',
           operationType: options.operation,
           userId,
           idempotencyKey,
           requestId,
         });
+
         return {
-          statusCode: 200,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cachedResult),
+          statusCode: 409,
+          headers: { 'Content-Type': 'application/problem+json' },
+          body: JSON.stringify({
+            type: '/errors/conflict',
+            title: 'Conflict',
+            status: 409,
+            detail: 'Duplicate request detected - original request is still processing.',
+            instance: event.requestContext.http.path,
+            requestId,
+          }),
         };
       }
 
-      // No cached result - execute handler
-      logger.debug('No cached result found, executing handler', {
+      // No cached result - create placeholder and execute handler
+      logger.debug('No cached result found, creating idempotency placeholder', {
+        operation: 'withIdempotency',
+        operationType: options.operation,
+        userId,
+        idempotencyKey,
+        requestId,
+      });
+
+      await createIdempotencyToken(
+        userId,
+        idempotencyKey,
+        options.operation,
+        requestId,
+        options.ttlSeconds,
+      );
+      tokenCreated = true;
+
+      logger.debug('Executing handler after creating idempotency token', {
         operation: 'withIdempotency',
         operationType: options.operation,
         userId,
@@ -200,28 +263,25 @@ export function withIdempotency(
       });
 
       const result = await handler(event);
+      handlerExecuted = true;
 
       // Store result with idempotency token (only for successful responses)
-      // Check if result is a string (simple response) or object with statusCode
       const statusCode =
         typeof result === 'string' ? 200 : (result as { statusCode?: number }).statusCode || 200;
 
       if (statusCode >= 200 && statusCode < 300) {
         try {
-          await saveIdempotencyToken(
+          await completeIdempotencyToken(
             userId,
             idempotencyKey,
             options.operation,
             result,
             requestId,
-            options.ttlSeconds,
           );
-        } catch (error) {
-          // Log error but don't fail the request
-          // The operation succeeded, we just couldn't cache it
+        } catch (completeError) {
           logger.error(
-            'Failed to save idempotency token (operation succeeded)',
-            error instanceof Error ? error : new Error(String(error)),
+            'Failed to complete idempotency token (operation succeeded)',
+            completeError instanceof Error ? completeError : new Error(String(completeError)),
             {
               operation: 'withIdempotency',
               operationType: options.operation,
@@ -231,15 +291,8 @@ export function withIdempotency(
             },
           );
         }
-      } else {
-        logger.debug('Not caching result (non-success status code)', {
-          operation: 'withIdempotency',
-          operationType: options.operation,
-          userId,
-          idempotencyKey,
-          statusCode,
-          requestId,
-        });
+      } else if (tokenCreated) {
+        await deleteIdempotencyToken(userId, idempotencyKey, options.operation, requestId);
       }
 
       return result;
@@ -254,8 +307,15 @@ export function withIdempotency(
         },
       );
 
-      // On middleware error, try to execute handler anyway
-      // This ensures the system degrades gracefully
+      if (tokenCreated && userId && idempotencyKey) {
+        await deleteIdempotencyToken(userId, idempotencyKey, options.operation, requestId);
+      }
+
+      if (handlerExecuted) {
+        throw error;
+      }
+
+      // On middleware error before handler execution, try to execute handler anyway
       return handler(event);
     }
   };

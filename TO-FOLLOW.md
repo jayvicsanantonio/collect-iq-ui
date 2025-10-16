@@ -10,3 +10,4 @@
 - Adjust Aggregator’s state input handling or state-machine `ResultPath`/`ResultSelector`; Step Functions wraps each Lambda result as `{ Payload, StatusCode, ... }`, so the code’s direct destructuring of `pricingResult`/`authenticityResult` will throw without that fix (see AWS Step Functions Lambda integration docs).
 - Provision the supporting AWS resources and wiring (EventBridge bus for `CardValuationCompleted`, SQS DLQ for the error handler, env vars) in Terraform so the Aggregator/EventBridge and ErrorHandler/SQS paths actually work.
 - Add Terraform coverage for CloudWatch dashboards/alarms and X-Ray resources to complete Task 12.4 once infra work resumes.
+- Confirm API consumers always supply an `Idempotency-Key` header for POST flows and update developer docs if gaps remain.
