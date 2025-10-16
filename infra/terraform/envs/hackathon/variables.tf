@@ -46,4 +46,27 @@ variable "log_level" {
   description = "Log level for Lambda functions"
   type        = string
   default     = "info"
+
+  validation {
+    condition     = contains(["debug", "info", "warn", "error"], var.log_level)
+    error_message = "Log level must be one of: debug, info, warn, error"
+  }
+}
+
+variable "budget_email_addresses" {
+  description = "Email addresses for budget alerts"
+  type        = list(string)
+  default     = []
+}
+
+variable "enable_xray_tracing" {
+  description = "Enable X-Ray tracing for Lambda and Step Functions"
+  type        = bool
+  default     = true
+}
+
+variable "log_retention_days" {
+  description = "CloudWatch log retention in days"
+  type        = number
+  default     = 30
 }
