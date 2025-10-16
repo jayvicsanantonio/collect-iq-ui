@@ -154,8 +154,8 @@
   - Test Cognito Hosted UI accessibility
   - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5_
 
-- [ ] 4. Configure Lambda functions
-- [ ] 4.1 Deploy upload_presign Lambda
+- [x] 4. Configure Lambda functions
+- [x] 4.1 Deploy upload_presign Lambda
   - Use lambda_fn module with function code from services/backend/src/handlers/upload_presign
   - Set memory to 512MB, timeout to 30 seconds
   - Grant s3:PutObject permission (scoped to uploads/ prefix)
@@ -163,7 +163,7 @@
   - Create API Gateway integration
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-- [ ] 4.2 Deploy cards CRUD Lambdas
+- [x] 4.2 Deploy cards CRUD Lambdas
   - Deploy cards_create Lambda from services/backend/src/handlers/cards_create with dynamodb:PutItem permission
   - Deploy cards_list Lambda from services/backend/src/handlers/cards_list with dynamodb:Query permission (GSI1)
   - Deploy cards_get Lambda from services/backend/src/handlers/cards_get with dynamodb:GetItem permission
@@ -172,14 +172,14 @@
   - Create API Gateway integrations for all functions
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-- [ ] 4.3 Deploy cards_revalue Lambda
+- [x] 4.3 Deploy cards_revalue Lambda
   - Use lambda_fn module with function code from services/backend/src/handlers/cards_revalue
   - Grant states:StartExecution permission for Step Functions
   - Set environment variables: STEP_FUNCTIONS_ARN, DDB_TABLE
   - Create API Gateway integration
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-- [ ] 4.4 Deploy rekognition_extract Lambda
+- [x] 4.4 Deploy rekognition_extract Lambda
   - Use lambda_fn module with function code from services/backend/src/orchestration/rekognition_extract
   - Set memory to 1024MB, timeout to 5 minutes
   - Attach rekognition_access IAM policy
@@ -187,14 +187,14 @@
   - Set environment variables: BUCKET_UPLOADS
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
-- [ ] 4.5 Deploy pricing_agent Lambda
+- [x] 4.5 Deploy pricing_agent Lambda
   - Use lambda_fn module with function code from services/backend/src/agents/pricing_agent
   - Set memory to 1024MB, timeout to 5 minutes
   - Attach ssm_secrets IAM policy for API keys
   - Set environment variables: EBAY_SECRET_ARN, TCGPLAYER_SECRET_ARN, PRICECHARTING_SECRET_ARN, DDB_TABLE
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 12.1, 12.2, 12.3, 12.4, 12.5_
 
-- [ ] 4.6 Deploy authenticity_agent Lambda
+- [x] 4.6 Deploy authenticity_agent Lambda
   - Use lambda_fn module with function code from services/backend/src/agents/authenticity_agent
   - Set memory to 1024MB, timeout to 5 minutes
   - Attach bedrock_access IAM policy
@@ -202,14 +202,14 @@
   - Set environment variables: BEDROCK_MODEL_ID, BUCKET_UPLOADS, BUCKET_SAMPLES
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7_
 
-- [ ] 4.7 Deploy aggregator Lambda
+- [x] 4.7 Deploy aggregator Lambda
   - Use lambda_fn module with function code from services/backend/src/orchestration/aggregator
   - Grant dynamodb:UpdateItem permission
   - Grant events:PutEvents permission for EventBridge
   - Set environment variables: DDB_TABLE, EVENT_BUS_NAME
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-- [ ] 4.8 Deploy error_handler Lambda
+- [x] 4.8 Deploy error_handler Lambda
   - Use lambda_fn module with function code from services/backend/src/orchestration/error_handler
   - Grant sqs:SendMessage permission for DLQ
   - Set environment variables: DLQ_URL, DDB_TABLE
