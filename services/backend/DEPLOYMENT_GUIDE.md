@@ -147,12 +147,11 @@ pnpm build
 # Production build (minified, no source maps)
 NODE_ENV=production pnpm build
 
-# Watch mode (rebuilds on file changes)
-pnpm build:watch
-
 # Clean build artifacts
 pnpm clean
 ```
+
+> ℹ️ Continuous rebuilds can be achieved by running `node esbuild.mjs` with a file watcher such as [`chokidar-cli`](https://github.com/open-cli-tools/chokidar-cli) if needed; a dedicated `pnpm build:watch` script is not yet provided.
 
 ### Build Output
 
@@ -193,6 +192,9 @@ Lambda functions are deployed as ZIP archives containing:
 **Option 1: Manual Packaging**
 
 ```bash
+# Work from the backend package
+cd services/backend
+
 # Build the code
 pnpm build
 
@@ -200,12 +202,13 @@ pnpm build
 pnpm install --prod --frozen-lockfile
 
 # Create ZIP for each function
-cd dist
-for file in *.mjs; do
-  name="${file%.mjs}"
-  zip -r "${name}.zip" "${file}" ../node_modules ../package.json
+for file in dist/*.mjs; do
+  name="$(basename "${file%.mjs}")"
+  zip -r "dist/${name}.zip" "dist/${name}.mjs" node_modules package.json
 done
 ```
+
+Each archive bundles the compiled handler plus the runtime dependencies that esbuild marks as external (for example `@aws-sdk/*`). Configure the Lambda handler to point at `dist/<functionName>.handler`.
 
 **Option 2: Terraform Archive Provider**
 
@@ -228,11 +231,13 @@ data "archive_file" "lambda_zip" {
     "error_handler"
   ])
 
-  type        = "zip"
-  source_file = "${path.module}/../../services/backend/dist/${each.key}.mjs"
+  type       = "zip"
+  source_dir = "${path.module}/../../services/backend/dist/${each.key}"
   output_path = "${path.module}/../../services/backend/dist/${each.key}.zip"
 }
 ```
+
+> Before using `archive_file`, ensure you stage a folder per function (for example `dist/upload_presign/`) that contains the compiled `.mjs` file, the `package.json`, and a trimmed `node_modules/`. You can adapt the packaging script above to create these folders so Terraform archives include all runtime dependencies.
 
 **Option 3: CI/CD Pipeline**
 
@@ -701,14 +706,15 @@ jobs:
       - name: Run tests
         run: |
           cd services/backend
-          pnpm test:run
+          pnpm test
 
       - name: Package Lambda functions
         run: |
-          cd services/backend/dist
-          for file in *.mjs; do
-            name="${file%.mjs}"
-            zip "${name}.zip" "${file}"
+          cd services/backend
+          pnpm install --prod --frozen-lockfile
+          for file in dist/*.mjs; do
+            name="$(basename "${file%.mjs}")"
+            zip -r "dist/${name}.zip" "dist/${name}.mjs" node_modules package.json
           done
 
       - name: Configure AWS credentials
@@ -751,7 +757,7 @@ jobs:
 
 ### Pre-Deployment
 
-- [ ] All tests passing (`pnpm test:run`)
+- [ ] All tests passing (`pnpm test`)
 - [ ] Code reviewed and approved
 - [ ] Environment variables documented
 - [ ] Secrets created in AWS Secrets Manager
