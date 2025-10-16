@@ -10,7 +10,7 @@ import { RevalueRequestSchema } from '@collectiq/shared';
 import { getUserId, type APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
 import { getCard } from '../store/card-service.js';
 import { formatErrorResponse, BadRequestError, UnauthorizedError } from '../utils/errors.js';
-import { logger, metrics, tracing, withIdempotency } from '../utils/index.js';
+import { logger, metrics, tracing, withIdempotency, getJsonHeaders } from '../utils/index.js';
 
 /**
  * Step Functions client singleton
@@ -202,9 +202,7 @@ async function cardsRevalueHandler(
 
       return {
         statusCode: 202,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getJsonHeaders(),
         body: JSON.stringify({
           executionArn: existingExecutionArn,
           status: 'RUNNING',
@@ -283,9 +281,7 @@ async function cardsRevalueHandler(
     // Return 202 Accepted with execution ARN
     return {
       statusCode: 202,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getJsonHeaders(),
       body: JSON.stringify({
         executionArn: result.executionArn,
         status: 'RUNNING',

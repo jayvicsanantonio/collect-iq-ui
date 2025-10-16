@@ -13,6 +13,7 @@ import {
   deleteIdempotencyToken,
 } from './idempotency.js';
 import { logger } from './logger.js';
+import { getJsonHeaders, getProblemJsonHeaders, getSecurityHeaders } from './response-headers.js';
 
 /**
  * Handler function type that supports idempotency
@@ -111,7 +112,7 @@ export function withIdempotency(
           });
           return {
             statusCode: 400,
-            headers: { 'Content-Type': 'application/problem+json' },
+            headers: getProblemJsonHeaders(),
             body: JSON.stringify({
               type: '/errors/bad-request',
               title: 'Bad Request',
@@ -147,7 +148,7 @@ export function withIdempotency(
         );
         return {
           statusCode: 401,
-          headers: { 'Content-Type': 'application/problem+json' },
+          headers: getProblemJsonHeaders(),
           body: JSON.stringify({
             type: '/errors/unauthorized',
             title: 'Unauthorized',
@@ -195,7 +196,7 @@ export function withIdempotency(
             });
             return {
               statusCode: 200,
-              headers: { 'Content-Type': 'application/json' },
+              headers: getJsonHeaders(),
               body: JSON.stringify(cachedResult),
             };
           }
@@ -209,7 +210,7 @@ export function withIdempotency(
           });
           return {
             statusCode: 204,
-            headers: {},
+            headers: getSecurityHeaders('application/json', { 'Content-Length': '0' }),
             body: '',
           };
         }
@@ -224,7 +225,7 @@ export function withIdempotency(
 
         return {
           statusCode: 409,
-          headers: { 'Content-Type': 'application/problem+json' },
+          headers: getProblemJsonHeaders(),
           body: JSON.stringify({
             type: '/errors/conflict',
             title: 'Conflict',

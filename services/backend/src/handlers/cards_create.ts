@@ -8,7 +8,7 @@ import { CreateCardRequestSchema } from '@collectiq/shared';
 import { getUserId, type APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
 import { createCard } from '../store/card-service.js';
 import { formatErrorResponse, BadRequestError, UnauthorizedError } from '../utils/errors.js';
-import { logger, metrics, tracing, withIdempotency } from '../utils/index.js';
+import { logger, metrics, tracing, withIdempotency, getJsonHeaders } from '../utils/index.js';
 
 /**
  * Lambda handler for creating a new card
@@ -83,9 +83,7 @@ async function cardsCreateHandler(event: APIGatewayProxyEventV2): Promise<APIGat
     // Return 201 Created with card object
     return {
       statusCode: 201,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getJsonHeaders(),
       body: JSON.stringify(card),
     };
   } catch (error) {

@@ -7,7 +7,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda
 import { getUserId, type APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
 import { deleteCard } from '../store/card-service.js';
 import { formatErrorResponse, BadRequestError, UnauthorizedError } from '../utils/errors.js';
-import { logger, metrics, tracing } from '../utils/index.js';
+import { logger, metrics, tracing, getSecurityHeaders } from '../utils/index.js';
 
 /**
  * Lambda handler for deleting a card
@@ -71,7 +71,7 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     // Return 204 No Content
     return {
       statusCode: 204,
-      headers: {},
+      headers: getSecurityHeaders('application/json', { 'Content-Length': '0' }),
       body: '',
     };
   } catch (error) {

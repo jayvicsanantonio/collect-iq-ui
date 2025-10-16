@@ -7,7 +7,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda
 import { getUserId, type APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
 import { getCard } from '../store/card-service.js';
 import { formatErrorResponse, BadRequestError, UnauthorizedError } from '../utils/errors.js';
-import { logger, metrics, tracing } from '../utils/index.js';
+import { logger, metrics, tracing, getJsonHeaders } from '../utils/index.js';
 
 /**
  * Lambda handler for getting a specific card
@@ -67,9 +67,7 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     // Return 200 OK with card object
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getJsonHeaders(),
       body: JSON.stringify(card),
     };
   } catch (error) {

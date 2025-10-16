@@ -15,7 +15,7 @@ import {
   PayloadTooLargeError,
   UnauthorizedError,
 } from '../utils/errors.js';
-import { logger, metrics, tracing } from '../utils/index.js';
+import { logger, metrics, tracing, getJsonHeaders } from '../utils/index.js';
 import {
   validate,
   sanitizeFilename,
@@ -175,9 +175,7 @@ export async function handler(
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getJsonHeaders(),
       body: JSON.stringify(response),
     };
   } catch (error) {
