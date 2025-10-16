@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Set up Terraform project structure and state management
+- [x] 1. Set up Terraform project structure and state management
   - Create infra/terraform directory with modules and envs subdirectories
   - Create S3 bucket for Terraform state with versioning enabled
   - Create DynamoDB table for state locking (collectiq-terraform-locks)
