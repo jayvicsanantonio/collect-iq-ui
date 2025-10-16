@@ -7,6 +7,7 @@
 - When you tackle Task 10, hook this adapter into the RekognitionExtract Lambda and back it with integration tests/mocks to keep the Rekognition contract stable.
 - Declare the valuation Step Functions state machine (RekognitionExtract → parallel Pricing/Authenticity → Aggregator, Catch → ErrorHandler) in Terraform and wire the Lambdas; currently only the handlers exist so Task 10 is incomplete.
 - Update the Step Functions definition (if needed) to consume the new `cardMeta` and `forceRefresh` fields when wiring the revaluation workflow.
+- Instantiate `modules/api_gateway_http` from your live Terraform stack and feed in the real Lambda invoke ARNs, function names, and Cognito IDs so the API Gateway resources are actually created.
 - Adjust Aggregator’s state input handling or state-machine `ResultPath`/`ResultSelector`; Step Functions wraps each Lambda result as `{ Payload, StatusCode, ... }`, so the code’s direct destructuring of `pricingResult`/`authenticityResult` will throw without that fix (see AWS Step Functions Lambda integration docs).
 - Provision the supporting AWS resources and wiring (EventBridge bus for `CardValuationCompleted`, SQS DLQ for the error handler, env vars) in Terraform so the Aggregator/EventBridge and ErrorHandler/SQS paths actually work.
 - Add Terraform coverage for CloudWatch dashboards/alarms and X-Ray resources to complete Task 12.4 once infra work resumes.

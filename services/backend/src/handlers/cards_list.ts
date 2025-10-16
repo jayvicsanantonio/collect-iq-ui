@@ -7,7 +7,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda
 import { getUserId, type APIGatewayProxyEventV2WithJWT } from '../auth/jwt-claims.js';
 import { listCards } from '../store/card-service.js';
 import { formatErrorResponse, BadRequestError, UnauthorizedError } from '../utils/errors.js';
-import { logger, metrics, tracing } from '../utils/index.js';
+import { logger, metrics, tracing, getJsonHeaders } from '../utils/index.js';
 
 /**
  * Lambda handler for listing user's cards
@@ -78,9 +78,7 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     // Return 200 OK with items and nextCursor
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getJsonHeaders(),
       body: JSON.stringify(result),
     };
   } catch (error) {

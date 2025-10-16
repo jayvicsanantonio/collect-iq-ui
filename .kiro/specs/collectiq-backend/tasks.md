@@ -427,8 +427,8 @@
     - Test error handling
     - _Requirements: 13.1_
 
-- [ ] 15. Create API Gateway configuration
-  - [ ] 15.1 Define API routes and methods
+- [x] 15. Create API Gateway configuration
+  - [x] 15.1 Define API routes and methods
     - POST /upload/presign → upload_presign Lambda
     - POST /cards → cards_create Lambda
     - GET /cards → cards_list Lambda
@@ -438,14 +438,14 @@
     - GET /healthz → healthz Lambda (no auth)
     - _Requirements: 1.1, 1.5_
 
-  - [ ] 15.2 Configure JWT authorizer
+  - [x] 15.2 Configure JWT authorizer
     - Set up Cognito User Pool as authorizer
     - Configure JWKS URL from environment
     - Set token source to Authorization header
     - Apply authorizer to all routes except /healthz
     - _Requirements: 1.1_
 
-  - [ ] 15.3 Configure CORS and security headers
+  - [x] 15.3 Configure CORS and security headers
     - Enable CORS with appropriate origins
     - Set security headers (HSTS, X-Content-Type-Options)
     - _Requirements: 12.3_
