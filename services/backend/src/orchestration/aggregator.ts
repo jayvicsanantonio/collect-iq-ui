@@ -10,12 +10,14 @@ import {
   type PutEventsCommandInput,
 } from '@aws-sdk/client-eventbridge';
 import type { Card, PricingResult, ValuationSummary, AuthenticityResult } from '@collectiq/shared';
-import { logger } from '../utils/logger.js';
+import { logger, metrics, tracing } from '../utils/index.js';
 import { updateCard } from '../store/card-service.js';
 
-const eventBridgeClient = new EventBridgeClient({
-  region: process.env.AWS_REGION || 'us-east-1',
-});
+const eventBridgeClient = tracing.captureAWSv3Client(
+  new EventBridgeClient({
+    region: process.env.AWS_REGION || 'us-east-1',
+  }),
+);
 
 /**
  * Input structure for Aggregator task
@@ -56,6 +58,12 @@ interface AggregatorOutput {
  */
 export const handler: Handler<AggregatorInput, AggregatorOutput> = async (event) => {
   const { userId, cardId, requestId, agentResults } = event;
+  const startTime = Date.now();
+
+  tracing.startSubsegment('aggregator_handler', { userId, cardId, requestId });
+  tracing.addAnnotation('userId', userId);
+  tracing.addAnnotation('cardId', cardId);
+  tracing.addAnnotation('operation', 'aggregator');
 
   logger.info('Aggregator task invoked', {
     userId,
@@ -112,7 +120,11 @@ export const handler: Handler<AggregatorInput, AggregatorOutput> = async (event)
       requestId,
     });
 
-    const updatedCard = await updateCard(userId, cardId, cardUpdate, requestId);
+    const updatedCard = await tracing.trace(
+      'dynamodb_update_card',
+      () => updateCard(userId, cardId, cardUpdate, requestId),
+      { userId, cardId, requestId },
+    );
 
     logger.info('Card updated successfully', {
       userId,
@@ -125,17 +137,32 @@ export const handler: Handler<AggregatorInput, AggregatorOutput> = async (event)
     });
 
     // Step 3: Emit EventBridge event for downstream consumers
-    await emitCardUpdateEvent(updatedCard, {
-      pricingResult,
-      valuationSummary,
-      authenticityResult,
-      requestId,
-    });
+    await metrics.recordAuthenticityScore(authenticityResult.authenticityScore, cardId);
+
+    await tracing.trace(
+      'eventbridge_emit_card_update',
+      () =>
+        emitCardUpdateEvent(updatedCard, {
+          pricingResult,
+          valuationSummary,
+          authenticityResult,
+          requestId,
+        }),
+      { userId, cardId, requestId },
+    );
 
     logger.info('Aggregator task completed successfully', {
       userId,
       cardId,
       requestId,
+    });
+
+    await metrics.recordStepFunctionExecution('success', Date.now() - startTime);
+
+    tracing.endSubsegment('aggregator_handler', {
+      success: true,
+      cardId,
+      userId,
     });
 
     // Return final card object to Step Functions
@@ -144,6 +171,15 @@ export const handler: Handler<AggregatorInput, AggregatorOutput> = async (event)
       requestId,
     };
   } catch (error) {
+    await metrics.recordStepFunctionExecution('failure', Date.now() - startTime);
+
+    tracing.endSubsegment('aggregator_handler', {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      cardId,
+      userId,
+    });
+
     logger.error(
       'Aggregator task failed',
       error instanceof Error ? error : new Error(String(error)),

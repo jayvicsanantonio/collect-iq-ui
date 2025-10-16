@@ -8,10 +8,13 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import * as sharpModule from 'sharp';
 const sharp = sharpModule.default;
 import { logger } from './logger.js';
+import { tracing } from './tracing.js';
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-});
+const s3Client = tracing.captureAWSv3Client(
+  new S3Client({
+    region: process.env.AWS_REGION || 'us-east-1',
+  }),
+);
 
 /**
  * Download image from S3
@@ -30,7 +33,10 @@ async function downloadImageFromS3(s3Key: string, bucket?: string): Promise<Buff
       Key: s3Key,
     });
 
-    const response = await s3Client.send(command);
+    const response = await tracing.trace('s3_get_phash_source', () => s3Client.send(command), {
+      bucket: bucketName,
+      key: s3Key,
+    });
 
     if (!response.Body) {
       throw new Error('Empty response body from S3');

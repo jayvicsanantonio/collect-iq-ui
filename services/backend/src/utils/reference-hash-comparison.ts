@@ -6,11 +6,14 @@
 
 import { S3Client, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { logger } from './logger.js';
+import { tracing } from './tracing.js';
 import { calculateHammingDistance, calculateSimilarityScore } from './phash.js';
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-});
+const s3Client = tracing.captureAWSv3Client(
+  new S3Client({
+    region: process.env.AWS_REGION || 'us-east-1',
+  }),
+);
 
 /**
  * Reference hash entry structure
@@ -57,7 +60,11 @@ export async function loadReferenceHashes(
       Prefix: prefix,
     });
 
-    const listResponse = await s3Client.send(listCommand);
+    const listResponse = await tracing.trace(
+      's3_list_reference_hashes',
+      () => s3Client.send(listCommand),
+      { prefix, bucket: bucketName },
+    );
 
     if (!listResponse.Contents || listResponse.Contents.length === 0) {
       logger.warn('No reference hashes found for card', { cardName, prefix });
@@ -76,7 +83,11 @@ export async function loadReferenceHashes(
           Key: object.Key,
         });
 
-        const response = await s3Client.send(getCommand);
+        const response = await tracing.trace(
+          's3_get_reference_hash',
+          () => s3Client.send(getCommand),
+          { key: object.Key, bucket: bucketName },
+        );
 
         if (!response.Body) {
           logger.warn('Empty reference hash file', { key: object.Key });

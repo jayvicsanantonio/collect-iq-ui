@@ -27,6 +27,7 @@
     "@aws-sdk/s3-request-presigner": "^3.700.0",
     "@aws-sdk/util-dynamodb": "^3.700.0",
     "@collectiq/shared": "workspace:*",
+    "@collectiq/telemetry": "workspace:*",
     "@smithy/node-http-handler": "^4.4.1",
     "sharp": "^0.34.4",
     "uuid": "^10.0.0",

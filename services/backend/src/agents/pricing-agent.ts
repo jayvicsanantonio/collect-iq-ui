@@ -6,6 +6,7 @@
 import type { Handler } from 'aws-lambda';
 import type { FeatureEnvelope, PricingResult, ValuationSummary } from '@collectiq/shared';
 import { logger } from '../utils/logger.js';
+import { tracing } from '../utils/tracing.js';
 import { getPricingOrchestrator } from '../adapters/pricing-orchestrator.js';
 import { bedrockService } from '../adapters/bedrock-service.js';
 
@@ -47,6 +48,11 @@ interface PricingAgentOutput {
  */
 export const handler: Handler<PricingAgentInput, PricingAgentOutput> = async (event) => {
   const { userId, cardId, cardMeta, requestId, forceRefresh = false } = event;
+  const startTime = Date.now();
+
+  tracing.startSubsegment('pricing_agent_handler', { userId, cardId, requestId });
+  tracing.addAnnotation('operation', 'pricing_agent');
+  tracing.addAnnotation('cardId', cardId);
 
   logger.info('Pricing Agent invoked', {
     userId,
@@ -82,17 +88,22 @@ export const handler: Handler<PricingAgentInput, PricingAgentOutput> = async (ev
 
     const orchestrator = getPricingOrchestrator();
 
-    const pricingResult = await orchestrator.fetchAllComps(
-      {
-        cardName,
-        set: set || undefined,
-        number: cardMeta.number || undefined,
-        condition,
-        windowDays: 14, // Default 14-day window
-      },
-      userId,
-      cardId,
-      forceRefresh,
+    const pricingResult = await tracing.trace(
+      'pricing_fetch_all_comps',
+      () =>
+        orchestrator.fetchAllComps(
+          {
+            cardName,
+            set: set || undefined,
+            number: cardMeta.number || undefined,
+            condition,
+            windowDays: 14, // Default 14-day window
+          },
+          userId,
+          cardId,
+          forceRefresh,
+        ),
+      { userId, cardId, requestId },
     );
 
     logger.info('Pricing data fetched successfully', {
@@ -108,13 +119,18 @@ export const handler: Handler<PricingAgentInput, PricingAgentOutput> = async (ev
       requestId,
     });
 
-    const valuationSummary = await bedrockService.invokeValuation({
-      cardName,
-      set,
-      condition,
-      pricingResult,
-      // historicalTrend could be added in future iterations
-    });
+    const valuationSummary = await tracing.trace(
+      'bedrock_invoke_valuation',
+      () =>
+        bedrockService.invokeValuation({
+          cardName,
+          set,
+          condition,
+          pricingResult,
+          // historicalTrend could be added in future iterations
+        }),
+      { userId, cardId, requestId },
+    );
 
     logger.info('Valuation summary generated', {
       fairValue: valuationSummary.fairValue,
@@ -124,12 +140,27 @@ export const handler: Handler<PricingAgentInput, PricingAgentOutput> = async (ev
     });
 
     // Return results to Step Functions
+    tracing.endSubsegment('pricing_agent_handler', {
+      success: true,
+      cardId,
+      userId,
+      durationMs: Date.now() - startTime,
+    });
+
     return {
       pricingResult,
       valuationSummary,
       requestId,
     };
   } catch (error) {
+    tracing.endSubsegment('pricing_agent_handler', {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      cardId,
+      userId,
+      durationMs: Date.now() - startTime,
+    });
+
     logger.error(
       'Pricing Agent failed',
       error instanceof Error ? error : new Error(String(error)),
