@@ -61,22 +61,101 @@ terraform apply
 
 ### Variables
 
-- `aws_region`: AWS region (default: us-east-1)
-- `environment`: Environment name (default: hackathon)
-- `project_name`: Project name for resource naming (default: collectiq)
-- `github_repo_url`: GitHub repository URL for Amplify
-- `budget_amount`: Monthly budget in USD (default: $50)
-- `lambda_memory_lightweight`: Memory for lightweight Lambdas (default: 512MB)
-- `lambda_memory_heavy`: Memory for heavy processing Lambdas (default: 1024MB)
-- `log_level`: Log level for Lambda functions (default: info)
+#### Core Configuration
+
+- `aws_region` (string): AWS region for all resources
+  - Default: `us-east-1`
+  - Description: Primary region for infrastructure deployment
+
+- `environment` (string): Environment name
+  - Default: `hackathon`
+  - Description: Used for resource naming and tagging
+
+- `project_name` (string): Project name for resource naming
+  - Default: `collectiq`
+  - Description: Base name for all resources
+
+#### GitHub Integration
+
+- `github_repo_url` (string): GitHub repository URL for Amplify hosting
+  - Required: Yes
+  - Example: `https://github.com/your-org/collect-iq`
+  - Description: Repository containing Next.js frontend code
+
+#### Budget Configuration
+
+- `budget_amount` (number): Monthly budget amount in USD
+  - Default: `50`
+  - Description: AWS Budget with alerts at 80% and 100% thresholds
+
+- `budget_email_addresses` (list(string)): Email addresses for budget alerts
+  - Default: `[]`
+  - Example: `["devops@example.com", "team@example.com"]`
+  - Description: Recipients for budget threshold notifications
+
+#### Lambda Configuration
+
+- `lambda_memory_lightweight` (number): Memory allocation for lightweight Lambda functions (MB)
+  - Default: `512`
+  - Description: Used for presign, list, get, delete handlers
+
+- `lambda_memory_heavy` (number): Memory allocation for heavy processing Lambda functions (MB)
+  - Default: `1024`
+  - Description: Used for rekognition_extract, pricing_agent, authenticity_agent
+
+#### Logging and Monitoring
+
+- `log_level` (string): Log level for Lambda functions
+  - Default: `info`
+  - Options: `debug`, `info`, `warn`, `error`
+  - Description: Controls verbosity of application logs
+
+- `log_retention_days` (number): CloudWatch log retention in days
+  - Default: `30`
+  - Description: How long to retain logs before automatic deletion
+
+- `enable_xray_tracing` (bool): Enable X-Ray tracing
+  - Default: `true`
+  - Description: Enables distributed tracing for Lambda and Step Functions
 
 ### Outputs
 
-After applying, Terraform will output:
+After applying, Terraform will output the following values for use by frontend and backend applications:
 
-- AWS region and account ID
-- Resource name prefix
-- (Future) API Gateway endpoint, Cognito IDs, S3 buckets, etc.
+#### Backend Outputs
+
+- `api_base_url`: API Gateway base URL for backend requests
+- `api_id`: API Gateway ID
+- `dynamodb_table_name`: DynamoDB table name for card data
+- `dynamodb_table_arn`: DynamoDB table ARN
+- `s3_uploads_bucket`: S3 bucket name for image uploads
+- `s3_uploads_bucket_arn`: S3 bucket ARN
+- `eventbridge_bus_name`: EventBridge bus name for domain events
+- `eventbridge_bus_arn`: EventBridge bus ARN
+
+#### Frontend Outputs
+
+- `amplify_app_id`: Amplify application ID
+- `amplify_default_domain`: Amplify default domain (e.g., `main.d123abc.amplifyapp.com`)
+- `amplify_main_branch_url`: Full URL for main branch deployment
+
+#### Authentication Outputs
+
+- `cognito_user_pool_id`: Cognito user pool ID
+- `cognito_user_pool_arn`: Cognito user pool ARN
+- `cognito_client_id`: Cognito app client ID for OAuth
+- `cognito_hosted_ui_domain`: Cognito Hosted UI domain for authentication
+- `cognito_jwks_url`: JWKS URL for JWT validation
+
+#### IAM Policy Outputs
+
+- `rekognition_policy_arn`: IAM policy ARN for Rekognition access
+- `bedrock_policy_arn`: IAM policy ARN for Bedrock access
+- `secrets_policy_arn`: IAM policy ARN for Secrets Manager access
+
+#### Secrets Manager Outputs
+
+- `secret_arns`: Map of secret names to ARNs (sensitive)
 
 ## Resource Naming Convention
 
