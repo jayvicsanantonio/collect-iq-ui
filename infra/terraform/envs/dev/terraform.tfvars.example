@@ -1,9 +1,0 @@
-# Example terraform.tfvars for dev environment
-# Copy this file to terraform.tfvars and update with your values
-
-aws_region      = "us-east-1"
-environment     = "dev"
-project_name    = "collectiq"
-custom_domain   = "dev.collectiq.com"
-github_repo_url = "https://github.com/your-org/collect-iq"
-budget_amount   = 50

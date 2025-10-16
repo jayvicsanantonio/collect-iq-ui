@@ -1,4 +1,4 @@
-# AWS Provider configuration for dev environment
+# AWS Provider configuration for hackathon environment
 
 provider "aws" {
   region = var.aws_region
