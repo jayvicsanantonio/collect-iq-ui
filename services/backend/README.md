@@ -2,6 +2,12 @@
 
 Serverless AWS-based backend for CollectIQ - AI-powered Pokémon TCG card identification, authentication, and valuation platform.
 
+## Documentation
+
+- **[Environment Variables](./ENVIRONMENT_VARIABLES.md)**: Complete list of required environment variables, secrets management approach, and configuration examples
+- **[IAM Requirements](./IAM_REQUIREMENTS.md)**: Detailed IAM permissions for each Lambda function, following least-privilege principles
+- **[Deployment Guide](./DEPLOYMENT_GUIDE.md)**: Step-by-step deployment instructions, build process, Terraform integration, and troubleshooting
+
 ## Project Structure
 
 ```
