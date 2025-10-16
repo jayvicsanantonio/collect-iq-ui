@@ -1,147 +1,105 @@
-# API Gateway HTTP Module Variables
-
-variable "stage" {
-  description = "Deployment stage (dev, staging, prod)"
+variable "api_name" {
+  description = "Name of the API Gateway"
   type        = string
 }
 
-variable "aws_region" {
-  description = "AWS region for deployment"
+variable "api_description" {
+  description = "Description of the API Gateway"
   type        = string
-  default     = "us-east-1"
+  default     = ""
 }
 
-# Cognito Configuration
+variable "stage_name" {
+  description = "Name of the API Gateway stage"
+  type        = string
+  default     = "$default"
+}
+
 variable "cognito_user_pool_id" {
-  description = "Cognito User Pool ID for JWT authorizer"
+  description = "Cognito user pool ID for JWT authorizer"
   type        = string
+  default     = ""
+}
+
+variable "cognito_user_pool_arn" {
+  description = "Cognito user pool ARN for JWT authorizer"
+  type        = string
+  default     = ""
 }
 
 variable "cognito_client_id" {
-  description = "Cognito User Pool Client ID"
+  description = "Cognito client ID for JWT audience validation"
   type        = string
+  default     = ""
 }
 
-# CORS Configuration
-variable "cors_allowed_origins" {
-  description = "List of allowed origins for CORS"
+variable "cors_allow_origins" {
+  description = "CORS allowed origins"
   type        = list(string)
-  default     = ["http://localhost:3000"]
+  default     = ["*"]
 }
 
-# Throttling Configuration
-variable "throttling_burst_limit" {
-  description = "API Gateway throttling burst limit"
+variable "cors_allow_methods" {
+  description = "CORS allowed methods"
+  type        = list(string)
+  default     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+}
+
+variable "cors_allow_headers" {
+  description = "CORS allowed headers"
+  type        = list(string)
+  default     = ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
+}
+
+variable "cors_expose_headers" {
+  description = "CORS exposed headers"
+  type        = list(string)
+  default     = []
+}
+
+variable "cors_max_age" {
+  description = "CORS max age in seconds"
   type        = number
-  default     = 5000
+  default     = 300
+}
+
+variable "cors_allow_credentials" {
+  description = "CORS allow credentials"
+  type        = bool
+  default     = true
+}
+
+variable "throttling_burst_limit" {
+  description = "Throttling burst limit"
+  type        = number
+  default     = 100
 }
 
 variable "throttling_rate_limit" {
-  description = "API Gateway throttling rate limit (requests per second)"
+  description = "Throttling rate limit (requests per second)"
   type        = number
-  default     = 2000
+  default     = 100
 }
 
-# Logging Configuration
 variable "log_retention_days" {
   description = "CloudWatch log retention in days"
   type        = number
   default     = 30
 }
 
-# Lambda Function ARNs - Upload
-variable "lambda_upload_presign_invoke_arn" {
-  description = "Invoke ARN for upload_presign Lambda function"
-  type        = string
+variable "lambda_integrations" {
+  description = "Map of Lambda integrations with route configurations"
+  type = map(object({
+    lambda_function_name = string
+    lambda_invoke_arn    = string
+    route_key            = string
+    require_auth         = bool
+  }))
+  default = {}
 }
 
-variable "lambda_upload_presign_function_name" {
-  description = "Function name for upload_presign Lambda"
-  type        = string
-}
-
-# Lambda Function ARNs - Cards Create
-variable "lambda_cards_create_invoke_arn" {
-  description = "Invoke ARN for cards_create Lambda function"
-  type        = string
-}
-
-variable "lambda_cards_create_function_name" {
-  description = "Function name for cards_create Lambda"
-  type        = string
-}
-
-# Lambda Function ARNs - Cards List
-variable "lambda_cards_list_invoke_arn" {
-  description = "Invoke ARN for cards_list Lambda function"
-  type        = string
-}
-
-variable "lambda_cards_list_function_name" {
-  description = "Function name for cards_list Lambda"
-  type        = string
-}
-
-# Lambda Function ARNs - Cards Get
-variable "lambda_cards_get_invoke_arn" {
-  description = "Invoke ARN for cards_get Lambda function"
-  type        = string
-}
-
-variable "lambda_cards_get_function_name" {
-  description = "Function name for cards_get Lambda"
-  type        = string
-}
-
-# Lambda Function ARNs - Cards Delete
-variable "lambda_cards_delete_invoke_arn" {
-  description = "Invoke ARN for cards_delete Lambda function"
-  type        = string
-}
-
-variable "lambda_cards_delete_function_name" {
-  description = "Function name for cards_delete Lambda"
-  type        = string
-}
-
-# Lambda Function ARNs - Cards Revalue
-variable "lambda_cards_revalue_invoke_arn" {
-  description = "Invoke ARN for cards_revalue Lambda function"
-  type        = string
-}
-
-variable "lambda_cards_revalue_function_name" {
-  description = "Function name for cards_revalue Lambda"
-  type        = string
-}
-
-# Lambda Function ARNs - Healthz
-variable "lambda_healthz_invoke_arn" {
-  description = "Invoke ARN for healthz Lambda function"
-  type        = string
-}
-
-variable "lambda_healthz_function_name" {
-  description = "Function name for healthz Lambda"
-  type        = string
-}
-
-# Custom Domain (Optional)
-variable "custom_domain_name" {
-  description = "Custom domain name for API Gateway (optional)"
-  type        = string
-  default     = ""
-}
-
-variable "certificate_arn" {
-  description = "ACM certificate ARN for custom domain (required if custom_domain_name is set)"
-  type        = string
-  default     = ""
-}
-
-# Tags
 variable "tags" {
-  description = "Tags to apply to all resources"
+  description = "Tags to apply to resources"
   type        = map(string)
   default     = {}
 }

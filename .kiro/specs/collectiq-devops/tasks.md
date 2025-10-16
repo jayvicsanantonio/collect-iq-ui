@@ -10,8 +10,8 @@
   - Initialize Terraform in hackathon environment
   - _Requirements: 1.2, 17.1_
 
-- [ ] 2. Create reusable Terraform modules
-- [ ] 2.1 Create amplify_hosting module
+- [x] 2. Create reusable Terraform modules
+- [x] 2.1 Create amplify_hosting module
   - Define aws_amplify_app resource with repository integration
   - Configure aws_amplify_branch for main and develop branches
   - Set up aws_amplify_domain_association for custom domain
@@ -20,7 +20,7 @@
   - Create outputs for app_id, default_domain, custom_domain
   - _Requirements: 2.1, 2.2, 2.4, 2.5_
 
-- [ ] 2.2 Create cognito_user_pool module
+- [x] 2.2 Create cognito_user_pool module
   - Define aws_cognito_user_pool with email sign-up
   - Configure password policy (min 8 chars, uppercase, lowercase, number, symbol)
   - Set auto_verified_attributes to ["email"]
@@ -31,7 +31,7 @@
   - Create outputs for user_pool_id, client_id, hosted_ui_domain, jwks_url
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
 
-- [ ] 2.3 Create api_gateway_http module
+- [x] 2.3 Create api_gateway_http module
   - Define aws_apigatewayv2_api resource (HTTP API)
   - Create aws_apigatewayv2_authorizer with Cognito JWT
   - Configure aws_apigatewayv2_stage with logging
@@ -42,7 +42,7 @@
   - Create outputs for api_endpoint, api_id, authorizer_id
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8_
 
-- [ ] 2.4 Create dynamodb_collectiq module
+- [x] 2.4 Create dynamodb_collectiq module
   - Define aws_dynamodb_table with single-table design
   - Set partition key PK and sort key SK
   - Create GSI1 with userId and createdAt
@@ -54,7 +54,7 @@
   - Create outputs for table_name, table_arn, gsi1_name, gsi2_name
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8_
 
-- [ ] 2.5 Create s3_uploads module
+- [x] 2.5 Create s3_uploads module
   - Define aws_s3_bucket resource
   - Configure aws_s3_bucket_public_access_block (all true)
   - Set up aws_s3_bucket_server_side_encryption_configuration (SSE-S3)
@@ -64,7 +64,7 @@
   - Create outputs for bucket_name, bucket_arn
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8_
 
-- [ ] 2.6 Create lambda_fn module
+- [x] 2.6 Create lambda_fn module
   - Define aws_lambda_function resource with configurable parameters
   - Create aws_iam_role for Lambda execution
   - Attach aws_iam_role_policy for basic Lambda execution
@@ -75,7 +75,7 @@
   - Create outputs for function_name, function_arn, role_arn, alias_arn
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-- [ ] 2.7 Create step_functions module
+- [x] 2.7 Create step_functions module
   - Define aws_sfn_state_machine resource
   - Accept ASL (Amazon States Language) JSON as input
   - Create aws_iam_role for Step Functions execution
@@ -84,7 +84,7 @@
   - Create outputs for state_machine_arn, role_arn
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9_
 
-- [ ] 2.8 Create eventbridge_bus module
+- [x] 2.8 Create eventbridge_bus module
   - Define aws_cloudwatch_event_bus resource
   - Create aws_cloudwatch_event_rule for CardValuationUpdated
   - Create aws_cloudwatch_event_rule for AuthenticityFlagged
@@ -94,7 +94,7 @@
   - Create outputs for bus_name, bus_arn, dlq_url
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
-- [ ] 2.9 Create rekognition_access module
+- [x] 2.9 Create rekognition_access module
   - Create IAM policy document for rekognition:DetectText
   - Create IAM policy document for rekognition:DetectLabels
   - Create IAM policy document for s3:GetObject (scoped to uploads bucket)
@@ -102,14 +102,14 @@
   - Create outputs for policy_arn
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
-- [ ] 2.10 Create bedrock_access module
+- [x] 2.10 Create bedrock_access module
   - Create IAM policy document for bedrock:InvokeModel
   - Scope policy to specific model ARNs (Claude 3 Sonnet)
   - Create aws_iam_policy resource
   - Create outputs for policy_arn
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7_
 
-- [ ] 2.11 Create cloudwatch_dashboards module
+- [x] 2.11 Create cloudwatch_dashboards module
   - Define aws_cloudwatch_dashboard for API performance
   - Define aws_cloudwatch_dashboard for Lambda performance
   - Define aws_cloudwatch_dashboard for Step Functions
@@ -118,7 +118,7 @@
   - Create widgets for metrics visualization
   - _Requirements: 13.1, 13.2_
 
-- [ ] 2.12 Create ssm_secrets module
+- [x] 2.12 Create ssm_secrets module
   - Define aws_secretsmanager_secret for eBay API key
   - Define aws_secretsmanager_secret for TCGPlayer keys
   - Define aws_secretsmanager_secret for PriceCharting key
