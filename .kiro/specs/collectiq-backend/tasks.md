@@ -407,15 +407,15 @@
     - Test TTL expiration
     - _Requirements: 13.1_
 
-- [ ] 14. Implement secrets management
-  - [ ] 14.1 Create secrets retrieval utility
+- [x] 14. Implement secrets management
+  - [x] 14.1 Create secrets retrieval utility
     - Create utility in services/backend/src/utils/secrets.ts
     - Implement getSecret function using AWS Secrets Manager
     - Cache secrets in memory for Lambda execution lifetime
     - Handle secret rotation gracefully
     - _Requirements: 12.5_
 
-  - [ ] 14.2 Update pricing adapters to use secrets
+  - [x] 14.2 Update pricing adapters to use secrets
     - Retrieve EBAY_APP_ID from Secrets Manager
     - Retrieve TCGPLAYER keys from Secrets Manager
     - Retrieve PRICECHARTING_KEY from Secrets Manager
