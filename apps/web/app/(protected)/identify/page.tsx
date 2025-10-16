@@ -168,17 +168,21 @@ export default function IdentifyPage() {
       return;
     }
 
-    // TODO: Navigate to authenticity/valuation screen with selected candidate
-    // For now, navigate to vault
     toast({
       title: 'Card selected',
       description: `Selected ${state.selectedCandidate.name}`,
     });
 
-    // Navigate to next step (authenticity analysis)
-    // This will be implemented in future tasks
-    router.push('/vault');
-  }, [state.selectedCandidate, router, toast]);
+    // Navigate to authenticity analysis with card details
+    const params = new URLSearchParams({
+      name: state.selectedCandidate.name,
+      set: state.selectedCandidate.set,
+      ...(s3Key && { key: s3Key }),
+      ...(state.selectedCandidate.id && { cardId: state.selectedCandidate.id }),
+    });
+    const url = `/authenticity?${params.toString()}`;
+    router.push(url);
+  }, [state.selectedCandidate, s3Key, router, toast]);
 
   const handleManualEntry = React.useCallback(() => {
     // TODO: Implement manual entry form
