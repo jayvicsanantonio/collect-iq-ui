@@ -482,20 +482,20 @@
     - Validate rationale content
     - _Requirements: 13.2_
 
-- [ ] 17. Create deployment documentation
-  - [ ] 17.1 Document environment variables
+- [x] 17. Create deployment documentation
+  - [x] 17.1 Document environment variables
     - List all required environment variables
     - Provide example values
     - Document secrets management approach
     - _Requirements: 9.1_
 
-  - [ ] 17.2 Document IAM requirements
+  - [x] 17.2 Document IAM requirements
     - List required IAM permissions per Lambda
     - Provide example IAM policy documents
     - Document least-privilege principles
     - _Requirements: 12.4_
 
-  - [ ] 17.3 Create deployment guide
+  - [x] 17.3 Create deployment guide
     - Document build process (esbuild)
     - Document Lambda packaging
     - Document Terraform integration points
