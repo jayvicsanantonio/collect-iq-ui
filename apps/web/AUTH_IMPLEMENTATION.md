@@ -1,6 +1,8 @@
 # Authentication Implementation Summary
 
-This document summarizes the authentication infrastructure implemented for CollectIQ.
+> **⚠️ DEPRECATED**: This document describes the old cookie-based authentication implementation.
+> The application now uses AWS Amplify for authentication, which handles OAuth, PKCE, and token management automatically.
+> See `AUTH_QUICK_START.md` for current implementation details.
 
 ## Overview
 

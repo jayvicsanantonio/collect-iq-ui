@@ -62,7 +62,7 @@ After creating the user pool:
    - Click on your app client name
 
 2. **Configure OAuth 2.0 Settings**
-   - Allowed callback URLs: Add `http://localhost:3000/auth/callback`
+   - Allowed callback URLs: Add `http://localhost:3000/` (root URL with trailing slash)
    - Allowed sign-out URLs: Add `http://localhost:3000`
    - Identity providers: Select "Cognito user pool"
    - OAuth 2.0 grant types: Select "Authorization code grant"
@@ -94,7 +94,7 @@ NEXT_PUBLIC_REGION=us-east-1
 NEXT_PUBLIC_COGNITO_USER_POOL_ID=us-east-1_XXXXXXXXX
 NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID=XXXXXXXXXXXXXXXXXXXXXXXXXX
 NEXT_PUBLIC_COGNITO_DOMAIN=collectiq.auth.us-east-1.amazoncognito.com
-NEXT_PUBLIC_OAUTH_REDIRECT_URI=http://localhost:3000/auth/callback
+NEXT_PUBLIC_OAUTH_REDIRECT_URI=http://localhost:3000/
 NEXT_PUBLIC_OAUTH_LOGOUT_URI=http://localhost:3000
 NEXT_PUBLIC_API_BASE=https://api.collectiq.com
 ```
@@ -157,13 +157,13 @@ NEXT_PUBLIC_API_BASE=https://api.collectiq.com
 
 1. **Update Callback URLs**
    - Add production URLs to Cognito app client
-   - Example: `https://collectiq.com/auth/callback`
+   - Example: `https://app.collectiq.com/` (root URL with trailing slash)
 
 2. **Update Environment Variables**
 
    ```env
-   NEXT_PUBLIC_OAUTH_REDIRECT_URI=https://collectiq.com/auth/callback
-   NEXT_PUBLIC_OAUTH_LOGOUT_URI=https://collectiq.com
+   NEXT_PUBLIC_OAUTH_REDIRECT_URI=https://app.collectiq.com/
+   NEXT_PUBLIC_OAUTH_LOGOUT_URI=https://app.collectiq.com
    ```
 
 3. **Configure Custom Domain (Optional)**
@@ -189,7 +189,7 @@ NEXT_PUBLIC_API_BASE=https://api.collectiq.com
 ### "Invalid redirect_uri" Error
 
 - Verify callback URL in Cognito matches exactly (including protocol and port)
-- Check for trailing slashes
+- Ensure the URL ends with a trailing slash (/)
 - Ensure URL is added to "Allowed callback URLs"
 
 ### "Invalid client_id" Error

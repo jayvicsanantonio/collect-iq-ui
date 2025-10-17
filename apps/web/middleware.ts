@@ -2,8 +2,19 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Middleware for server-side authentication checks
- * Protects routes that require authentication
+ * Lightweight middleware for protected routes
+ *
+ * Note: This middleware provides basic route protection for better UX.
+ * Since Amplify stores tokens in browser storage (not cookies), the middleware
+ * cannot access them directly. The actual authentication check happens client-side
+ * in the AuthGuard component, which uses Amplify's fetchAuthSession.
+ *
+ * This middleware simply ensures protected routes are wrapped with proper layouts
+ * that include AuthGuard. The AuthGuard component will handle:
+ * - Checking authentication status via Amplify
+ * - Redirecting to sign-in if unauthenticated
+ * - Periodic session checks
+ * - Token refresh
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -18,18 +29,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for access token in cookies
-  const accessToken = request.cookies.get('access_token')?.value;
-
-  if (!accessToken) {
-    // No token - redirect to home (client-side AuthGuard will handle sign in)
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
-    return NextResponse.redirect(url);
-  }
-
-  // Token exists - allow request to proceed
-  // Note: Token validation happens in API routes and client-side
+  // Allow request to proceed - AuthGuard in the layout will handle authentication
+  // This provides better UX than redirecting here, as AuthGuard can:
+  // 1. Show loading states while checking auth
+  // 2. Access Amplify tokens from browser storage
+  // 3. Handle sign-in redirects with proper state management
   return NextResponse.next();
 }
 

@@ -46,7 +46,7 @@ export function Sidebar() {
   }
 
   async function handleSignIn() {
-    await signIn(pathname === '/' ? '/vault' : pathname);
+    await signIn();
   }
 
   const isActive = (path: string) => pathname === path;
