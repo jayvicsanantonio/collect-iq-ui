@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { SignInButton } from '@/components/auth/SignInButton';
 import { Sparkles, Shield, TrendingUp } from 'lucide-react';
 import { isAuthenticated } from '@/lib/auth';
+import { Header } from '@/components/navigation';
 
 /**
  * Public landing page for unauthenticated users
@@ -94,46 +94,9 @@ export default function LandingPage() {
       </div>
 
       {/* Header */}
-      <header
-        className="w-full relative z-10"
-        style={{
-          paddingTop: '32px',
-          paddingBottom: '32px',
-          paddingLeft: '32px',
-          paddingRight: '32px',
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <div
-            className="text-2xl font-medium tracking-tight"
-            style={{
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '-0.01em',
-              marginTop: '8px',
-              marginLeft: '4px',
-            }}
-          >
-            Collect
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #FFD700, #FFA500)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              IQ
-            </span>
-          </div>
-          <div
-            className="flex items-center gap-4"
-            style={{ marginTop: '8px', marginRight: '4px' }}
-          >
-            <SignInButton variant="primary" size="default" />
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      <Header
+        rightContent={<SignInButton variant="primary" size="default" />}
+      />
 
       {/* Main Content - Centered */}
       <main className="flex-1 flex items-center justify-center px-6 py-24 relative z-10">
