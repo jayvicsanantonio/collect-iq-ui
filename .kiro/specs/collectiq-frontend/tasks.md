@@ -191,8 +191,8 @@
   - Test error handling and retry logic
   - _Requirements: 15.2, 15.5_
 
-- [ ] 6. Card identification interface
-- [ ] 6.1 Create CandidateList component
+- [x] 6. Card identification interface
+- [x] 6.1 Create CandidateList component
   - Design card list layout with top-k results
   - Display card name, set, rarity for each candidate
   - Implement confidence bar visualization
@@ -201,7 +201,7 @@
   - Add loading skeleton state
   - _Requirements: 3.2, 3.3_
 
-- [ ] 6.2 Create identification page
+- [x] 6.2 Create identification page
   - Create /identify route (or modal)
   - Integrate CandidateList component
   - Add loading state while backend processes image
@@ -218,8 +218,8 @@
   - Test error states
   - _Requirements: 15.1_
 
-- [ ] 7. Authenticity analysis interface
-- [ ] 7.1 Create AuthenticityBadge component
+- [x] 7. Authenticity analysis interface
+- [x] 7.1 Create AuthenticityBadge component
   - Design rounded pill badge with score display
   - Implement color coding based on score (green > 0.8, yellow 0.5-0.8, red < 0.5)
   - Create tooltip with detailed breakdown
@@ -228,7 +228,7 @@
   - Ensure accessibility (not relying solely on color)
   - _Requirements: 4.2, 4.3, 4.5, 4.7_
 
-- [ ] 7.2 Create authenticity analysis page/section
+- [x] 7.2 Create authenticity analysis page/section
   - Design split-view layout (image + metrics)
   - Display card image with zoom capability
   - Integrate AuthenticityBadge component
@@ -238,7 +238,7 @@
   - Add rationale text from AI analysis
   - _Requirements: 4.1, 4.4_
 
-- [ ] 7.3 Implement feedback reporting
+- [x] 7.3 Implement feedback reporting
   - Create "Report Incorrect Result" button
   - Design feedback modal with reason selection
   - Implement feedback submission to backend
@@ -252,8 +252,8 @@
   - Test accessibility compliance
   - _Requirements: 15.1, 15.8_
 
-- [ ] 8. Valuation interface
-- [ ] 8.1 Create ValuationPanel component
+- [x] 8. Valuation interface
+- [x] 8.1 Create ValuationPanel component
   - Design panel layout with price range display
   - Implement low/median/high price visualization
   - Create trend indicator with arrow and percentage
@@ -264,7 +264,7 @@
   - Create "Save to Vault" CTA button
   - _Requirements: 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 8.2 Implement valuation refresh functionality
+- [x] 8.2 Implement valuation refresh functionality
   - Add refresh button to ValuationPanel
   - Implement loading state during refresh
   - Update display with new valuation data
@@ -272,13 +272,13 @@
   - Show toast notification on successful refresh
   - _Requirements: 5.8_
 
-- [ ] 8.3 Handle unavailable valuation data
+- [x] 8.3 Handle unavailable valuation data
   - Display last cached valuation with timestamp
   - Add "Data unavailable" indicator
   - Provide explanation and retry option
   - _Requirements: 5.6_
 
-- [ ] 8.4 Create valuation workflow page
+- [x] 8.4 Create valuation workflow page
   - Integrate authenticity and valuation sections
   - Create progressive disclosure flow
   - Add navigation between sections
@@ -294,8 +294,8 @@
   - Test cached data display
   - _Requirements: 15.1_
 
-- [ ] 9. Vault and portfolio management
-- [ ] 9.1 Create VaultGrid component
+- [x] 9. Vault and portfolio management
+- [x] 9.1 Create VaultGrid component
   - Implement responsive grid layout (1-4 columns based on screen size)
   - Create card thumbnail component with image and value
   - Add hover/long-press quick actions (refresh, delete)
@@ -304,7 +304,7 @@
   - Implement virtualization for collections > 200 items
   - _Requirements: 6.1, 6.6, 6.7, 6.8, 6.9_
 
-- [ ] 9.2 Create PortfolioSummary component
+- [x] 9.2 Create PortfolioSummary component
   - Design summary card layout
   - Display total collection value
   - Display total card count
@@ -313,7 +313,7 @@
   - Add loading state
   - _Requirements: 6.2_
 
-- [ ] 9.3 Create VaultFilters component
+- [x] 9.3 Create VaultFilters component
   - Implement filter UI for set, type, rarity, authenticity
   - Create sort dropdown (value, date added, rarity)
   - Add filter chips showing active filters
@@ -321,7 +321,7 @@
   - Persist filter state in URL query parameters
   - _Requirements: 6.4, 6.5_
 
-- [ ] 9.4 Implement vault page
+- [x] 9.4 Implement vault page
   - Create /vault route
   - Integrate PortfolioSummary at top
   - Add VaultFilters component
@@ -331,7 +331,7 @@
   - Create empty vault state with upload CTA
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
 
-- [ ] 9.5 Implement card deletion
+- [x] 9.5 Implement card deletion
   - Add delete confirmation dialog
   - Implement optimistic UI update
   - Call deleteCard API endpoint
@@ -350,8 +350,8 @@
   - Test virtualization performance
   - _Requirements: 15.1, 15.2, 15.6_
 
-- [ ] 10. Card detail view
-- [ ] 10.1 Create CardDetail component
+- [x] 10. Card detail view
+- [x] 10.1 Create CardDetail component
   - Design detail page layout
   - Implement large card image with zoom functionality
   - Display card metadata (name, set, rarity, condition)
@@ -359,7 +359,7 @@
   - Add action buttons (Re-evaluate, Delete, Share)
   - _Requirements: 7.1, 7.2, 7.3, 7.6_
 
-- [ ] 10.2 Create valuation history chart
+- [x] 10.2 Create valuation history chart
   - Lazy-load Recharts library
   - Create line chart component for valuation history
   - Display low/median/high price bands over time
@@ -369,14 +369,14 @@
   - Include aria-descriptions for accessibility
   - _Requirements: 7.4, 10.5, 10.6, 10.7, 10.8, 10.9_
 
-- [ ] 10.3 Create market data sources table
+- [x] 10.3 Create market data sources table
   - Display recent comparable sales
   - Show source, date, price, condition for each comp
   - Add sorting by date or price
   - Implement responsive table (cards on mobile)
   - _Requirements: 7.5_
 
-- [ ] 10.4 Implement card detail page
+- [x] 10.4 Implement card detail page
   - Create /cards/[id] route
   - Fetch card data with SWR
   - Integrate CardDetail component
@@ -387,7 +387,7 @@
   - Handle 403 (not owner) error
   - _Requirements: 7.1, 7.8, 7.9_
 
-- [ ] 10.5 Implement card actions
+- [x] 10.5 Implement card actions
   - Implement re-evaluate action (refresh valuation)
   - Implement delete action with confirmation
   - Implement share action (copy link or native share)
@@ -405,7 +405,7 @@
   - _Requirements: 15.1, 15.6_
 
 - [ ] 11. Error handling and user feedback
-- [ ] 11.1 Create ProblemDetails error handler
+- [x] 11.1 Create ProblemDetails error handler
   - Create error handler in apps/web/lib/errors.ts
   - Use ProblemDetails type and schema from @collectiq/shared
   - Implement error parsing utility
@@ -414,14 +414,14 @@
   - Add requestId tracking
   - _Requirements: 11.1, 11.2, 11.9_
 
-- [ ] 11.2 Create ErrorAlert component
+- [x] 11.2 Create ErrorAlert component
   - Design alert component with icon and message
   - Add retry button when applicable
   - Add dismiss button
   - Implement different severity levels (error, warning, info)
   - _Requirements: 11.2, 11.9_
 
-- [ ] 11.3 Implement error states for all flows
+- [x] 11.3 Implement error states for all flows
   - Add 401 redirect to Cognito Hosted UI
   - Add 403 forbidden message
   - Add 404 not found message
@@ -431,7 +431,7 @@
   - Add 5xx server error with retry
   - _Requirements: 11.3, 11.4, 11.5, 11.6, 11.7, 11.8_
 
-- [ ] 11.4 Implement toast notifications
+- [x] 11.4 Implement toast notifications
   - Create toast system using shadcn/ui Toast
   - Add success toasts for actions (card saved, deleted, etc.)
   - Add error toasts for failures

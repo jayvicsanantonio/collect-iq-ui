@@ -47,6 +47,28 @@ export type PresignResponse = z.infer<typeof PresignResponseSchema>;
 // Card Schemas
 // ============================================================================
 
+/**
+ * Card identification candidate
+ */
+export const CandidateSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  set: z.string(),
+  rarity: z.string(),
+  confidence: z.number().min(0).max(1),
+  imageUrl: z.string().url().optional(),
+  number: z.string().optional(),
+});
+
+export type Candidate = z.infer<typeof CandidateSchema>;
+
+export const IdentificationResultSchema = z.object({
+  candidates: z.array(CandidateSchema),
+  processingTime: z.number().optional(),
+});
+
+export type IdentificationResult = z.infer<typeof IdentificationResultSchema>;
+
 export const AuthenticitySignalsSchema = z.object({
   visualHashConfidence: z.number().min(0).max(1),
   textMatchConfidence: z.number().min(0).max(1),

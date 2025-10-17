@@ -34,6 +34,32 @@ export class ApiError extends Error {
   ) {
     super(message);
     this.name = 'ApiError';
+    
+    // Maintain proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ApiError);
+    }
+  }
+  
+  /**
+   * Check if this is a specific HTTP status code
+   */
+  isStatus(status: number): boolean {
+    return this.problem.status === status;
+  }
+  
+  /**
+   * Check if this error requires authentication
+   */
+  requiresAuth(): boolean {
+    return this.problem.status === 401;
+  }
+  
+  /**
+   * Check if this error is retryable
+   */
+  isRetryable(): boolean {
+    return this.problem.status >= 500 || this.problem.status === 429;
   }
 }
 
