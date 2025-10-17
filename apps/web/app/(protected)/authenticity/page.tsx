@@ -155,12 +155,14 @@ export default function AuthenticityPage() {
   };
 
   const handleContinue = () => {
-    // TODO: Navigate to valuation screen
-    toast({
-      title: 'Continuing to valuation',
-      description: 'Valuation feature coming soon.',
+    // Navigate to valuation screen with card details
+    const params = new URLSearchParams({
+      cardId: cardId || '',
+      name: state.cardName,
+      set: state.cardSet,
+      authenticityScore: state.score.toString(),
     });
-    router.push('/vault');
+    router.push(`/valuation?${params.toString()}`);
   };
 
   const handleOpenFeedback = () => {

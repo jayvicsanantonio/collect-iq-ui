@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import type { ToastActionElement, ToastProps } from '@/components/ui/toast';
 
-const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_LIMIT = 3; // Show up to 3 toasts at once
+const TOAST_REMOVE_DELAY = 5000; // Auto-dismiss after 5 seconds
 
 type ToasterToast = ToastProps & {
   id: string;
@@ -181,4 +181,90 @@ function useToast() {
   };
 }
 
-export { useToast, toast };
+// ============================================================================
+// Toast Helper Functions
+// ============================================================================
+
+/**
+ * Show a success toast notification
+ */
+function success(message: string, title?: string) {
+  return toast({
+    title: title || 'Success',
+    description: message,
+    variant: 'default',
+  });
+}
+
+/**
+ * Show an error toast notification
+ */
+function error(message: string, title?: string) {
+  return toast({
+    title: title || 'Error',
+    description: message,
+    variant: 'destructive',
+  });
+}
+
+/**
+ * Show an info toast notification
+ */
+function info(message: string, title?: string) {
+  return toast({
+    title: title || 'Info',
+    description: message,
+    variant: 'default',
+  });
+}
+
+/**
+ * Show a loading toast notification
+ */
+function loading(message: string, title?: string) {
+  return toast({
+    title: title || 'Loading',
+    description: message,
+    variant: 'default',
+    duration: Infinity, // Don't auto-dismiss loading toasts
+  });
+}
+
+/**
+ * Show a promise toast that updates based on promise state
+ */
+async function promise<T>(
+  promise: Promise<T>,
+  messages: {
+    loading: string;
+    success: string | ((data: T) => string);
+    error: string | ((error: unknown) => string);
+  }
+): Promise<T> {
+  const loadingToast = loading(messages.loading);
+
+  try {
+    const data = await promise;
+    loadingToast.dismiss();
+
+    const successMessage =
+      typeof messages.success === 'function'
+        ? messages.success(data)
+        : messages.success;
+
+    success(successMessage);
+    return data;
+  } catch (err) {
+    loadingToast.dismiss();
+
+    const errorMessage =
+      typeof messages.error === 'function'
+        ? messages.error(err)
+        : messages.error;
+
+    error(errorMessage);
+    throw err;
+  }
+}
+
+export { useToast, toast, success, error, info, loading, promise };

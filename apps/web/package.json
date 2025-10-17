@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage"
   },
   "dependencies": {
     "@collectiq/shared": "workspace:*",
@@ -23,6 +26,7 @@
     "next": "^14.2.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "recharts": "^3.2.1",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.5",
     "zod": "^3.23.8"
@@ -33,10 +37,14 @@
     "@types/node": "^20.11.0",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.8",
     "eslint": "^9.37.0",
     "eslint-config-next": "^14.2.18",
+    "happy-dom": "^15.11.7",
     "postcss": "^8.4.49",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.8"
   }
 }

@@ -181,7 +181,8 @@ export default function IdentifyPage() {
       ...(state.selectedCandidate.id && { cardId: state.selectedCandidate.id }),
     });
     const url = `/authenticity?${params.toString()}`;
-    router.push(url);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    router.push(url as any);
   }, [state.selectedCandidate, s3Key, router, toast]);
 
   const handleManualEntry = React.useCallback(() => {
