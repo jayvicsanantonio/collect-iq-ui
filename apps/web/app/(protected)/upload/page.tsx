@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UploadDropzone } from '@/components/upload/UploadDropzone';
@@ -129,7 +130,8 @@ export default function UploadPage() {
 
         // Navigate to identification page with the S3 key
         setTimeout(() => {
-          const identifyUrl = `/identify?key=${encodeURIComponent(presignResponse.key)}`;
+          const identifyUrl =
+            `/identify?key=${encodeURIComponent(presignResponse.key)}` as Route;
           router.push(identifyUrl);
         }, 500);
       } catch (error) {
@@ -151,7 +153,8 @@ export default function UploadPage() {
         // Handle API errors
         let errorMessage = 'Failed to upload file. Please try again.';
         if (error instanceof ApiError) {
-          errorMessage = error.problem.detail || error.problem.title;
+          errorMessage =
+            error.problem?.detail || error.problem?.title || error.message;
         } else if (error instanceof Error) {
           errorMessage = error.message;
         }
