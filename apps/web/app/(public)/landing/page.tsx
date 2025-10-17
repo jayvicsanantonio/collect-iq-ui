@@ -44,36 +44,10 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col relative bg-[var(--background)] text-[var(--foreground)]">
       {/* Gradient Background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute inset-0 dark:hidden"
-          style={{
-            background:
-              'linear-gradient(135deg, rgb(56, 189, 248) 0%, rgb(52, 211, 153) 25%, rgb(250, 204, 21) 50%, rgb(251, 146, 60) 75%, rgb(167, 139, 250) 100%)',
-          }}
-        />
-        <div
-          className="absolute inset-0 hidden dark:block"
-          style={{
-            background:
-              'linear-gradient(135deg, rgba(147, 197, 253, 0.08) 0%, rgba(167, 243, 208, 0.06) 25%, rgba(253, 224, 71, 0.05) 50%, rgba(251, 146, 60, 0.06) 75%, rgba(196, 181, 253, 0.08) 100%)',
-          }}
-        />
+        <div className="absolute inset-0 landing-gradient" />
       </div>
       <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute inset-0 dark:hidden"
-          style={{
-            background:
-              'radial-gradient(circle at 30% 40%, rgba(14, 165, 233, 0.6) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(16, 185, 129, 0.55) 0%, transparent 50%), radial-gradient(circle at 50% 80%, rgba(249, 115, 22, 0.5) 0%, transparent 45%)',
-          }}
-        />
-        <div
-          className="absolute inset-0 hidden dark:block"
-          style={{
-            background:
-              'radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.05) 0%, transparent 40%), radial-gradient(circle at 70% 60%, rgba(34, 197, 94, 0.04) 0%, transparent 40%), radial-gradient(circle at 50% 80%, rgba(251, 146, 60, 0.03) 0%, transparent 35%)',
-          }}
-        />
+        <div className="absolute inset-0 landing-radials" />
       </div>
 
       <Header
@@ -164,7 +138,7 @@ export default function LandingPage() {
           <div className="max-w-7xl w-full">
             <div className="grid md:grid-cols-3 gap-12 lg:gap-16 px-4">
               {/* Feature 1 */}
-              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-white/5 border-2 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-emerald-glow)] hover:shadow-[0_20px_60px_rgba(16,185,129,0.15)]">
+              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-[color-mix(in_srgb,var(--card)_8%,transparent)] border-2 border-[var(--border)] shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-emerald-glow)] hover:shadow-[0_20px_60px_rgba(16,185,129,0.15)]">
                 <div className="text-center w-full flex flex-col items-center">
                   <div className="mb-12">
                     <Shield
@@ -183,7 +157,7 @@ export default function LandingPage() {
               </div>
 
               {/* Feature 2 */}
-              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-white/5 border-2 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-vault-blue)] hover:shadow-[0_20px_60px_rgba(59,130,246,0.15)]">
+              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-[color-mix(in_srgb,var(--card)_8%,transparent)] border-2 border-[var(--border)] shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-vault-blue)] hover:shadow-[0_20px_60px_rgba(59,130,246,0.15)]">
                 <div className="space-y-6 text-center w-full flex flex-col items-center">
                   <div className="mb-12">
                     <TrendingUp
@@ -202,7 +176,7 @@ export default function LandingPage() {
               </div>
 
               {/* Feature 3 */}
-              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-white/5 border-2 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-holo-cyan)] hover:shadow-[0_20px_60px_rgba(6,182,212,0.15)]">
+              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-[color-mix(in_srgb,var(--card)_8%,transparent)] border-2 border-[var(--border)] shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-holo-cyan)] hover:shadow-[0_20px_60px_rgba(6,182,212,0.15)]">
                 <div className="space-y-8 text-center w-full flex flex-col items-center">
                   <div className="mb-12">
                     <Sparkles

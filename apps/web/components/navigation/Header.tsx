@@ -24,7 +24,7 @@ export function Header({ rightContent, className = '' }: HeaderProps) {
     <header
       className={`fixed top-0 left-0 right-0 z-50 flex justify-center p-4 ${className}`}
     >
-      <nav className="w-full rounded-2xl max-w-[1280px] backdrop-blur-[20px] bg-white/90 dark:bg-black/70 border border-black/10 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.08),_0_1px_3px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.5),_0_1px_3px_rgba(0,0,0,0.3)] transition-all duration-300">
+      <nav className="w-full rounded-2xl max-w-[1280px] backdrop-blur-[20px] text-[var(--foreground)] border border-[var(--border)] bg-[color-mix(in_srgb,var(--card)_88%,transparent)] dark:bg-[color-mix(in_srgb,var(--card)_70%,transparent)] shadow-[0_4px_24px_rgba(0,0,0,0.08),_0_1px_3px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.5),_0_1px_3px_rgba(0,0,0,0.3)] transition-all duration-300">
         <div className="flex items-center justify-between px-6 h-16">
           {/* Logo */}
           <Link

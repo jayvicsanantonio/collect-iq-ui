@@ -40,6 +40,7 @@
   - Test theme persistence across sessions
   - _Requirements: 13.1, 13.2, 13.3_
   - Maintenance (2025-10-17): Replaced inline styles with Tailwind utilities where feasible (Header, Sidebar, Landing, SignInButton spinner). Standardized colors via CSS variables with text-[var(--...)]/bg-[var(--...)] and gradients via bg-gradient-to-_. This ensures spacing utilities like px-_ are not overridden.
+  - Maintenance (2025-10-17): Themed Landing backgrounds. Added `.landing-gradient` and `.landing-radials` classes in `globals.css` with light/dark variants and switched frosted cards to token-based backgrounds/borders (`bg-[color-mix(...var(--card)...)], border-[var(--border)]`). Removed remaining inline styles from Landing.
 
 - [x] 3. Authentication infrastructure
 - [x] 3.1 Set up Cognito Hosted UI integration
