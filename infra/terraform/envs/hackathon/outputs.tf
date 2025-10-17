@@ -141,3 +141,27 @@ output "s3_uploads_bucket_arn" {
 #  value       = module.ssm_secrets.secret_arns
 #  sensitive   = true
 #}
+
+## ============================================================================
+## Monitoring Outputs
+## ============================================================================
+
+output "cloudwatch_dashboard_names" {
+  description = "List of CloudWatch dashboard names"
+  value       = module.cloudwatch_dashboards.dashboard_names
+}
+
+output "cloudwatch_alarms_topic_arn" {
+  description = "SNS topic ARN for CloudWatch alarms"
+  value       = aws_sns_topic.cloudwatch_alarms.arn
+}
+
+output "step_functions_state_machine_arn" {
+  description = "Step Functions state machine ARN"
+  value       = module.step_functions.state_machine_arn
+}
+
+output "step_functions_state_machine_name" {
+  description = "Step Functions state machine name"
+  value       = module.step_functions.state_machine_name
+}

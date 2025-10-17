@@ -241,8 +241,8 @@
   - Test error handling by injecting failures
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9_
 
-- [ ] 6. Configure CloudWatch monitoring
-- [ ] 6.1 Create CloudWatch dashboards
+- [x] 6. Configure CloudWatch monitoring
+- [x] 6.1 Create CloudWatch dashboards
   - Deploy cloudwatch_dashboards module
   - Configure API performance dashboard with 4xx/5xx rates, latency
   - Configure Lambda performance dashboard with errors, duration, throttles
@@ -251,7 +251,7 @@
   - Configure AI services dashboard with Rekognition and Bedrock metrics
   - _Requirements: 13.1, 13.2_
 
-- [ ] 6.2 Create CloudWatch alarms
+- [x] 6.2 Create CloudWatch alarms
   - Create alarm for API 5xx rate > 5% for 5 minutes
   - Create alarm for Lambda error rate > 10% for 5 minutes
   - Create alarm for Step Functions failed executions > 10 in 15 minutes
@@ -262,7 +262,7 @@
   - Configure SNS topics for alarm notifications
   - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7_
 
-- [ ] 6.3 Configure X-Ray tracing
+- [x] 6.3 Configure X-Ray tracing
   - Enable X-Ray on all Lambda functions (already done in lambda_fn module)
   - Enable X-Ray on API Gateway
   - Enable X-Ray on Step Functions

@@ -48,13 +48,15 @@ resource "aws_apigatewayv2_stage" "default" {
       responseLength = "$context.responseLength"
       errorMessage   = "$context.error.message"
       integrationErrorMessage = "$context.integrationErrorMessage"
+      xrayTraceId    = "$context.xrayTraceId"
     })
   }
 
-  # Throttling settings
+  # Throttling settings and detailed metrics (includes X-Ray)
   default_route_settings {
     throttling_burst_limit = var.throttling_burst_limit
     throttling_rate_limit  = var.throttling_rate_limit
+    detailed_metrics_enabled = var.enable_xray_tracing
   }
 
   tags = var.tags
