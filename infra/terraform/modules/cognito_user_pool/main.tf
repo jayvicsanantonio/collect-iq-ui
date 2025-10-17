@@ -18,6 +18,14 @@ resource "aws_cognito_user_pool" "pool" {
   # MFA configuration
   mfa_configuration = var.mfa_configuration
 
+  # Software token MFA (TOTP) configuration
+  dynamic "software_token_mfa_configuration" {
+    for_each = var.mfa_configuration != "OFF" ? [1] : []
+    content {
+      enabled = true
+    }
+  }
+
   # Email configuration
   email_configuration {
     email_sending_account = "COGNITO_DEFAULT"

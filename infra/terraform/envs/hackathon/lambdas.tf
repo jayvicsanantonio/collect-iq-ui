@@ -206,8 +206,8 @@ data "aws_iam_policy_document" "aggregator_eventbridge" {
     ]
     resources = [
       # Will be added when EventBridge is deployed
-      # module.eventbridge_bus.bus_arn
-      "*"
+      module.eventbridge_bus.bus_arn
+      #"*"
     ]
   }
 }
@@ -221,8 +221,8 @@ data "aws_iam_policy_document" "error_handler_sqs" {
     ]
     resources = [
       # Will be added when EventBridge DLQ is deployed
-      # module.eventbridge_bus.dlq_arn
-      "*"
+      module.eventbridge_bus.dlq_arn
+      #"*"
     ]
   }
 
@@ -255,8 +255,12 @@ module "lambda_upload_presign" {
   memory_size = 512
   timeout     = 30
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION           = var.aws_region
+    REGION           = var.aws_region
     BUCKET_UPLOADS       = module.s3_uploads.bucket_name
     MAX_UPLOAD_MB        = "12"
     ALLOWED_UPLOAD_MIME  = "image/jpeg,image/png,image/heic"
@@ -285,8 +289,12 @@ module "lambda_cards_create" {
   memory_size = 512
   timeout     = 30
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION            = var.aws_region
+    REGION            = var.aws_region
     DDB_TABLE             = module.dynamodb_collectiq.table_name
     COGNITO_USER_POOL_ID  = "" # Will be added when Cognito is deployed
   }
@@ -313,8 +321,12 @@ module "lambda_cards_list" {
   memory_size = 512
   timeout     = 30
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION            = var.aws_region
+    REGION            = var.aws_region
     DDB_TABLE             = module.dynamodb_collectiq.table_name
     COGNITO_USER_POOL_ID  = "" # Will be added when Cognito is deployed
   }
@@ -341,8 +353,12 @@ module "lambda_cards_get" {
   memory_size = 512
   timeout     = 30
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION            = var.aws_region
+    REGION            = var.aws_region
     DDB_TABLE             = module.dynamodb_collectiq.table_name
     COGNITO_USER_POOL_ID  = "" # Will be added when Cognito is deployed
   }
@@ -369,8 +385,12 @@ module "lambda_cards_delete" {
   memory_size = 512
   timeout     = 30
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION            = var.aws_region
+    REGION            = var.aws_region
     DDB_TABLE             = module.dynamodb_collectiq.table_name
     COGNITO_USER_POOL_ID  = "" # Will be added when Cognito is deployed
     HARD_DELETE_CARDS     = "false"
@@ -398,9 +418,13 @@ module "lambda_cards_revalue" {
   memory_size = 512
   timeout     = 30
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION           = var.aws_region
-    STEP_FUNCTIONS_ARN   = "" # Will be added when Step Functions is deployed
+    REGION           = var.aws_region
+    STEP_FUNCTIONS_ARN   = try(module.step_functions.state_machine_arn, "") # Will be added when Step Functions is deployed
     DDB_TABLE            = module.dynamodb_collectiq.table_name
   }
 
@@ -430,8 +454,12 @@ module "lambda_rekognition_extract" {
   memory_size = 1024
   timeout     = 300 # 5 minutes
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION     = var.aws_region
+    REGION     = var.aws_region
     BUCKET_UPLOADS = module.s3_uploads.bucket_name
   }
 
@@ -458,8 +486,12 @@ module "lambda_pricing_agent" {
   memory_size = 1024
   timeout     = 300 # 5 minutes
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION                = var.aws_region
+    REGION                = var.aws_region
     DDB_TABLE                 = module.dynamodb_collectiq.table_name
     EBAY_SECRET_ARN           = "" # Will be added when Secrets Manager is configured
     TCGPLAYER_SECRET_ARN      = "" # Will be added when Secrets Manager is configured
@@ -488,8 +520,12 @@ module "lambda_authenticity_agent" {
   memory_size = 1024
   timeout     = 300 # 5 minutes
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION       = var.aws_region
+    REGION       = var.aws_region
     BEDROCK_MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0"
     BUCKET_UPLOADS   = module.s3_uploads.bucket_name
     BUCKET_SAMPLES   = "" # Optional authentic samples bucket
@@ -518,10 +554,14 @@ module "lambda_aggregator" {
   memory_size = 512
   timeout     = 60
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION     = var.aws_region
+    REGION     = var.aws_region
     DDB_TABLE      = module.dynamodb_collectiq.table_name
-    EVENT_BUS_NAME = "" # Will be added when EventBridge is deployed
+    EVENT_BUS_NAME = module.eventbridge_bus.bus_name # Will be added when EventBridge is deployed
   }
 
   custom_iam_policy_json = jsonencode({
@@ -552,9 +592,13 @@ module "lambda_error_handler" {
   memory_size = 512
   timeout     = 60
 
+  # VPC Configuration
+  vpc_subnet_ids         = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [aws_security_group.lambda.id]
+
   environment_variables = {
-    AWS_REGION = var.aws_region
-    DLQ_URL    = "" # Will be added when EventBridge DLQ is deployed
+    REGION = var.aws_region
+    DLQ_URL    = module.eventbridge_bus.dlq_url # Will be added when EventBridge DLQ is deployed
     DDB_TABLE  = module.dynamodb_collectiq.table_name
   }
 
