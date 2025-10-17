@@ -55,20 +55,42 @@ export default function LandingPage() {
       />
 
       <main className="flex-1 relative z-10">
+        {/* Spacer */}
+        <div className="h-12"></div>
+
         {/* Hero Section */}
-        <section className="min-h-[85vh] flex items-center justify-center px-6 py-20">
+        <section className="min-h-[65vh] flex items-center justify-center px-6 py-20">
           <div className="max-w-6xl w-full flex flex-col items-center">
             <div className="space-y-12 w-full flex flex-col items-center">
               <div className="space-y-8 w-full flex flex-col items-center">
-                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-center font-display tracking-[-0.02em] leading-[1.1]">
+                <h1
+                  className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-center font-display tracking-[-0.02em] leading-[1.1]"
+                  style={{
+                    textShadow:
+                      'var(--text-shadow, 0 2px 8px rgba(0, 0, 0, 0.3))',
+                  }}
+                >
                   Know the Truth Behind
                   <br />
-                  <span className="bg-gradient-to-tr from-[var(--color-holo-cyan)] via-[var(--color-emerald-glow)] to-[var(--color-vault-blue)] bg-clip-text text-transparent">
+                  <span
+                    className="bg-gradient-to-tr from-[var(--color-holo-cyan)] via-[var(--color-emerald-glow)] to-[var(--color-vault-blue)] bg-clip-text text-transparent"
+                    style={{
+                      textShadow: 'none',
+                      filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
+                    }}
+                  >
                     Every Card You Own
                   </span>
                 </h1>
 
-                <p className="text-xl sm:text-2xl md:text-3xl max-w-4xl leading-relaxed text-center text-[var(--muted-foreground)]">
+                <p
+                  className="text-xl sm:text-2xl md:text-3xl max-w-4xl leading-relaxed text-center"
+                  style={{
+                    color: 'var(--foreground)',
+                    opacity: 0.9,
+                    textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
                   AI-powered authenticity verification and real-time
                   multi-source valuations for Pokémon TCG collectors
                 </p>
@@ -82,7 +104,14 @@ export default function LandingPage() {
                 >
                   Start Scanning Free
                 </SignInButton>
-                <p className="text-base text-center text-[var(--muted-foreground)]">
+                <p
+                  className="text-base text-center"
+                  style={{
+                    color: 'var(--foreground)',
+                    opacity: 0.85,
+                    textShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
                   No credit card required
                 </p>
               </div>
@@ -95,34 +124,34 @@ export default function LandingPage() {
           <div className="max-w-7xl w-full">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-16 lg:gap-24 px-4">
               <div className="text-center space-y-5">
-                <p className="text-5xl lg:text-7xl font-bold text-[var(--color-holo-cyan)]">
+                <p className="text-5xl lg:text-7xl font-bold text-[#0891b2] dark:text-[var(--color-holo-cyan)]">
                   $400B+
                 </p>
-                <p className="text-base lg:text-lg font-medium text-[var(--muted-foreground)]">
+                <p className="text-base lg:text-lg font-medium text-[#4b5563] dark:text-[var(--muted-foreground)]">
                   Collectibles Market
                 </p>
               </div>
               <div className="text-center space-y-5">
-                <p className="text-5xl lg:text-7xl font-bold text-[var(--color-emerald-glow)]">
+                <p className="text-5xl lg:text-7xl font-bold text-[#059669] dark:text-[var(--color-emerald-glow)]">
                   3,821%
                 </p>
-                <p className="text-base lg:text-lg font-medium text-[var(--muted-foreground)]">
+                <p className="text-base lg:text-lg font-medium text-[#4b5563] dark:text-[var(--muted-foreground)]">
                   Pokémon ROI
                 </p>
               </div>
               <div className="text-center space-y-5">
-                <p className="text-5xl lg:text-7xl font-bold text-[var(--color-vault-blue)]">
+                <p className="text-5xl lg:text-7xl font-bold text-[#1a73e8] dark:text-[var(--color-vault-blue)]">
                   100M+
                 </p>
-                <p className="text-base lg:text-lg font-medium text-[var(--muted-foreground)]">
+                <p className="text-base lg:text-lg font-medium text-[#4b5563] dark:text-[var(--muted-foreground)]">
                   TCG Downloads
                 </p>
               </div>
               <div className="text-center space-y-5">
-                <p className="text-5xl lg:text-7xl font-bold text-[var(--color-holo-cyan)]">
+                <p className="text-5xl lg:text-7xl font-bold text-[#0891b2] dark:text-[var(--color-holo-cyan)]">
                   13%
                 </p>
-                <p className="text-base lg:text-lg font-medium text-[var(--muted-foreground)]">
+                <p className="text-base lg:text-lg font-medium text-[#4b5563] dark:text-[var(--muted-foreground)]">
                   Annual Growth
                 </p>
               </div>
@@ -138,7 +167,12 @@ export default function LandingPage() {
           <div className="max-w-7xl w-full">
             <div className="grid md:grid-cols-3 gap-12 lg:gap-16 px-4">
               {/* Feature 1 */}
-              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-[color-mix(in_srgb,var(--card)_8%,transparent)] border-2 border-[var(--border)] shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-emerald-glow)] hover:shadow-[0_20px_60px_rgba(16,185,129,0.15)]">
+              <div
+                className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center border-2 border-gray-200 dark:border-white/10 shadow-lg dark:shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-[var(--color-emerald-glow)] hover:shadow-xl"
+                style={{
+                  backgroundColor: 'var(--background)',
+                }}
+              >
                 <div className="text-center w-full flex flex-col items-center">
                   <div className="mb-12">
                     <Shield
@@ -157,7 +191,12 @@ export default function LandingPage() {
               </div>
 
               {/* Feature 2 */}
-              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-[color-mix(in_srgb,var(--card)_8%,transparent)] border-2 border-[var(--border)] shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-vault-blue)] hover:shadow-[0_20px_60px_rgba(59,130,246,0.15)]">
+              <div
+                className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center border-2 border-gray-200 dark:border-white/10 shadow-lg dark:shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-[var(--color-vault-blue)] hover:shadow-xl"
+                style={{
+                  backgroundColor: 'var(--background)',
+                }}
+              >
                 <div className="space-y-6 text-center w-full flex flex-col items-center">
                   <div className="mb-12">
                     <TrendingUp
@@ -176,7 +215,12 @@ export default function LandingPage() {
               </div>
 
               {/* Feature 3 */}
-              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-[color-mix(in_srgb,var(--card)_8%,transparent)] border-2 border-[var(--border)] shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-holo-cyan)] hover:shadow-[0_20px_60px_rgba(6,182,212,0.15)]">
+              <div
+                className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center border-2 border-gray-200 dark:border-white/10 shadow-lg dark:shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-[var(--color-holo-cyan)] hover:shadow-xl"
+                style={{
+                  backgroundColor: 'var(--background)',
+                }}
+              >
                 <div className="space-y-8 text-center w-full flex flex-col items-center">
                   <div className="mb-12">
                     <Sparkles
@@ -220,7 +264,7 @@ export default function LandingPage() {
         <div className="h-96"></div>
       </main>
 
-      <footer className="py-8 relative z-10 border-t border-[var(--border)]">
+      <footer className="py-8 relative z-10">
         <div className="w-full flex justify-center">
           <p className="text-xs text-center text-[var(--muted-foreground)] tracking-[0.05em]">
             POWERED BY AWS AI • COLLECTIQ 2025
