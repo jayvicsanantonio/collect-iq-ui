@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   // AWS Configuration
-  NEXT_PUBLIC_REGION: z.string().min(1, 'AWS region is required'),
+  NEXT_PUBLIC_AWS_REGION: z.string().min(1, 'AWS region is required'),
 
   // Cognito Configuration
   NEXT_PUBLIC_COGNITO_USER_POOL_ID: z
@@ -36,7 +36,7 @@ type Env = z.infer<typeof envSchema>;
 
 function validateEnv(): Env {
   const env = {
-    NEXT_PUBLIC_REGION: process.env.NEXT_PUBLIC_REGION,
+    NEXT_PUBLIC_AWS_REGION: process.env.NEXT_PUBLIC_AWS_REGION,
     NEXT_PUBLIC_COGNITO_USER_POOL_ID:
       process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
     NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID:

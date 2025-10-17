@@ -6,7 +6,7 @@ This implementation plan focuses on integrating AWS Amplify for Cognito Hosted U
 
 ## Tasks
 
-- [ ] 1. Install and configure AWS Amplify
+- [x] 1. Install and configure AWS Amplify
   - Install aws-amplify package via pnpm
   - Create lib/amplify-config.ts with Cognito configuration
   - Configure OAuth settings (domain, scopes, redirect URIs)
