@@ -98,6 +98,12 @@ variable "lambda_integrations" {
   default = {}
 }
 
+variable "enable_xray_tracing" {
+  description = "Enable X-Ray tracing for API Gateway"
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
