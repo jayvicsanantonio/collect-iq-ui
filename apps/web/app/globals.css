@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+@layer base {
+  /* Base Styles */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+  }
+}
+
 @theme {
   /* Color Tokens */
   --color-vault-blue: #1a73e8;
@@ -36,12 +44,7 @@
   --transition-slow: 300ms;
 }
 
-/* Base Styles */
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+/* Note: Avoid setting global padding: 0; here. */
 
 html,
 body {
@@ -196,4 +199,67 @@ body {
 
 .card-description {
   color: var(--muted-foreground);
+}
+
+/* Landing page themed backgrounds */
+@layer components {
+  /* Light/Dark gradient wash */
+  .landing-gradient {
+    background: linear-gradient(
+      135deg,
+      rgba(56, 189, 248, 0.2) 0%,
+      rgba(52, 211, 153, 0.18) 25%,
+      rgba(250, 204, 21, 0.15) 50%,
+      rgba(251, 146, 60, 0.18) 75%,
+      rgba(167, 139, 250, 0.2) 100%
+    );
+  }
+  .dark .landing-gradient {
+    background: linear-gradient(
+      135deg,
+      rgba(147, 197, 253, 0.08) 0%,
+      rgba(167, 243, 208, 0.06) 25%,
+      rgba(253, 224, 71, 0.05) 50%,
+      rgba(251, 146, 60, 0.06) 75%,
+      rgba(196, 181, 253, 0.08) 100%
+    );
+  }
+
+  /* Light/Dark radial accents */
+  .landing-radials {
+    background:
+      radial-gradient(
+        circle at 30% 40%,
+        rgba(14, 165, 233, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 60%,
+        rgba(16, 185, 129, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 80%,
+        rgba(249, 115, 22, 0.1) 0%,
+        transparent 45%
+      );
+  }
+  .dark .landing-radials {
+    background:
+      radial-gradient(
+        circle at 30% 40%,
+        rgba(59, 130, 246, 0.05) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 70% 60%,
+        rgba(34, 197, 94, 0.04) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 50% 80%,
+        rgba(251, 146, 60, 0.03) 0%,
+        transparent 35%
+      );
+  }
 }

@@ -50,16 +50,16 @@ export function Header({ rightContent, className = '' }: HeaderProps) {
         className="w-full rounded-2xl"
         style={{
           maxWidth: '1280px',
-          WebkitBackdropFilter: 'blur(20px)',
-          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          backdropFilter: 'blur(24px)',
           background: isDark
-            ? 'rgba(0, 0, 0, 0.7)'
+            ? 'rgba(0, 0, 0, 0.75)'
             : 'rgba(255, 255, 255, 0.9)',
           border: isDark
-            ? '1px solid rgba(255, 255, 255, 0.1)'
+            ? '1px solid rgba(255, 255, 255, 0.08)'
             : '1px solid rgba(0, 0, 0, 0.1)',
           boxShadow: isDark
-            ? '0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3)'
+            ? '0 4px 24px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.4)'
             : '0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
           transition: 'all 0.3s ease',
         }}

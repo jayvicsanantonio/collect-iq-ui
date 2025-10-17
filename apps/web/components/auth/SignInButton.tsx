@@ -48,47 +48,10 @@ export function SignInButton({
       variant={variant}
       size={size}
       className={className}
-      style={{
-        padding: '8px 20px',
-        height: '40px',
-        fontSize: '14px',
-        fontWeight: '500',
-        borderRadius: '12px',
-        backgroundColor: '#1a73e8',
-        color: '#ffffff',
-        border: 'none',
-        cursor: isRedirecting ? 'not-allowed' : 'pointer',
-        transition: 'all 0.2s ease',
-        opacity: isRedirecting ? 0.7 : 1,
-      }}
-      onMouseEnter={(e) => {
-        if (!isRedirecting) {
-          e.currentTarget.style.backgroundColor = '#1557b0';
-          e.currentTarget.style.transform = 'translateY(-1px)';
-          e.currentTarget.style.boxShadow =
-            '0 4px 12px rgba(26, 115, 232, 0.3)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = '#1a73e8';
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
     >
       {isRedirecting ? (
         <>
-          <span
-            style={{
-              marginRight: '8px',
-              display: 'inline-block',
-              width: '14px',
-              height: '14px',
-              border: '2px solid currentColor',
-              borderTopColor: 'transparent',
-              borderRadius: '50%',
-              animation: 'spin 0.6s linear infinite',
-            }}
-          ></span>
+          <span className="mr-2 inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
           Redirecting...
         </>
       ) : (

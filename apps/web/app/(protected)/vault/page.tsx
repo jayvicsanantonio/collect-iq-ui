@@ -51,12 +51,7 @@ export default function VaultPage() {
   // Placeholder for vault with cards (will be implemented in a later task)
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1
-        className="mb-4 text-4xl font-bold"
-        style={{ fontFamily: 'var(--font-display)' }}
-      >
-        Your Vault
-      </h1>
+      <h1 className="mb-4 text-4xl font-bold font-display">Your Vault</h1>
       <p className="text-[var(--muted-foreground)]">
         Card collection display will be implemented in a later task.
       </p>
