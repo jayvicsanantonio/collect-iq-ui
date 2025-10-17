@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UploadDropzone } from '@/components/upload/UploadDropzone';
@@ -129,9 +130,9 @@ export default function UploadPage() {
 
         // Navigate to identification page with the S3 key
         setTimeout(() => {
-          router.push(
-            `/identify?key=${encodeURIComponent(presignResponse.key)}`
-          );
+          const identifyUrl =
+            `/identify?key=${encodeURIComponent(presignResponse.key)}` as Route;
+          router.push(identifyUrl);
         }, 500);
       } catch (error) {
         console.error('Upload error:', error);
@@ -152,7 +153,8 @@ export default function UploadPage() {
         // Handle API errors
         let errorMessage = 'Failed to upload file. Please try again.';
         if (error instanceof ApiError) {
-          errorMessage = error.problem.detail || error.problem.title;
+          errorMessage =
+            error.problem?.detail || error.problem?.title || error.message;
         } else if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -256,12 +258,7 @@ export default function UploadPage() {
     <div className="container mx-auto max-w-4xl px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1
-          className="mb-2 text-4xl font-bold"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
-          Upload Card
-        </h1>
+        <h1 className="mb-2 text-4xl font-bold font-display">Upload Card</h1>
         <p className="text-[var(--muted-foreground)]">
           Take a photo or upload an image of your trading card
         </p>

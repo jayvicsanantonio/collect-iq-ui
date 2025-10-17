@@ -3,16 +3,8 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Home,
-  Upload,
-  Vault,
-  LogIn,
-  LogOut,
-  User,
-  Sparkles,
-} from 'lucide-react';
-import { getSession, signIn, signOut } from '@/lib/auth';
+import { Upload, Vault, LogOut, User, Sparkles } from 'lucide-react';
+import { getSession, signOut } from '@/lib/auth';
 import type { UserSession } from '@/lib/auth';
 
 /**
@@ -45,54 +37,19 @@ export function Sidebar() {
     await signOut();
   }
 
-  async function handleSignIn() {
-    await signIn(pathname === '/' ? '/vault' : pathname);
-  }
-
   const isActive = (path: string) => pathname === path;
 
   return (
-    <aside
-      className="fixed left-0 top-0 h-screen w-64 flex flex-col z-50"
-      style={{
-        backgroundColor: 'var(--card)',
-        borderRight: '1px solid var(--border)',
-      }}
-    >
+    <aside className="fixed left-0 top-0 h-screen w-64 flex flex-col z-50 bg-[var(--card)] border-r border-[var(--border)]">
       {/* Logo */}
-      <div
-        className="p-6"
-        style={{
-          borderBottom: '1px solid var(--border)',
-        }}
-      >
-        <Link href="/" className="flex items-center gap-2">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{
-              background:
-                'linear-gradient(to bottom right, var(--color-vault-blue), var(--color-holo-cyan))',
-            }}
-          >
+      <div className="p-6 border-b border-[var(--border)]">
+        <Link href="/upload" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-[var(--color-vault-blue)] to-[var(--color-holo-cyan)]">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span
-            className="text-xl font-semibold"
-            style={{
-              fontFamily: 'var(--font-display)',
-              color: 'var(--foreground)',
-            }}
-          >
+          <span className="text-xl font-semibold font-display text-[var(--foreground)]">
             Collect
-            <span
-              style={{
-                background:
-                  'linear-gradient(to right, var(--color-amber-pulse), #FFD700)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span className="ml-0.5 bg-gradient-to-r from-[var(--color-amber-pulse)] to-[#FFD700] bg-clip-text text-transparent">
               IQ
             </span>
           </span>
@@ -101,79 +58,37 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {/* Home */}
         <Link
-          href="/"
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-          style={{
-            backgroundColor: isActive('/') ? 'var(--accent)' : 'transparent',
-            color: isActive('/')
-              ? 'var(--accent-foreground)'
-              : 'var(--muted-foreground)',
-          }}
+          href="/upload"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            isActive('/upload')
+              ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+              : 'text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]'
+          }`}
         >
-          <Home className="w-5 h-5" />
-          <span>Home</span>
+          <Upload className="w-5 h-5" />
+          <span>Upload Card</span>
         </Link>
 
-        {/* Authenticated Navigation */}
-        {session && (
-          <>
-            <Link
-              href="/upload"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{
-                backgroundColor: isActive('/upload')
-                  ? 'var(--accent)'
-                  : 'transparent',
-                color: isActive('/upload')
-                  ? 'var(--accent-foreground)'
-                  : 'var(--muted-foreground)',
-              }}
-            >
-              <Upload className="w-5 h-5" />
-              <span>Upload Card</span>
-            </Link>
-
-            <Link
-              href="/vault"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{
-                backgroundColor: isActive('/vault')
-                  ? 'var(--accent)'
-                  : 'transparent',
-                color: isActive('/vault')
-                  ? 'var(--accent-foreground)'
-                  : 'var(--muted-foreground)',
-              }}
-            >
-              <Vault className="w-5 h-5" />
-              <span>My Vault</span>
-            </Link>
-          </>
-        )}
+        <Link
+          href="/vault"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            isActive('/vault')
+              ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
+              : 'text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]'
+          }`}
+        >
+          <Vault className="w-5 h-5" />
+          <span>My Vault</span>
+        </Link>
       </nav>
 
       {/* User Section */}
-      <div
-        className="p-4"
-        style={{
-          borderTop: '1px solid var(--border)',
-        }}
-      >
+      <div className="p-4 border-t border-[var(--border)]">
         {isCheckingAuth ? (
           <div className="flex items-center gap-3 px-3 py-2">
-            <div
-              className="w-5 h-5 animate-spin rounded-full border-2"
-              style={{
-                borderColor: 'var(--muted)',
-                borderTopColor: 'var(--foreground)',
-              }}
-            />
-            <span
-              className="text-sm"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
+            <div className="w-5 h-5 animate-spin rounded-full border-2 border-[var(--muted)] border-t-[var(--foreground)]" />
+            <span className="text-sm text-[var(--muted-foreground)]">
               Loading...
             </span>
           </div>
@@ -181,26 +96,14 @@ export function Sidebar() {
           <>
             {/* User Info */}
             <div className="flex items-center gap-3 px-3 py-2 mb-2">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{
-                  background:
-                    'linear-gradient(to bottom right, var(--color-vault-blue), var(--color-holo-cyan))',
-                }}
-              >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-[var(--color-vault-blue)] to-[var(--color-holo-cyan)]">
                 <User className="w-4 h-4 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p
-                  className="text-sm font-medium truncate"
-                  style={{ color: 'var(--foreground)' }}
-                >
+                <p className="text-sm font-medium truncate text-[var(--foreground)]">
                   {session.email}
                 </p>
-                <p
-                  className="text-xs"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Authenticated
                 </p>
               </div>
@@ -210,33 +113,13 @@ export function Sidebar() {
             <button
               onClick={handleSignOut}
               disabled={isSigningOut}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-              style={{
-                color: 'var(--muted-foreground)',
-              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             >
               <LogOut className="w-5 h-5" />
               <span>{isSigningOut ? 'Signing out...' : 'Sign Out'}</span>
             </button>
           </>
-        ) : (
-          <button
-            onClick={handleSignIn}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white transition-opacity"
-            style={{
-              backgroundColor: 'var(--color-vault-blue)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '0.9';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1';
-            }}
-          >
-            <LogIn className="w-5 h-5" />
-            <span>Sign In</span>
-          </button>
-        )}
+        ) : null}
       </div>
     </aside>
   );

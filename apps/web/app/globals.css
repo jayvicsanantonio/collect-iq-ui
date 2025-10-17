@@ -1,4 +1,12 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@layer base {
+  /* Base Styles */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+  }
+}
 
 @theme {
   /* Color Tokens */
@@ -36,12 +44,7 @@
   --transition-slow: 300ms;
 }
 
-/* Base Styles */
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+/* Note: Avoid setting global padding: 0; here. */
 
 html,
 body {
@@ -58,45 +61,22 @@ body {
 /* Light Mode (Default) - Very Light for Rainbow Visibility */
 :root {
   --background: #ffffff;
-  --foreground: var(--color-carbon-gray);
+  --foreground: #1e1e1e;
   --card: #ffffff;
-  --card-foreground: var(--color-carbon-gray);
-  --primary: var(--color-vault-blue);
+  --card-foreground: #1e1e1e;
+  --primary: #1a73e8;
   --primary-foreground: #ffffff;
-  --secondary: var(--color-holo-cyan);
+  --secondary: #00c6ff;
   --secondary-foreground: #ffffff;
-  --muted: #e5e7eb;
+  --muted: #f5f7fa;
   --muted-foreground: #6b7280;
-  --accent: var(--color-holo-cyan);
-  --accent-foreground: #ffffff;
-  --destructive: var(--color-crimson-red);
+  --accent: #f5f7fa;
+  --accent-foreground: #1e1e1e;
+  --destructive: #d32f2f;
   --destructive-foreground: #ffffff;
   --border: #e5e7eb;
-  --input: #e5e7eb;
-  --ring: var(--color-holo-cyan);
-}
-
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #f5f7fa;
-    --card: #1a1a1a;
-    --card-foreground: #f5f7fa;
-    --primary: #4a9eff;
-    --primary-foreground: #ffffff;
-    --secondary: var(--color-holo-cyan);
-    --secondary-foreground: #000000;
-    --muted: #2a2a2a;
-    --muted-foreground: #a1a1aa;
-    --accent: #2a2a2a;
-    --accent-foreground: #f5f7fa;
-    --destructive: var(--color-crimson-red);
-    --destructive-foreground: #ffffff;
-    --border: #3a3a3a;
-    --input: #2a2a2a;
-    --ring: var(--color-holo-cyan);
-  }
+  --input: #f5f7fa;
+  --ring: #00c6ff;
 }
 
 /* Dark mode class override - Very Dark */
@@ -107,23 +87,33 @@ body {
   --card-foreground: #f5f7fa;
   --primary: #4a9eff;
   --primary-foreground: #ffffff;
-  --secondary: var(--color-holo-cyan);
+  --secondary: #00c6ff;
   --secondary-foreground: #000000;
   --muted: #2a2a2a;
   --muted-foreground: #a1a1aa;
   --accent: #2a2a2a;
   --accent-foreground: #f5f7fa;
-  --destructive: var(--color-crimson-red);
+  --destructive: #d32f2f;
   --destructive-foreground: #ffffff;
   --border: #3a3a3a;
   --input: #2a2a2a;
-  --ring: var(--color-holo-cyan);
+  --ring: #00c6ff;
 }
 
 /* Focus Styles */
 *:focus-visible {
   outline: 2px solid var(--color-holo-cyan);
   outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Reduced Motion */
@@ -155,7 +145,11 @@ body {
 }
 
 .btn-gradient {
-  background: linear-gradient(to right, var(--color-vault-blue), var(--color-holo-cyan));
+  background: linear-gradient(
+    to right,
+    var(--color-vault-blue),
+    var(--color-holo-cyan)
+  );
   color: white;
 }
 .btn-gradient:hover {
@@ -205,4 +199,67 @@ body {
 
 .card-description {
   color: var(--muted-foreground);
+}
+
+/* Landing page themed backgrounds */
+@layer components {
+  /* Light/Dark gradient wash */
+  .landing-gradient {
+    background: linear-gradient(
+      135deg,
+      rgba(56, 189, 248, 0.2) 0%,
+      rgba(52, 211, 153, 0.18) 25%,
+      rgba(250, 204, 21, 0.15) 50%,
+      rgba(251, 146, 60, 0.18) 75%,
+      rgba(167, 139, 250, 0.2) 100%
+    );
+  }
+  .dark .landing-gradient {
+    background: linear-gradient(
+      135deg,
+      rgba(147, 197, 253, 0.08) 0%,
+      rgba(167, 243, 208, 0.06) 25%,
+      rgba(253, 224, 71, 0.05) 50%,
+      rgba(251, 146, 60, 0.06) 75%,
+      rgba(196, 181, 253, 0.08) 100%
+    );
+  }
+
+  /* Light/Dark radial accents */
+  .landing-radials {
+    background:
+      radial-gradient(
+        circle at 30% 40%,
+        rgba(14, 165, 233, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 60%,
+        rgba(16, 185, 129, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 80%,
+        rgba(249, 115, 22, 0.1) 0%,
+        transparent 45%
+      );
+  }
+  .dark .landing-radials {
+    background:
+      radial-gradient(
+        circle at 30% 40%,
+        rgba(59, 130, 246, 0.05) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 70% 60%,
+        rgba(34, 197, 94, 0.04) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 50% 80%,
+        rgba(251, 146, 60, 0.03) 0%,
+        transparent 35%
+      );
+  }
 }

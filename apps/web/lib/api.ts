@@ -1,38 +1,38 @@
-/**
- * Typed API client for CollectIQ backend
- * Handles authentication, error parsing, retries, and schema validation
- */
-
+import { getAccessToken, signIn } from './auth';
 import { env } from './env';
 import {
-  type PresignRequest,
-  type PresignResponse,
-  PresignResponseSchema,
-  type Card,
-  type CreateCardRequest,
-  CardSchema,
-  type ListCardsResponse,
-  ListCardsResponseSchema,
-  type RevalueRequest,
-  type RevalueResponse,
-  RevalueResponseSchema,
-  type ProblemDetails,
+  PresignRequest,
+  PresignResponse,
+  CreateCardRequest,
+  ListCardsResponse,
+  Card,
+  ProblemDetails,
   ProblemDetailsSchema,
+  RevalueResponse,
 } from '@collectiq/shared';
 
-// ============================================================================
-// Types
-// ============================================================================
+/**
+ * API request options
+ */
+export interface ApiRequestOptions extends RequestInit {
+  /** Skip automatic authentication (for public endpoints) */
+  skipAuth?: boolean;
+  /** Custom headers to merge with defaults */
+  headers?: HeadersInit;
+}
 
 /**
- * API client error with ProblemDetails
+ * API error class with status code and response details
  */
 export class ApiError extends Error {
   constructor(
-    public problem: ProblemDetails,
-    public response?: Response
+    public status: number,
+    public statusText: string,
+    message: string,
+    public response?: unknown,
+    public problem?: ProblemDetails
   ) {
-    super(problem.detail || problem.title);
+    super(message);
     this.name = 'ApiError';
     
     // Maintain proper stack trace for where our error was thrown (only available on V8)
@@ -64,329 +64,227 @@ export class ApiError extends Error {
 }
 
 /**
- * Request options for API calls
+ * Make an authenticated API request to the backend
+ * Automatically adds Authorization header with access token
+ * Handles 401 responses by attempting token refresh and retry
+ *
+ * @param endpoint - API endpoint path (e.g., '/cards', '/upload/presign')
+ * @param options - Fetch options with optional skipAuth flag
+ * @returns Typed response data
+ * @throws ApiError on HTTP errors or network failures
  */
-interface RequestOptions extends RequestInit {
-  retry?: boolean;
-  retryAttempts?: number;
-  retryDelay?: number;
-}
-
-// ============================================================================
-// Request ID Generation
-// ============================================================================
-
-/**
- * Generate a unique request ID for traceability
- */
-function generateRequestId(): string {
-  return `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-}
-
-// ============================================================================
-// Error Handling
-// ============================================================================
-
-/**
- * Parse error response into ProblemDetails format
- */
-async function parseProblemDetails(
-  response: Response
-): Promise<ProblemDetails> {
-  const contentType = response.headers.get('content-type');
-
-  // Try to parse JSON response
-  if (contentType?.includes('application/json')) {
-    try {
-      const json = await response.json();
-
-      // Try to parse as ProblemDetails
-      const parsed = ProblemDetailsSchema.safeParse(json);
-      if (parsed.success) {
-        return parsed.data;
-      }
-
-      // Convert generic error to ProblemDetails
-      return {
-        type: 'about:blank',
-        title: json.error || json.message || 'Request failed',
-        status: response.status,
-        detail: json.detail || json.message || response.statusText,
-        requestId: json.requestId,
-      };
-    } catch {
-      // Fall through to default error
-    }
-  }
-
-  // Default ProblemDetails for non-JSON responses
-  return {
-    type: 'about:blank',
-    title: getDefaultErrorTitle(response.status),
-    status: response.status,
-    detail: response.statusText || 'An error occurred',
-  };
-}
-
-/**
- * Get default error title based on status code
- */
-function getDefaultErrorTitle(status: number): string {
-  switch (status) {
-    case 400:
-      return 'Bad Request';
-    case 401:
-      return 'Unauthorized';
-    case 403:
-      return 'Forbidden';
-    case 404:
-      return 'Not Found';
-    case 413:
-      return 'Payload Too Large';
-    case 415:
-      return 'Unsupported Media Type';
-    case 429:
-      return 'Too Many Requests';
-    case 500:
-      return 'Internal Server Error';
-    case 502:
-      return 'Bad Gateway';
-    case 503:
-      return 'Service Unavailable';
-    default:
-      return 'Request Failed';
-  }
-}
-
-// ============================================================================
-// Retry Logic
-// ============================================================================
-
-/**
- * Sleep for specified milliseconds
- */
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Calculate exponential backoff delay
- */
-function getBackoffDelay(attempt: number, baseDelay: number): number {
-  return baseDelay * Math.pow(2, attempt - 1);
-}
-
-/**
- * Check if error is retryable
- */
-function isRetryableError(status: number): boolean {
-  // Retry on 5xx errors and 429 (rate limit)
-  return status >= 500 || status === 429;
-}
-
-// ============================================================================
-// Core Request Function
-// ============================================================================
-
-/**
- * Make an HTTP request with retry logic and error handling
- */
-async function request<T>(
+export async function apiRequest<T = unknown>(
   endpoint: string,
-  options: RequestOptions = {}
+  options: ApiRequestOptions = {}
 ): Promise<T> {
-  const {
-    retry = false,
-    retryAttempts = 3,
-    retryDelay = 1000,
-    ...fetchOptions
-  } = options;
+  const { skipAuth = false, headers: customHeaders, ...fetchOptions } = options;
 
+  // Build full URL
   const url = `${env.NEXT_PUBLIC_API_BASE}${endpoint}`;
-  const requestId = generateRequestId();
 
-  // Add default headers
-  const headers = new Headers(fetchOptions.headers);
+  // Prepare headers
+  const headers = new Headers(customHeaders);
   headers.set('Content-Type', 'application/json');
-  headers.set('X-Request-ID', requestId);
 
-  let lastError: ApiError | null = null;
+  // Add Authorization header if not skipping auth
+  if (!skipAuth) {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      // No token available - redirect to sign in
+      await signIn();
+      throw new ApiError(401, 'Unauthorized', 'No access token available');
+    }
+    headers.set('Authorization', `Bearer ${accessToken}`);
+  }
 
-  // Retry loop
-  for (let attempt = 1; attempt <= (retry ? retryAttempts : 1); attempt++) {
-    try {
-      const response = await fetch(url, {
-        ...fetchOptions,
-        headers,
-        credentials: 'include', // Include cookies for JWT
-      });
+  try {
+    // Make the request
+    const response = await fetch(url, {
+      ...fetchOptions,
+      headers,
+    });
 
-      // Success response
-      if (response.ok) {
-        // Handle empty responses (204 No Content, DELETE operations)
-        if (response.status === 204 || response.headers.get('content-length') === '0') {
-          return {} as T;
+    // Handle 401 - token might be expired, Amplify should have refreshed it
+    if (response.status === 401 && !skipAuth) {
+      // Try one more time with fresh token
+      const freshToken = await getAccessToken();
+      if (freshToken) {
+        headers.set('Authorization', `Bearer ${freshToken}`);
+        const retryResponse = await fetch(url, {
+          ...fetchOptions,
+          headers,
+        });
+
+        if (retryResponse.ok) {
+          return await retryResponse.json();
         }
 
-        const data = await response.json();
-        return data as T;
+        // Still 401 after retry - redirect to sign in
+        if (retryResponse.status === 401) {
+          await signIn();
+        }
+
+        throw new ApiError(
+          retryResponse.status,
+          retryResponse.statusText,
+          `API request failed: ${retryResponse.statusText}`,
+          await retryResponse.text()
+        );
       }
 
-      // Parse error response
-      const problem = await parseProblemDetails(response);
-      problem.requestId = problem.requestId || requestId;
-      lastError = new ApiError(problem, response);
-
-      // Check if we should retry
-      if (retry && attempt < retryAttempts && isRetryableError(response.status)) {
-        const delay = getBackoffDelay(attempt, retryDelay);
-        await sleep(delay);
-        continue;
-      }
-
-      // No retry, throw error
-      throw lastError;
-    } catch (error) {
-      // Network error or other exception
-      if (error instanceof ApiError) {
-        throw error;
-      }
-
-      // Convert to ProblemDetails
-      const problem: ProblemDetails = {
-        type: 'about:blank',
-        title: 'Network Error',
-        status: 0,
-        detail: error instanceof Error ? error.message : 'Network request failed',
-        requestId,
-      };
-
-      lastError = new ApiError(problem);
-
-      // Retry on network errors
-      if (retry && attempt < retryAttempts) {
-        const delay = getBackoffDelay(attempt, retryDelay);
-        await sleep(delay);
-        continue;
-      }
-
-      throw lastError;
+      // No fresh token - redirect to sign in
+      await signIn();
+      throw new ApiError(401, 'Unauthorized', 'Session expired');
     }
-  }
 
-  // Should never reach here, but TypeScript needs it
-  throw lastError!;
+    // Handle other HTTP errors
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = `API request failed: ${response.statusText}`;
+      let problem: ProblemDetails | undefined;
+
+      try {
+        const parsed = JSON.parse(errorText);
+        const result = ProblemDetailsSchema.safeParse(parsed);
+        if (result.success) {
+          problem = result.data;
+          errorMessage = problem.detail || problem.title || errorMessage;
+        } else if (parsed && typeof parsed.message === 'string') {
+          errorMessage = parsed.message;
+        } else if (typeof parsed === 'string') {
+          errorMessage = parsed;
+        }
+      } catch {
+        if (errorText) errorMessage = errorText;
+      }
+
+      throw new ApiError(
+        response.status,
+        response.statusText,
+        errorMessage,
+        errorText,
+        problem
+      );
+    }
+
+    // Parse and return response
+    if (response.status === 204) {
+      return undefined as T;
+    }
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      return data as T;
+    }
+    // Fallback to text for non-JSON responses
+    const text = await response.text();
+    return text as unknown as T;
+  } catch (error) {
+    // Re-throw ApiError as-is
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    // Network or other errors
+    throw new ApiError(
+      0,
+      'Network Error',
+      error instanceof Error ? error.message : 'Unknown error occurred'
+    );
+  }
 }
 
-// ============================================================================
-// API Client Methods
-// ============================================================================
+/**
+ * Convenience methods for common HTTP verbs
+ */
+const baseApi = {
+  get: <T = unknown>(endpoint: string, options?: ApiRequestOptions) =>
+    apiRequest<T>(endpoint, { ...options, method: 'GET' }),
+
+  post: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) =>
+    apiRequest<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+
+  put: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) =>
+    apiRequest<T>(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+
+  delete: <T = unknown>(endpoint: string, options?: ApiRequestOptions) =>
+    apiRequest<T>(endpoint, { ...options, method: 'DELETE' }),
+
+  patch: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) =>
+    apiRequest<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+};
 
 /**
- * Get presigned URL for S3 upload
+ * High-level API helpers (typed)
  */
+
 export async function getPresignedUrl(
   params: PresignRequest
 ): Promise<PresignResponse> {
-  const response = await request<unknown>('/upload/presign', {
-    method: 'POST',
-    body: JSON.stringify(params),
-    retry: false, // Don't retry POST requests
-  });
-
-  // Validate response with Zod schema
-  return PresignResponseSchema.parse(response);
+  return api.post<PresignResponse>('/upload/presign', params);
 }
 
-/**
- * Create a new card
- */
 export async function createCard(data: CreateCardRequest): Promise<Card> {
-  const response = await request<unknown>('/cards', {
-    method: 'POST',
-    body: JSON.stringify(data),
-    retry: false,
-  });
-
-  // Validate response with Zod schema
-  return CardSchema.parse(response);
+  return api.post<Card>('/cards', data);
 }
 
-/**
- * Get paginated list of cards
- */
 export async function getCards(params?: {
   cursor?: string;
   limit?: number;
 }): Promise<ListCardsResponse> {
-  const searchParams = new URLSearchParams();
-  if (params?.cursor) searchParams.set('cursor', params.cursor);
-  if (params?.limit) searchParams.set('limit', params.limit.toString());
-
-  const query = searchParams.toString();
-  const endpoint = query ? `/cards?${query}` : '/cards';
-
-  const response = await request<unknown>(endpoint, {
-    method: 'GET',
-    retry: true, // Retry GET requests
-  });
-
-  // Validate response with Zod schema
-  return ListCardsResponseSchema.parse(response);
+  const search = new URLSearchParams();
+  if (params?.cursor) search.set('cursor', params.cursor);
+  if (params?.limit) search.set('limit', String(params.limit));
+  const qs = search.toString();
+  return api.get<ListCardsResponse>(`/cards${qs ? `?${qs}` : ''}`);
 }
 
-/**
- * Get a single card by ID
- */
 export async function getCard(cardId: string): Promise<Card> {
-  const response = await request<unknown>(`/cards/${cardId}`, {
-    method: 'GET',
-    retry: true,
-  });
-
-  // Validate response with Zod schema
-  return CardSchema.parse(response);
+  return api.get<Card>(`/cards/${cardId}`);
 }
 
-/**
- * Delete a card
- */
 export async function deleteCard(cardId: string): Promise<{ ok: boolean }> {
-  await request(`/cards/${cardId}`, {
-    method: 'DELETE',
-    retry: false,
-  });
-
+  await api.delete(`/cards/${cardId}`);
   return { ok: true };
 }
 
-/**
- * Refresh valuation for a card
- */
 export async function refreshValuation(
   cardId: string,
-  forceRefresh = false
+  forceRefresh?: boolean
 ): Promise<RevalueResponse> {
-  const data: RevalueRequest = {
-    cardId,
-    forceRefresh,
-  };
-
-  const response = await request<unknown>(`/cards/${cardId}/revalue`, {
-    method: 'POST',
-    body: JSON.stringify(data),
-    retry: false,
-  });
-
-  // Validate response with Zod schema
-  return RevalueResponseSchema.parse(response);
+  return api.post<RevalueResponse>('/cards/revalue', { cardId, forceRefresh });
 }
 
-// ============================================================================
-// Exports
-// ============================================================================
+// Public API client type including typed helpers
+export interface ApiClient {
+  get: <T = unknown>(endpoint: string, options?: ApiRequestOptions) => Promise<T>;
+  post: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) => Promise<T>;
+  put: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) => Promise<T>;
+  delete: <T = unknown>(endpoint: string, options?: ApiRequestOptions) => Promise<T>;
+  patch: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) => Promise<T>;
 
-export const api = {
+  getPresignedUrl: (params: PresignRequest) => Promise<PresignResponse>;
+  createCard: (data: CreateCardRequest) => Promise<Card>;
+  getCards: (params?: { cursor?: string; limit?: number }) => Promise<ListCardsResponse>;
+  getCard: (cardId: string) => Promise<Card>;
+  deleteCard: (cardId: string) => Promise<{ ok: boolean }>;
+  refreshValuation: (cardId: string, forceRefresh?: boolean) => Promise<RevalueResponse>;
+}
+
+export const api: ApiClient = {
+  ...baseApi,
   getPresignedUrl,
   createCard,
   getCards,
