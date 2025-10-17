@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { isAuthenticated, signIn } from '@/lib/auth';
+import { isAuthenticated } from '@/lib/auth';
 import { SessionExpiredModal } from './SessionExpiredModal';
 
 interface AuthGuardProps {
@@ -35,14 +35,16 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
         setShowSessionExpired(false);
         setIsLoading(false);
       } else {
-        // No valid session - redirect to sign in
+        // No valid session - redirect to landing page
+        // Don't call signIn() here to avoid redirect loop
+        // User should click sign in button on landing page
         setIsLoading(false);
-        await signIn();
+        window.location.href = '/landing';
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       setIsLoading(false);
-      await signIn();
+      window.location.href = '/landing';
     }
   }
 

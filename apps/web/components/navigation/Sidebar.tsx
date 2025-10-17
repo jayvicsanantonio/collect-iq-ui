@@ -3,16 +3,8 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Home,
-  Upload,
-  Vault,
-  LogIn,
-  LogOut,
-  User,
-  Sparkles,
-} from 'lucide-react';
-import { getSession, signIn, signOut } from '@/lib/auth';
+import { Upload, Vault, LogOut, User, Sparkles } from 'lucide-react';
+import { getSession, signOut } from '@/lib/auth';
 import type { UserSession } from '@/lib/auth';
 
 /**
@@ -45,10 +37,6 @@ export function Sidebar() {
     await signOut();
   }
 
-  async function handleSignIn() {
-    await signIn();
-  }
-
   const isActive = (path: string) => pathname === path;
 
   return (
@@ -66,7 +54,7 @@ export function Sidebar() {
           borderBottom: '1px solid var(--border)',
         }}
       >
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/upload" className="flex items-center gap-2">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center"
             style={{
@@ -101,57 +89,37 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {/* Home */}
         <Link
-          href="/"
+          href="/upload"
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
           style={{
-            backgroundColor: isActive('/') ? 'var(--accent)' : 'transparent',
-            color: isActive('/')
+            backgroundColor: isActive('/upload')
+              ? 'var(--accent)'
+              : 'transparent',
+            color: isActive('/upload')
               ? 'var(--accent-foreground)'
               : 'var(--muted-foreground)',
           }}
         >
-          <Home className="w-5 h-5" />
-          <span>Home</span>
+          <Upload className="w-5 h-5" />
+          <span>Upload Card</span>
         </Link>
 
-        {/* Authenticated Navigation */}
-        {session && (
-          <>
-            <Link
-              href="/upload"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{
-                backgroundColor: isActive('/upload')
-                  ? 'var(--accent)'
-                  : 'transparent',
-                color: isActive('/upload')
-                  ? 'var(--accent-foreground)'
-                  : 'var(--muted-foreground)',
-              }}
-            >
-              <Upload className="w-5 h-5" />
-              <span>Upload Card</span>
-            </Link>
-
-            <Link
-              href="/vault"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{
-                backgroundColor: isActive('/vault')
-                  ? 'var(--accent)'
-                  : 'transparent',
-                color: isActive('/vault')
-                  ? 'var(--accent-foreground)'
-                  : 'var(--muted-foreground)',
-              }}
-            >
-              <Vault className="w-5 h-5" />
-              <span>My Vault</span>
-            </Link>
-          </>
-        )}
+        <Link
+          href="/vault"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+          style={{
+            backgroundColor: isActive('/vault')
+              ? 'var(--accent)'
+              : 'transparent',
+            color: isActive('/vault')
+              ? 'var(--accent-foreground)'
+              : 'var(--muted-foreground)',
+          }}
+        >
+          <Vault className="w-5 h-5" />
+          <span>My Vault</span>
+        </Link>
       </nav>
 
       {/* User Section */}
@@ -219,24 +187,7 @@ export function Sidebar() {
               <span>{isSigningOut ? 'Signing out...' : 'Sign Out'}</span>
             </button>
           </>
-        ) : (
-          <button
-            onClick={handleSignIn}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white transition-opacity"
-            style={{
-              backgroundColor: 'var(--color-vault-blue)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '0.9';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1';
-            }}
-          >
-            <LogIn className="w-5 h-5" />
-            <span>Sign In</span>
-          </button>
-        )}
+        ) : null}
       </div>
     </aside>
   );
