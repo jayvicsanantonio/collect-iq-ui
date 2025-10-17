@@ -21,7 +21,7 @@ This implementation plan focuses on integrating AWS Amplify for Cognito Hosted U
   - Update lib/env.ts to include AWS_REGION validation
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8_
 
-- [ ] 3. Create authentication utilities with Amplify
+- [x] 3. Create authentication utilities with Amplify
   - Create lib/auth.ts with Amplify wrapper functions
   - Implement signIn() using signInWithRedirect
   - Implement signOut() using Amplify signOut
@@ -31,7 +31,7 @@ This implementation plan focuses on integrating AWS Amplify for Cognito Hosted U
   - Remove old PKCE-related functions
   - _Requirements: 1.2, 1.3, 1.6, 1.7, 2.1, 2.2, 2.3, 2.4, 4.1, 4.2, 4.3, 5.1, 5.2_
 
-- [ ] 4. Create API client with automatic authentication
+- [x] 4. Create API client with automatic authentication
   - Create lib/api.ts with apiRequest function
   - Automatically add Authorization header with access token
   - Implement 401 retry logic with token refresh
@@ -39,7 +39,7 @@ This implementation plan focuses on integrating AWS Amplify for Cognito Hosted U
   - Add TypeScript generic for response typing
   - _Requirements: 7.1, 7.2, 7.5, 7.8, 8.4, 8.5_
 
-- [ ] 5. Remove unnecessary Next.js API routes
+- [x] 5. Remove unnecessary Next.js API routes
   - Delete apps/web/app/api/auth/callback/route.ts
   - Delete apps/web/app/api/auth/session/route.ts
   - Delete apps/web/app/api/auth/refresh/route.ts
@@ -47,7 +47,7 @@ This implementation plan focuses on integrating AWS Amplify for Cognito Hosted U
   - Delete apps/web/app/api/auth directory if empty
   - _Requirements: 1.5, 1.6, 2.5_
 
-- [ ] 6. Update AuthGuard component
+- [x] 6. Update AuthGuard component
   - Replace getSession() with isAuthenticated() from Amplify
   - Remove refreshSession() logic (Amplify handles this)
   - Replace signIn(pathname) with signIn() (Amplify handles redirect)
@@ -55,42 +55,42 @@ This implementation plan focuses on integrating AWS Amplify for Cognito Hosted U
   - Keep loading and error states
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8_
 
-- [ ] 7. Update SignInButton component
+- [x] 7. Update SignInButton component
   - Replace custom signIn with Amplify signIn
   - Remove destination prop (not needed with Amplify)
   - Keep loading state and error handling
   - _Requirements: 1.2, 3.6_
 
-- [ ] 8. Update SignOutButton component
+- [x] 8. Update SignOutButton component
   - Replace custom signOut with Amplify signOut
   - Keep loading state and error handling
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 9. Update SessionExpiredModal component
+- [x] 9. Update SessionExpiredModal component
   - Replace custom re-authentication with Amplify signIn
   - Remove signOut prop (use Amplify signOut directly)
   - Keep modal UI and focus management
   - _Requirements: 4.5, 4.6, 5.1_
 
-- [ ] 10. Remove OAuth callback page
+- [x] 10. Remove OAuth callback page
   - Delete apps/web/app/(public)/auth/callback/page.tsx
   - Amplify handles callback automatically at redirect URI
   - Update redirect URI to point to root (/) or /vault
   - _Requirements: 1.4, 1.5, 1.6_
 
-- [ ] 11. Update home page authentication check
+- [x] 11. Update home page authentication check
   - Replace getSession() with isAuthenticated() from Amplify
   - Use getCurrentUserInfo() to get user email
   - Keep SignInButton and SignOutButton components
   - _Requirements: 3.6, 6.1_
 
-- [ ] 12. Update middleware (optional)
+- [x] 12. Update middleware (optional)
   - Consider removing middleware since Amplify handles auth
   - Or keep lightweight check for better UX
   - Middleware cannot access Amplify tokens directly
   - _Requirements: 3.1_
 
-- [ ] 13. Verify backend API Gateway configuration
+- [x] 13. Verify backend API Gateway configuration
   - Confirm JWT authorizer is configured for Cognito User Pool
   - Verify JWKS URL is correct
   - Test that backend extracts claims from event.requestContext

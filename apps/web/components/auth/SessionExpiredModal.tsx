@@ -14,18 +14,14 @@ import { signIn, signOut } from '@/lib/auth';
 
 interface SessionExpiredModalProps {
   isOpen: boolean;
-  onReauthenticate?: () => void;
 }
 
 /**
  * Modal displayed when user session expires
  * Provides options to re-authenticate or sign out
- * Amplify handles redirect destination automatically
+ * Uses Amplify signIn and signOut directly
  */
-export function SessionExpiredModal({
-  isOpen,
-  onReauthenticate,
-}: SessionExpiredModalProps) {
+export function SessionExpiredModal({ isOpen }: SessionExpiredModalProps) {
   const [isReauthenticating, setIsReauthenticating] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -37,12 +33,7 @@ export function SessionExpiredModal({
 
   const handleReauthenticate = async () => {
     setIsReauthenticating(true);
-
-    if (onReauthenticate) {
-      onReauthenticate();
-    } else {
-      await signIn();
-    }
+    await signIn();
   };
 
   const handleSignOut = async () => {

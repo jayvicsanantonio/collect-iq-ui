@@ -7,11 +7,11 @@
 Copy `.env.example` to `.env.local` and fill in your Cognito details:
 
 ```env
-NEXT_PUBLIC_REGION=us-east-1
+NEXT_PUBLIC_AWS_REGION=us-east-1
 NEXT_PUBLIC_COGNITO_USER_POOL_ID=us-east-1_XXXXXXXXX
 NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID=XXXXXXXXXXXXXXXXXXXXXXXXXX
 NEXT_PUBLIC_COGNITO_DOMAIN=collectiq.auth.us-east-1.amazoncognito.com
-NEXT_PUBLIC_OAUTH_REDIRECT_URI=http://localhost:3000/auth/callback
+NEXT_PUBLIC_OAUTH_REDIRECT_URI=http://localhost:3000/
 NEXT_PUBLIC_OAUTH_LOGOUT_URI=http://localhost:3000
 NEXT_PUBLIC_API_BASE=https://api.collectiq.com
 ```
@@ -23,7 +23,7 @@ In AWS Console:
 - Create a User Pool with Hosted UI enabled
 - Add app client with OAuth 2.0 flows
 - Enable "Authorization code grant" flow
-- Add callback URL: `http://localhost:3000/auth/callback`
+- Add callback URL: `http://localhost:3000/` (root URL with trailing slash)
 - Add sign-out URL: `http://localhost:3000`
 - Enable PKCE (required for public clients)
 
@@ -100,40 +100,37 @@ await signOut(); // Clears session and redirects to Cognito logout
 ## Authentication Flow
 
 1. User clicks "Sign In" → Redirects to Cognito Hosted UI
-2. User authenticates → Cognito redirects to `/auth/callback`
-3. Callback exchanges code for tokens → Stores in HTTP-only cookies
-4. User redirected to intended destination
+2. User authenticates → Cognito redirects to root URL (/)
+3. AWS Amplify automatically exchanges code for tokens and stores them securely
+4. Application checks authentication status and displays user info
 
 ## Security Notes
 
-- ✅ Tokens stored in HTTP-only cookies (not accessible to JavaScript)
-- ✅ PKCE prevents authorization code interception
-- ✅ State parameter prevents CSRF attacks
-- ✅ Automatic token refresh before expiration
-- ✅ Server-side middleware protects routes
+- ✅ Tokens managed securely by AWS Amplify
+- ✅ PKCE prevents authorization code interception (handled by Amplify)
+- ✅ State parameter prevents CSRF attacks (handled by Amplify)
+- ✅ Automatic token refresh before expiration (handled by Amplify)
+- ✅ Client-side AuthGuard protects routes
 
 ## Troubleshooting
 
-**"Invalid state parameter" error:**
+**"Invalid redirect_uri" error:**
 
-- Clear browser cookies and sessionStorage
-- Ensure callback URL matches Cognito configuration
+- Ensure callback URL in Cognito matches `NEXT_PUBLIC_OAUTH_REDIRECT_URI` exactly
+- Verify the URL ends with a trailing slash (/)
+- Check that the URL is added to "Allowed callback URLs" in Cognito
 
-**"Missing code verifier" error:**
+**Authentication not working:**
 
-- Don't open auth callback URL directly
-- Always initiate sign in through SignInButton or signIn()
-
-**Redirect loop:**
-
-- Check that middleware.ts is not blocking public routes
-- Verify environment variables are correct
+- Clear browser storage and try again
+- Verify all environment variables are set correctly
+- Check browser console for Amplify errors
 
 **Session not persisting:**
 
-- Check that cookies are enabled
-- Verify cookie domain matches your app domain
-- Check browser console for cookie errors
+- Check browser console for Amplify errors
+- Verify Cognito User Pool and App Client IDs are correct
+- Ensure OAuth domain is correct
 
 ## Testing
 
@@ -154,17 +151,19 @@ pnpm dev
 
 ```bash
 # In browser console:
-fetch('/api/auth/session', { credentials: 'include' })
-  .then(r => r.json())
-  .then(console.log)
+import { isAuthenticated, getCurrentUserInfo } from '@/lib/auth';
+const authenticated = await isAuthenticated();
+const userInfo = await getCurrentUserInfo();
+console.log({ authenticated, userInfo });
 ```
 
-## API Routes
+## Auth Functions
 
-- `GET /api/auth/session` - Get current session
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/signout` - Clear session
-- `POST /api/auth/callback` - Exchange code for tokens
+- `signIn()` - Redirect to Cognito Hosted UI
+- `signOut()` - Sign out and clear session
+- `isAuthenticated()` - Check if user is authenticated
+- `getAccessToken()` - Get current access token
+- `getCurrentUserInfo()` - Get current user information
 
 ## Next Steps
 

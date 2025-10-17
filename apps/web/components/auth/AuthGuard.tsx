@@ -66,12 +66,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
   // Show session expired modal if needed
   if (showSessionExpired) {
-    return (
-      <SessionExpiredModal
-        isOpen={showSessionExpired}
-        onReauthenticate={() => signIn()}
-      />
-    );
+    return <SessionExpiredModal isOpen={showSessionExpired} />;
   }
 
   // Render protected content
