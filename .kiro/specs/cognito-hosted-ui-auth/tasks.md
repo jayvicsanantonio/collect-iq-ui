@@ -13,7 +13,7 @@ This implementation plan focuses on integrating AWS Amplify for Cognito Hosted U
   - Initialize Amplify in root layout
   - _Requirements: 1.1, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.9_
 
-- [ ] 2. Update environment configuration
+- [x] 2. Update environment configuration
   - Add NEXT_PUBLIC_AWS_REGION to environment variables
   - Update NEXT_PUBLIC_OAUTH_REDIRECT_URI to point to root (/)
   - Verify all required Cognito environment variables are set

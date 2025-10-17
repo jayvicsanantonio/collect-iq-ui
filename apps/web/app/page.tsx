@@ -6,12 +6,12 @@ import { SignInButton } from '@/components/auth/SignInButton';
 import { SignOutButton } from '@/components/auth/SignOutButton';
 import { Camera, Upload, Sparkles, Shield, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getSession } from '@/lib/auth';
-import type { UserSession } from '@/lib/auth';
+import { isAuthenticated, getCurrentUserInfo } from '@/lib/auth';
+import type { UserInfo } from '@/lib/auth';
 
 export default function HomePage() {
   const { toast } = useToast();
-  const [session, setSession] = useState<UserSession | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
@@ -20,8 +20,11 @@ export default function HomePage() {
 
   async function checkAuth() {
     try {
-      const currentSession = await getSession();
-      setSession(currentSession);
+      const authenticated = await isAuthenticated();
+      if (authenticated) {
+        const info = await getCurrentUserInfo();
+        setUserInfo(info);
+      }
     } catch (error) {
       console.error('Auth check failed:', error);
     } finally {
@@ -129,18 +132,18 @@ export default function HomePage() {
           >
             {!isCheckingAuth && (
               <>
-                {session ? (
+                {userInfo ? (
                   <div className="flex items-center gap-3">
                     <span
                       className="text-sm"
                       style={{ color: 'var(--muted-foreground)' }}
                     >
-                      {session.email}
+                      {userInfo.email}
                     </span>
                     <SignOutButton variant="link" size="sm" />
                   </div>
                 ) : (
-                  <SignInButton variant="link" size="sm" destination="/vault" />
+                  <SignInButton variant="link" size="sm" />
                 )}
               </>
             )}
