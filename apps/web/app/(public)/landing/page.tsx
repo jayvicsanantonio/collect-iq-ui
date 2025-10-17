@@ -41,13 +41,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex flex-col relative"
-      style={{
-        backgroundColor: 'var(--background)',
-        color: 'var(--foreground)',
-      }}
-    >
+    <div className="min-h-screen flex flex-col relative bg-[var(--background)] text-[var(--foreground)]">
       {/* Gradient Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div
@@ -92,33 +86,15 @@ export default function LandingPage() {
           <div className="max-w-6xl w-full flex flex-col items-center">
             <div className="space-y-12 w-full flex flex-col items-center">
               <div className="space-y-8 w-full flex flex-col items-center">
-                <h1
-                  className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-center"
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    letterSpacing: '-0.02em',
-                    lineHeight: '1.1',
-                  }}
-                >
+                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-center font-display tracking-[-0.02em] leading-[1.1]">
                   Know the Truth Behind
                   <br />
-                  <span
-                    style={{
-                      background:
-                        'linear-gradient(135deg, var(--color-holo-cyan), var(--color-emerald-glow), var(--color-vault-blue))',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
+                  <span className="bg-gradient-to-tr from-[var(--color-holo-cyan)] via-[var(--color-emerald-glow)] to-[var(--color-vault-blue)] bg-clip-text text-transparent">
                     Every Card You Own
                   </span>
                 </h1>
 
-                <p
-                  className="text-xl sm:text-2xl md:text-3xl max-w-4xl leading-relaxed text-center"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+                <p className="text-xl sm:text-2xl md:text-3xl max-w-4xl leading-relaxed text-center text-[var(--muted-foreground)]">
                   AI-powered authenticity verification and real-time
                   multi-source valuations for Pokémon TCG collectors
                 </p>
@@ -132,10 +108,7 @@ export default function LandingPage() {
                 >
                   Start Scanning Free
                 </SignInButton>
-                <p
-                  className="text-base text-center"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+                <p className="text-base text-center text-[var(--muted-foreground)]">
                   No credit card required
                 </p>
               </div>
@@ -148,58 +121,34 @@ export default function LandingPage() {
           <div className="max-w-7xl w-full">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-16 lg:gap-24 px-4">
               <div className="text-center space-y-5">
-                <p
-                  className="text-5xl lg:text-7xl font-bold"
-                  style={{ color: 'var(--color-holo-cyan)' }}
-                >
+                <p className="text-5xl lg:text-7xl font-bold text-[var(--color-holo-cyan)]">
                   $400B+
                 </p>
-                <p
-                  className="text-base lg:text-lg font-medium"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+                <p className="text-base lg:text-lg font-medium text-[var(--muted-foreground)]">
                   Collectibles Market
                 </p>
               </div>
               <div className="text-center space-y-5">
-                <p
-                  className="text-5xl lg:text-7xl font-bold"
-                  style={{ color: 'var(--color-emerald-glow)' }}
-                >
+                <p className="text-5xl lg:text-7xl font-bold text-[var(--color-emerald-glow)]">
                   3,821%
                 </p>
-                <p
-                  className="text-base lg:text-lg font-medium"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+                <p className="text-base lg:text-lg font-medium text-[var(--muted-foreground)]">
                   Pokémon ROI
                 </p>
               </div>
               <div className="text-center space-y-5">
-                <p
-                  className="text-5xl lg:text-7xl font-bold"
-                  style={{ color: 'var(--color-vault-blue)' }}
-                >
+                <p className="text-5xl lg:text-7xl font-bold text-[var(--color-vault-blue)]">
                   100M+
                 </p>
-                <p
-                  className="text-base lg:text-lg font-medium"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+                <p className="text-base lg:text-lg font-medium text-[var(--muted-foreground)]">
                   TCG Downloads
                 </p>
               </div>
               <div className="text-center space-y-5">
-                <p
-                  className="text-5xl lg:text-7xl font-bold"
-                  style={{ color: 'var(--color-holo-cyan)' }}
-                >
+                <p className="text-5xl lg:text-7xl font-bold text-[var(--color-holo-cyan)]">
                   13%
                 </p>
-                <p
-                  className="text-base lg:text-lg font-medium"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+                <p className="text-base lg:text-lg font-medium text-[var(--muted-foreground)]">
                   Annual Growth
                 </p>
               </div>
@@ -215,55 +164,18 @@ export default function LandingPage() {
           <div className="max-w-7xl w-full">
             <div className="grid md:grid-cols-3 gap-12 lg:gap-16 px-4">
               {/* Feature 1 */}
-              <div
-                className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '2px solid rgba(255, 255, 255, 0.1)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor =
-                    'var(--color-emerald-glow)';
-                  e.currentTarget.style.boxShadow =
-                    '0 20px 60px rgba(16, 185, 129, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
+              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-white/5 border-2 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-emerald-glow)] hover:shadow-[0_20px_60px_rgba(16,185,129,0.15)]">
                 <div className="text-center w-full flex flex-col items-center">
-                  <div
-                    className="mb-12"
-                    style={{ paddingTop: '2rem', paddingBottom: '1rem' }}
-                  >
+                  <div className="mb-12">
                     <Shield
-                      className="w-16 h-16"
-                      style={{ color: 'var(--color-emerald-glow)' }}
+                      className="w-16 h-16 text-[var(--color-emerald-glow)]"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <h3
-                    className="text-2xl lg:text-3xl font-bold mb-8"
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                    }}
-                  >
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-8 font-display px-4">
                     Clear Authenticity
                   </h3>
-                  <p
-                    className="text-base lg:text-lg leading-relaxed"
-                    style={{
-                      color: 'var(--muted-foreground)',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                      paddingTop: '1rem',
-                      paddingBottom: '2rem',
-                    }}
-                  >
+                  <p className="text-base lg:text-lg leading-relaxed text-[var(--muted-foreground)]">
                     Multi-agent AI analyzes holographic patterns and visual
                     features with transparent reasoning
                   </p>
@@ -271,54 +183,18 @@ export default function LandingPage() {
               </div>
 
               {/* Feature 2 */}
-              <div
-                className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '2px solid rgba(255, 255, 255, 0.1)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--color-vault-blue)';
-                  e.currentTarget.style.boxShadow =
-                    '0 20px 60px rgba(59, 130, 246, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
+              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-white/5 border-2 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-vault-blue)] hover:shadow-[0_20px_60px_rgba(59,130,246,0.15)]">
                 <div className="space-y-6 text-center w-full flex flex-col items-center">
-                  <div
-                    className="mb-12"
-                    style={{ paddingTop: '2rem', paddingBottom: '1rem' }}
-                  >
+                  <div className="mb-12">
                     <TrendingUp
-                      className="w-16 h-16"
-                      style={{ color: 'var(--color-vault-blue)' }}
+                      className="w-16 h-16 text-[var(--color-vault-blue)]"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <h3
-                    className="text-2xl lg:text-3xl font-bold mb-8"
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                    }}
-                  >
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-8 font-display px-4">
                     Multi-Source Valuation
                   </h3>
-                  <p
-                    className="text-base lg:text-lg leading-relaxed"
-                    style={{
-                      color: 'var(--muted-foreground)',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                      paddingTop: '1rem',
-                      paddingBottom: '2rem',
-                    }}
-                  >
+                  <p className="text-base lg:text-lg leading-relaxed text-[var(--muted-foreground)]">
                     Real-time pricing from eBay, TCGPlayer, and PriceCharting
                     for accurate market value
                   </p>
@@ -326,54 +202,18 @@ export default function LandingPage() {
               </div>
 
               {/* Feature 3 */}
-              <div
-                className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '2px solid rgba(255, 255, 255, 0.1)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--color-holo-cyan)';
-                  e.currentTarget.style.boxShadow =
-                    '0 20px 60px rgba(6, 182, 212, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
+              <div className="group relative p-12 lg:p-16 rounded-3xl transition-all duration-300 cursor-pointer flex flex-col items-center backdrop-blur-xl bg-white/5 border-2 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:border-[var(--color-holo-cyan)] hover:shadow-[0_20px_60px_rgba(6,182,212,0.15)]">
                 <div className="space-y-8 text-center w-full flex flex-col items-center">
-                  <div
-                    className="mb-12"
-                    style={{ paddingTop: '2rem', paddingBottom: '1rem' }}
-                  >
+                  <div className="mb-12">
                     <Sparkles
-                      className="w-16 h-16"
-                      style={{ color: 'var(--color-holo-cyan)' }}
+                      className="w-16 h-16 text-[var(--color-holo-cyan)]"
                       strokeWidth={1.5}
                     />
                   </div>
-                  <h3
-                    className="text-2xl lg:text-3xl font-bold mb-8"
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                    }}
-                  >
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-8 font-display px-4">
                     Instant Recognition
                   </h3>
-                  <p
-                    className="text-base lg:text-lg leading-relaxed"
-                    style={{
-                      color: 'var(--muted-foreground)',
-                      paddingLeft: '1rem',
-                      paddingRight: '1rem',
-                      paddingTop: '1rem',
-                      paddingBottom: '2rem',
-                    }}
-                  >
+                  <p className="text-base lg:text-lg leading-relaxed text-[var(--muted-foreground)] ">
                     Snap a photo for instant card identification, set, rarity,
                     and variant detection
                   </p>
@@ -389,28 +229,14 @@ export default function LandingPage() {
         {/* Value Prop Section */}
         <section className="px-6 flex items-center justify-center">
           <div className="max-w-6xl w-full text-center space-y-10 px-4">
-            <p
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight"
-              style={{ color: 'var(--foreground)' }}
-            >
+            <p className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-[var(--foreground)]">
               Other apps show you a price.
               <br />
-              <span
-                style={{
-                  background:
-                    'linear-gradient(135deg, var(--color-holo-cyan), var(--color-emerald-glow))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
+              <span className="bg-gradient-to-tr from-[var(--color-holo-cyan)] to-[var(--color-emerald-glow)] bg-clip-text text-transparent">
                 CollectIQ shows you the truth.
               </span>
             </p>
-            <p
-              className="text-xl md:text-2xl lg:text-3xl"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
+            <p className="text-xl md:text-2xl lg:text-3xl text-[var(--muted-foreground)]">
               Authentic, explainable, and reliable.
             </p>
           </div>
@@ -420,22 +246,9 @@ export default function LandingPage() {
         <div className="h-96"></div>
       </main>
 
-      <footer
-        className="py-8 relative z-10 border-t"
-        style={{
-          borderColor: 'var(--border)',
-          paddingTop: '1rem',
-          paddingBottom: '1rem',
-        }}
-      >
+      <footer className="py-8 relative z-10 border-t border-[var(--border)]">
         <div className="w-full flex justify-center">
-          <p
-            className="text-xs tracking-wide text-center"
-            style={{
-              color: 'var(--muted-foreground)',
-              letterSpacing: '0.05em',
-            }}
-          >
+          <p className="text-xs text-center text-[var(--muted-foreground)] tracking-[0.05em]">
             POWERED BY AWS AI • COLLECTIQ 2025
           </p>
         </div>

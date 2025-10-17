@@ -19,6 +19,7 @@
   - Define border radius, shadow, and motion tokens
   - Implement light/dark mode CSS variables
   - _Requirements: 13.4, 13.5, 13.6, 13.7, 13.8_
+  - Maintenance (2025-10-17): Moved global base reset into `@layer base` and removed `* { padding: 0 }` which was overriding Tailwind utilities (e.g., `px-*`). Verified Tailwind v4 setup with `@tailwindcss/postcss` and `@import 'tailwindcss'` is correct.
 
 - [x] 2.2 Create base UI components (shadcn/ui)
   - Install and configure shadcn/ui CLI
@@ -38,6 +39,7 @@
   - Add theme switching logic without page reload
   - Test theme persistence across sessions
   - _Requirements: 13.1, 13.2, 13.3_
+  - Maintenance (2025-10-17): Replaced inline styles with Tailwind utilities where feasible (Header, Sidebar, Landing, SignInButton spinner). Standardized colors via CSS variables with text-[var(--...)]/bg-[var(--...)] and gradients via bg-gradient-to-_. This ensures spacing utilities like px-_ are not overridden.
 
 - [x] 3. Authentication infrastructure
 - [x] 3.1 Set up Cognito Hosted UI integration

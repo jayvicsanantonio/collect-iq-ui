@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useEffect, useState } from 'react';
 
 interface HeaderProps {
   /**
@@ -21,79 +20,25 @@ interface HeaderProps {
  * Used across both public and protected routes
  */
 export function Header({ rightContent, className = '' }: HeaderProps) {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    // Check initial theme
-    const checkTheme = () => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    };
-
-    checkTheme();
-
-    // Watch for theme changes
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 flex justify-center ${className}`}
-      style={{ padding: '16px' }}
+      className={`fixed top-0 left-0 right-0 z-50 flex justify-center p-4 ${className}`}
     >
-      <nav
-        className="w-full rounded-2xl"
-        style={{
-          maxWidth: '1280px',
-          WebkitBackdropFilter: 'blur(20px)',
-          backdropFilter: 'blur(20px)',
-          background: isDark
-            ? 'rgba(0, 0, 0, 0.7)'
-            : 'rgba(255, 255, 255, 0.9)',
-          border: isDark
-            ? '1px solid rgba(255, 255, 255, 0.1)'
-            : '1px solid rgba(0, 0, 0, 0.1)',
-          boxShadow: isDark
-            ? '0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3)'
-            : '0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
-          transition: 'all 0.3s ease',
-        }}
-      >
-        <div
-          className="flex items-center justify-between"
-          style={{ padding: '0 24px', height: '64px' }}
-        >
+      <nav className="w-full rounded-2xl max-w-[1280px] backdrop-blur-[20px] bg-white/90 dark:bg-black/70 border border-black/10 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.08),_0_1px_3px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.5),_0_1px_3px_rgba(0,0,0,0.3)] transition-all duration-300">
+        <div className="flex items-center justify-between px-6 h-16">
           {/* Logo */}
           <Link
             href="/"
-            className="group flex items-center text-xl font-semibold tracking-tight transition-all duration-200 hover:scale-[1.02]"
-            style={{
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '-0.02em',
-              color: isDark ? '#f5f7fa' : '#1e1e1e',
-            }}
+            className="group flex items-center text-xl font-semibold tracking-[-0.02em] transition-all duration-200 hover:scale-[1.02] font-display text-[var(--foreground)]"
           >
             <span>Collect</span>
-            <span
-              className="relative ml-0.5"
-              style={{
-                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span className="relative ml-0.5 bg-gradient-to-tr from-[#FFD700] to-[#FFA500] bg-clip-text text-transparent">
               IQ
             </span>
           </Link>
 
           {/* Right Content */}
-          <div className="flex items-center" style={{ gap: '12px' }}>
+          <div className="flex items-center gap-3">
             {rightContent}
             <ThemeToggle />
           </div>

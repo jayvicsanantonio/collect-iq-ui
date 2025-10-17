@@ -258,12 +258,7 @@ export default function UploadPage() {
     <div className="container mx-auto max-w-4xl px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1
-          className="mb-2 text-4xl font-bold"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
-          Upload Card
-        </h1>
+        <h1 className="mb-2 text-4xl font-bold font-display">Upload Card</h1>
         <p className="text-[var(--muted-foreground)]">
           Take a photo or upload an image of your trading card
         </p>
