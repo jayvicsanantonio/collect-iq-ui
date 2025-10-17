@@ -40,8 +40,8 @@ resource "aws_cloudwatch_event_target" "targets" {
 
   # Retry policy
   retry_policy {
-    maximum_event_age       = var.retry_maximum_event_age
-    maximum_retry_attempts  = var.retry_maximum_retry_attempts
+    maximum_event_age_in_seconds = var.retry_maximum_event_age
+    maximum_retry_attempts       = var.retry_maximum_retry_attempts
   }
 
   # Input transformer (optional)

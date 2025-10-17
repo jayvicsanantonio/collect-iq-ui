@@ -4,14 +4,6 @@ resource "aws_secretsmanager_secret" "secrets" {
   name        = each.value.name
   description = each.value.description
 
-  # Automatic rotation configuration (if supported)
-  dynamic "rotation_rules" {
-    for_each = each.value.rotation_days != null ? [1] : []
-    content {
-      automatically_after_days = each.value.rotation_days
-    }
-  }
-
   tags = merge(
     var.tags,
     {

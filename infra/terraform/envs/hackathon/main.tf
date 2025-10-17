@@ -32,6 +32,33 @@ module "vpc" {
   private_subnet_count = 2
 }
 
+# Security group for Lambda functions
+resource "aws_security_group" "lambda" {
+  name_prefix = "${local.name_prefix}-lambda-"
+  description = "Security group for Lambda functions"
+  vpc_id      = module.vpc.vpc_id
+
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+  }
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.name_prefix}-lambda-sg"
+    }
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 # ============================================================================
 # S3 Uploads Bucket
 # ============================================================================
@@ -76,72 +103,69 @@ module "dynamodb_collectiq" {
 ## ============================================================================
 ## Cognito User Pool
 ## ============================================================================
-#module "cognito_user_pool" {
-#  source = "../../modules/cognito_user_pool"
-#
-#  user_pool_name = "${local.name_prefix}-users"
-#
-#  auto_verified_attributes = ["email"]
-#  mfa_configuration        = "OPTIONAL"
-#
-#  password_policy = {
-#    minimum_length    = 8
-#    require_uppercase = true
-#    require_lowercase = true
-#    require_numbers   = true
-#    require_symbols   = true
-#  }
-#
-#  app_client_name = "${local.name_prefix}-web-client"
-#
-#  # Callback URLs will be updated after Amplify deployment
-#  callback_urls = [
-#    "http://localhost:3000/auth/callback",
-#    "https://localhost:3000/auth/callback"
-#  ]
-#
-#  logout_urls = [
-#    "http://localhost:3000",
-#    "https://localhost:3000"
-#  ]
-#
-#  allowed_oauth_flows  = ["code"]
-#  allowed_oauth_scopes = ["openid", "email", "profile"]
-#
-#  hosted_ui_domain_prefix = "${var.project_name}-${var.environment}"
-#
-#  tags = local.common_tags
-#}
+module "cognito_user_pool" {
+  source = "../../modules/cognito_user_pool"
+
+  user_pool_name = "${local.name_prefix}-users"
+
+  auto_verified_attributes = ["email"]
+  mfa_configuration        = "OFF"
+
+  password_policy = {
+    minimum_length    = 8
+    require_uppercase = true
+    require_lowercase = true
+    require_numbers   = true
+    require_symbols   = true
+  }
+
+  app_client_name = "${local.name_prefix}-web-client"
+
+  # Callback URLs will be updated after Amplify deployment
+  callback_urls = [
+    "http://localhost:3000/auth/callback",
+    "https://localhost:3000/auth/callback"
+  ]
+
+  logout_urls = [
+    "http://localhost:3000",
+    "https://localhost:3000"
+  ]
+
+  allowed_oauth_flows  = ["code"]
+  allowed_oauth_scopes = ["openid", "email", "profile"]
+
+  hosted_ui_domain_prefix = "${var.project_name}-${var.environment}"
+
+  tags = local.common_tags
+}
 
 ## ============================================================================
 ## Secrets Manager
 ## ============================================================================
-#module "ssm_secrets" {
-#  source = "../../modules/ssm_secrets"
-#
-#  secrets = {
-#    ebay = {
-#      name          = "${local.name_prefix}/ebay-api-key"
-#      description   = "eBay API key for pricing data"
-#      rotation_days = null
-#    }
-#    tcgplayer = {
-#      name          = "${local.name_prefix}/tcgplayer-api-keys"
-#      description   = "TCGPlayer public and private API keys"
-#      rotation_days = null
-#    }
-#    pricecharting = {
-#      name          = "${local.name_prefix}/pricecharting-api-key"
-#      description   = "PriceCharting API key for pricing data"
-#      rotation_days = null
-#    }
-#  }
-#
-#  policy_name        = "${local.name_prefix}-secrets-read"
-#  policy_description = "IAM policy for reading CollectIQ secrets"
-#
-#  tags = local.common_tags
-#}
+module "ssm_secrets" {
+  source = "../../modules/ssm_secrets"
+
+  secrets = {
+    ebay = {
+      name          = "${local.name_prefix}/ebay-api-key"
+      description   = "eBay API key for pricing data"
+    }
+    tcgplayer = {
+      name          = "${local.name_prefix}/tcgplayer-api-keys"
+      description   = "TCGPlayer public and private API keys"
+    }
+    pricecharting = {
+      name          = "${local.name_prefix}/pricecharting-api-key"
+      description   = "PriceCharting API key for pricing data"
+    }
+  }
+
+  policy_name        = "${local.name_prefix}-secrets-read"
+  policy_description = "IAM policy for reading CollectIQ secrets"
+
+  tags = local.common_tags
+}
 
 ## ============================================================================
 ## IAM Policies for AI Services
@@ -173,89 +197,22 @@ module "bedrock_access" {
 }
 
 ## ============================================================================
-## API Gateway HTTP API
-## ============================================================================
-#module "api_gateway_http" {
-#  source = "../../modules/api_gateway_http"
-#
-#  api_name        = "${local.name_prefix}-api"
-#  api_description = "CollectIQ API Gateway for hackathon environment"
-#  stage_name      = "$default"
-#
-#  cognito_user_pool_id  = module.cognito_user_pool.user_pool_id
-#  cognito_user_pool_arn = module.cognito_user_pool.user_pool_arn
-#  cognito_client_id     = module.cognito_user_pool.client_id
-#
-#  cors_allow_origins     = ["*"] # Will be restricted to Amplify domain after deployment
-#  cors_allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-#  cors_allow_headers     = ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
-#  cors_allow_credentials = true
-#  cors_max_age           = 300
-#
-#  throttling_burst_limit = 100
-#  throttling_rate_limit  = 100
-#
-#  log_retention_days = 30
-#
-#  # Lambda integrations will be added when Lambda functions are deployed
-#  lambda_integrations = {}
-#
-#  tags = local.common_tags
-#}
-
-## ============================================================================
 ## EventBridge Event Bus
 ## ============================================================================
-#module "eventbridge_bus" {
-#  source = "../../modules/eventbridge_bus"
-#
-#  bus_name = "${local.name_prefix}-events"
-#
-#  # Event rules will be added when Lambda targets are deployed
-#  event_rules = {}
-#
-#  dlq_message_retention_seconds = 1209600 # 14 days
-#  retry_maximum_event_age       = 86400   # 24 hours
-#  retry_maximum_retry_attempts  = 3
-#
-#  tags = local.common_tags
-#}
+module "eventbridge_bus" {
+  source = "../../modules/eventbridge_bus"
 
-## ============================================================================
-## AWS Budgets
-## ============================================================================
-#resource "aws_budgets_budget" "hackathon" {
-#  name              = "${local.name_prefix}-monthly-budget"
-#  budget_type       = "COST"
-#  limit_amount      = tostring(var.budget_amount)
-#  limit_unit        = "USD"
-#  time_period_start = "2025-01-01_00:00"
-#  time_unit         = "MONTHLY"
-#
-#  cost_filter {
-#    name = "TagKeyValue"
-#    values = [
-#      "user:Project$CollectIQ",
-#      "user:Environment$${var.environment}"
-#    ]
-#  }
-#
-#  notification {
-#    comparison_operator        = "GREATER_THAN"
-#    threshold                  = 80
-#    threshold_type             = "PERCENTAGE"
-#    notification_type          = "ACTUAL"
-#    subscriber_email_addresses = [] # Add email addresses in terraform.tfvars
-#  }
-#
-#  notification {
-#    comparison_operator        = "GREATER_THAN"
-#    threshold                  = 100
-#    threshold_type             = "PERCENTAGE"
-#    notification_type          = "ACTUAL"
-#    subscriber_email_addresses = [] # Add email addresses in terraform.tfvars
-#  }
-#}
+  bus_name = "${local.name_prefix}-events"
+
+  # Event rules will be added when Lambda targets are deployed
+  event_rules = {}
+
+  dlq_message_retention_seconds = 1209600 # 14 days
+  retry_maximum_event_age       = 86400   # 24 hours
+  retry_maximum_retry_attempts  = 3
+
+  tags = local.common_tags
+}
 
 ## ============================================================================
 ## Amplify Hosting (Frontend)

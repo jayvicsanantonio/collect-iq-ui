@@ -3,7 +3,6 @@ variable "secrets" {
   type = map(object({
     name          = string
     description   = string
-    rotation_days = optional(number)
     initial_value = optional(string)
   }))
   default = {}
