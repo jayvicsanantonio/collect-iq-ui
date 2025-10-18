@@ -42,20 +42,18 @@ module "amplify_hosting" {
       phases:
         preBuild:
           commands:
-            - corepack enable
-            - pnpm install --frozen-lockfile
+            - npm ci
         build:
           commands:
-            - pnpm run build
+            - npm run build
       artifacts:
         baseDirectory: .next
         files:
           - '**/*'
       cache:
         paths:
-          - node_modules/.pnpm
-          - node_modules/.cache
-          - .next/cache
+          - node_modules/**/*
+
   EOT
 
   tags = local.common_tags
