@@ -45,16 +45,17 @@ module "amplify_hosting" {
             preBuild:
               commands:
                 - npm install -g pnpm@9
-                - pnpm install --frozen-lockfile
+                - cd ../.. && pnpm install --frozen-lockfile
             build:
               commands:
-                - pnpm build
+                - cd ../.. && pnpm web:build
           artifacts:
-            baseDirectory: .next
+            baseDirectory: .amplify-hosting
             files:
               - '**/*'
           cache:
             paths:
+              - ../../node_modules/**/*
               - node_modules/**/*
               - .next/cache/**/*
   EOT

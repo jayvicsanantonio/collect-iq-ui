@@ -34,10 +34,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_OAUTH_REDIRECT_URI: z
     .string()
     .url('OAuth Redirect URI must be a valid URL')
-    .refine(
-      (url) => url.endsWith('/'),
-      'OAuth Redirect URI should end with / for Amplify to handle callback'
-    ),
+    .describe('Must match Cognito callback exactly (with or without trailing slash)'),
   NEXT_PUBLIC_OAUTH_LOGOUT_URI: z
     .string()
     .url('OAuth Logout URI must be a valid URL'),

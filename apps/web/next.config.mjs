@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@collectiq/shared'],
+  output: 'standalone',
   experimental: {
     typedRoutes: true,
   },
