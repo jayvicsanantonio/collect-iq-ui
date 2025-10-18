@@ -45,10 +45,10 @@ module "amplify_hosting" {
             preBuild:
               commands:
                 - npm install -g pnpm@9
-                - cd ../.. && pnpm install --frozen-lockfile
+                - pnpm --dir "$CODEBUILD_SRC_DIR" install --frozen-lockfile
             build:
               commands:
-                - cd ../.. && pnpm web:build
+                - pnpm --dir "$CODEBUILD_SRC_DIR" web:build
           artifacts:
             baseDirectory: .amplify-hosting
             files:
@@ -81,4 +81,3 @@ output "amplify_main_branch_url" {
   description = "Amplify main branch URL"
   value       = module.amplify_hosting.main_branch_url
 }
-
