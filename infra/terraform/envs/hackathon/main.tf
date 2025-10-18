@@ -254,28 +254,26 @@ module "amplify_hosting" {
 
   build_spec = <<-EOT
     version: 1
-    applications:
-      - appRoot: apps/web
-        frontend:
-          phases:
-            preBuild:
-              commands:
-                - npm install -g pnpm@9
-                - pnpm install --frozen-lockfile
-            build:
-              commands:
-                - pnpm -w run web:build
-          artifacts:
-            baseDirectory: .next
-            files:
-              - '**/*'
-          cache:
-            paths:
-              - node_modules/**/*
-              - .next/cache/**/*
-              - packages/*/node_modules/**/*
-              - services/*/node_modules/**/*
-              - .pnpm-store/**/*
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - npm install -g pnpm@9
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - pnpm -w run web:build
+      artifacts:
+        baseDirectory: apps/web/.next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - apps/web/node_modules/**/*
+          - packages/*/node_modules/**/*
+          - services/*/node_modules/**/*
+          - .pnpm-store/**/*
   EOT
 
   tags = local.common_tags
