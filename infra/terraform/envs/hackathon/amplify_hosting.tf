@@ -45,10 +45,10 @@ module "amplify_hosting" {
             preBuild:
               commands:
                 - npm install -g pnpm@9
-                - pnpm --dir "$CODEBUILD_SRC_DIR" install --frozen-lockfile
+                - ROOT_DIR=$(git rev-parse --show-toplevel) && pnpm --dir "$ROOT_DIR" install --frozen-lockfile
             build:
               commands:
-                - pnpm --dir "$CODEBUILD_SRC_DIR" web:build
+                - ROOT_DIR=$(git rev-parse --show-toplevel) && pnpm --dir "$ROOT_DIR" web:build
           artifacts:
             baseDirectory: .amplify-hosting
             files:
