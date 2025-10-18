@@ -7,14 +7,27 @@ rm -rf ./.amplify-hosting
 mkdir -p ./.amplify-hosting/compute/default
 mkdir -p ./.amplify-hosting/static
 
-# Copy the standalone server files
-cp -r ./.next/standalone/. ./.amplify-hosting/compute/default/
+# Copy the standalone server files from the monorepo nested structure
+# The standalone build creates: .next/standalone/apps/web/*
+# We need to flatten it to: .amplify-hosting/compute/default/*
+cp -r ./.next/standalone/apps/web/. ./.amplify-hosting/compute/default/
 
-# Create .next directory if it doesn't exist
-mkdir -p ./.amplify-hosting/compute/default/.next
+# Copy shared dependencies from the root of standalone (for monorepo)
+if [ -d "./.next/standalone/node_modules" ]; then
+  cp -r ./.next/standalone/node_modules ./.amplify-hosting/compute/default/
+fi
+
+if [ -f "./.next/standalone/package.json" ]; then
+  cp ./.next/standalone/package.json ./.amplify-hosting/compute/default/
+fi
+
+# Copy packages directory if it exists (for workspace dependencies)
+if [ -d "./.next/standalone/packages" ]; then
+  cp -r ./.next/standalone/packages ./.amplify-hosting/compute/default/
+fi
 
 # Copy static assets
-cp -r ./.next/static ./.amplify-hosting/compute/default/.next/
+cp -r ./.next/static ./.amplify-hosting/compute/default/.next/static
 
 # Copy public directory if it exists
 if [ -d "./public" ]; then
