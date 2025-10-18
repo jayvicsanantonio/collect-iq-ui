@@ -20,8 +20,7 @@ const envSchema = z.object({
     ),
   NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: z
     .string()
-    .min(1, 'Cognito Client ID is required')
-    .min(26, 'Cognito Client ID should be 26 characters'),
+    .min(1, 'Cognito Client ID is required'),
   NEXT_PUBLIC_COGNITO_DOMAIN: z
     .string()
     .min(1, 'Cognito Domain is required')
