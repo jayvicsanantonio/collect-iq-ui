@@ -2,17 +2,14 @@ resource "aws_amplify_app" "app" {
   name       = var.app_name
   repository = var.repository
 
+  # GitHub access token (required for private repos)
+  access_token = var.access_token != "" ? var.access_token : null
+
   # Build settings for Next.js SSR/ISR
   build_spec = var.build_spec
 
   # Environment variables for Next.js
-  dynamic "environment_variables" {
-    for_each = var.environment_variables
-    content {
-      name  = environment_variables.key
-      value = environment_variables.value
-    }
-  }
+  environment_variables = var.environment_variables
 
   # Enable auto branch creation for PR previews
   enable_auto_branch_creation = var.enable_auto_branch_creation
@@ -32,6 +29,13 @@ resource "aws_amplify_branch" "main" {
   stage             = "PRODUCTION"
 
   tags = var.tags
+}
+
+# Webhook to trigger builds
+resource "aws_amplify_webhook" "main" {
+  app_id      = aws_amplify_app.app.id
+  branch_name = aws_amplify_branch.main.branch_name
+  description = "Webhook for ${var.main_branch_name} branch"
 }
 
 resource "aws_amplify_branch" "develop" {

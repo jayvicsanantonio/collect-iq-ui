@@ -22,3 +22,9 @@ output "app_arn" {
   description = "Amplify app ARN"
   value       = aws_amplify_app.app.arn
 }
+
+output "webhook_url" {
+  description = "Webhook URL to trigger builds"
+  value       = aws_amplify_webhook.main.url
+  sensitive   = true
+}

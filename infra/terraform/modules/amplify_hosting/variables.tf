@@ -8,6 +8,13 @@ variable "repository" {
   type        = string
 }
 
+variable "access_token" {
+  description = "GitHub personal access token for repository access"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "build_spec" {
   description = "Build specification for Next.js SSR/ISR"
   type        = string

@@ -24,6 +24,25 @@ variable "github_repo_url" {
   default     = ""
 }
 
+variable "github_access_token" {
+  description = "GitHub personal access token for Amplify (store in terraform.tfvars or use environment variable)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "amplify_oauth_redirect_uri" {
+  description = "OAuth redirect URI for Amplify app (set after first deployment)"
+  type        = string
+  default     = "https://localhost:3000/auth/callback/"
+}
+
+variable "amplify_oauth_logout_uri" {
+  description = "OAuth logout URI for Amplify app (set after first deployment)"
+  type        = string
+  default     = "https://localhost:3000/landing"
+}
+
 variable "budget_amount" {
   description = "Monthly budget amount in USD"
   type        = number
