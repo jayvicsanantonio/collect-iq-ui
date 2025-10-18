@@ -262,9 +262,12 @@ module "amplify_hosting" {
             - pnpm install --frozen-lockfile
         build:
           commands:
-            - pnpm -w run web:build
+            - pnpm run web:build
+            - cp -r apps/web/.next/standalone/apps/web/. apps/web/.next/standalone/
+            - cp -r apps/web/.next/static apps/web/.next/standalone/.next/
+            - cp -r apps/web/public apps/web/.next/standalone/
       artifacts:
-        baseDirectory: apps/web/.next
+        baseDirectory: apps/web/.next/standalone
         files:
           - '**/*'
       cache:
