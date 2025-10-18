@@ -263,70 +263,8 @@ module "amplify_hosting" {
         build:
           commands:
             - pnpm run -w web:build
-            - cp -r apps/web/.next/standalone/apps/web/. apps/web/.next/standalone/
-            - cp -r apps/web/.next/static apps/web/.next/standalone/.next/
-            - if [ -d "apps/web/public" ]; then cp -r apps/web/public apps/web/.next/standalone/; fi
-            - |
-              cat > apps/web/.next/standalone/deploy-manifest.json << 'EOF'
-              {
-                "version": 1,
-                "framework": { "name": "nextjs", "version": "14.2.33" },
-                "imageSettings": {
-                  "sizes": [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-                  "domains": [],
-                  "remotePatterns": [],
-                  "formats": ["image/webp"],
-                  "minimumCacheTTL": 60,
-                  "dangerouslyAllowSVG": false
-                },
-                "routes": [
-                  {
-                    "path": "/_amplify/image",
-                    "target": {
-                      "kind": "ImageOptimization",
-                      "cacheControl": "public, max-age=3600, immutable"
-                    }
-                  },
-                  {
-                    "path": "/_next/static/*",
-                    "target": {
-                      "kind": "Static",
-                      "cacheControl": "public, max-age=31536000, immutable"
-                    }
-                  },
-                  {
-                    "path": "/_next/image*",
-                    "target": {
-                      "kind": "Compute",
-                      "src": "default"
-                    }
-                  },
-                  {
-                    "path": "/api/*",
-                    "target": {
-                      "kind": "Compute",
-                      "src": "default"
-                    }
-                  },
-                  {
-                    "path": "/*",
-                    "target": {
-                      "kind": "Compute",
-                      "src": "default"
-                    }
-                  }
-                ],
-                "computeResources": [
-                  {
-                    "name": "default",
-                    "runtime": "nodejs20.x",
-                    "entrypoint": "server.js"
-                  }
-                ]
-              }
-              EOF
       artifacts:
-        baseDirectory: apps/web/.next/standalone
+        baseDirectory: apps/web/.amplify-hosting
         files:
           - '**/*'
       cache:
@@ -336,6 +274,7 @@ module "amplify_hosting" {
           - packages/*/node_modules/**/*
           - services/*/node_modules/**/*
           - .pnpm-store/**/*
+          - apps/web/.next/cache/**/*
   EOT
 
   tags = local.common_tags

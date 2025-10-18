@@ -20,6 +20,7 @@ export default [
       '.next/**',
       '**/.next/**',
       'apps/*/.next/**',
+      'apps/*/.amplify-hosting/**',
       'out/**',
       '.turbo/**',
       '.eslintcache',
