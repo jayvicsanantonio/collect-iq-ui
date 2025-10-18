@@ -38,26 +38,24 @@ module "amplify_hosting" {
 
   build_spec = <<-EOT
     version: 1
-    applications:
-      - appRoot: apps/web
-        frontend:
-          phases:
-            preBuild:
-              commands:
-                - npm install -g pnpm@9
-                - ROOT_DIR=$(git rev-parse --show-toplevel) && pnpm --dir "$ROOT_DIR" install --frozen-lockfile
-            build:
-              commands:
-                - ROOT_DIR=$(git rev-parse --show-toplevel) && pnpm --dir "$ROOT_DIR" web:build
-          artifacts:
-            baseDirectory: .amplify-hosting
-            files:
-              - '**/*'
-          cache:
-            paths:
-              - ../../node_modules/**/*
-              - node_modules/**/*
-              - .next/cache/**/*
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - pnpm run build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/.pnpm
+          - node_modules/.cache
+          - .next/cache
   EOT
 
   tags = local.common_tags
