@@ -266,6 +266,20 @@ module "amplify_hosting" {
             - cp -r apps/web/.next/standalone/apps/web/. apps/web/.next/standalone/
             - cp -r apps/web/.next/static apps/web/.next/standalone/.next/
             - if [ -d "apps/web/public" ]; then cp -r apps/web/public apps/web/.next/standalone/; fi
+            - |
+              cat > apps/web/.next/standalone/deploy-manifest.json << 'EOF'
+              {
+                "version": 1,
+                "framework": { "name": "nextjs", "version": "14.2.33" },
+                "imageOptimization": { "path": "/_next/image", "loader": "default" },
+                "routes": [
+                  { "path": "/_next/static/*", "target": "static", "fallback": null },
+                  { "path": "/_next/image*", "target": "compute", "fallback": null },
+                  { "path": "/api/*", "target": "compute", "fallback": null },
+                  { "path": "/*", "target": "compute", "fallback": null }
+                ]
+              }
+              EOF
       artifacts:
         baseDirectory: apps/web/.next/standalone
         files:
