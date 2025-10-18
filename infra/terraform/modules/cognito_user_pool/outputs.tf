@@ -20,8 +20,18 @@ output "client_secret" {
 }
 
 output "hosted_ui_domain" {
-  description = "Cognito Hosted UI domain"
+  description = "Cognito Hosted UI domain (full URL with https://)"
   value       = "https://${aws_cognito_user_pool_domain.domain.domain}.auth.${data.aws_region.current.name}.amazoncognito.com"
+}
+
+output "hosted_ui_domain_name" {
+  description = "Cognito Hosted UI domain name (without https://)"
+  value       = "${aws_cognito_user_pool_domain.domain.domain}.auth.${data.aws_region.current.name}.amazoncognito.com"
+}
+
+output "domain_prefix" {
+  description = "Cognito domain prefix only"
+  value       = aws_cognito_user_pool_domain.domain.domain
 }
 
 output "jwks_url" {
