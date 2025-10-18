@@ -204,8 +204,67 @@ module "eventbridge_bus" {
 
   bus_name = "${local.name_prefix}-events"
 
-  # Event rules will be added when Lambda targets are deployed
-  event_rules = {}
+  # Event rules for card processing workflow
+  #event_rules = {}
+  event_rules = {
+    # Rule 1: Card processing completed successfully
+    card_processing_completed = {
+      description = "Trigger when card processing completes successfully"
+      event_pattern = jsonencode({
+        source      = ["collectiq.card.processing"]
+        detail-type = ["Card Processing Completed"]
+        detail = {
+          status = ["success"]
+        }
+      })
+      target_arn           = module.lambda_aggregator.function_arn
+      target_type          = "lambda"
+      target_function_name = module.lambda_aggregator.function_name
+      input_transformer    = null
+    }
+
+    # Rule 2: Card processing failed
+    card_processing_failed = {
+      description = "Trigger when card processing fails"
+      event_pattern = jsonencode({
+        source      = ["collectiq.card.processing"]
+        detail-type = ["Card Processing Failed"]
+        detail = {
+          status = ["failed", "error"]
+        }
+      })
+      target_arn           = module.lambda_error_handler.function_arn
+      target_type          = "lambda"
+      target_function_name = module.lambda_error_handler.function_name
+      input_transformer    = null
+    }
+
+    # Rule 3: Card valuation updated
+    card_valuation_updated = {
+      description = "Trigger when card valuation is updated"
+      event_pattern = jsonencode({
+        source      = ["collectiq.card.valuation"]
+        detail-type = ["Card Valuation Updated"]
+      })
+      target_arn           = module.lambda_aggregator.function_arn
+      target_type          = "lambda"
+      target_function_name = module.lambda_aggregator.function_name
+      input_transformer    = null
+    }
+
+    # Rule 4: Authenticity check completed
+    authenticity_check_completed = {
+      description = "Trigger when authenticity check completes"
+      event_pattern = jsonencode({
+        source      = ["collectiq.card.authenticity"]
+        detail-type = ["Authenticity Check Completed"]
+      })
+      target_arn           = module.lambda_aggregator.function_arn
+      target_type          = "lambda"
+      target_function_name = module.lambda_aggregator.function_name
+      input_transformer    = null
+    }
+  }
 
   dlq_message_retention_seconds = 1209600 # 14 days
   retry_maximum_event_age       = 86400   # 24 hours
