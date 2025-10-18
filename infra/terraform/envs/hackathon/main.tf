@@ -265,7 +265,7 @@ module "amplify_hosting" {
             - pnpm run -w web:build
             - cp -r apps/web/.next/standalone/apps/web/. apps/web/.next/standalone/
             - cp -r apps/web/.next/static apps/web/.next/standalone/.next/
-            - cp -r apps/web/public apps/web/.next/standalone/
+            - if [ -d "apps/web/public" ]; then cp -r apps/web/public apps/web/.next/standalone/; fi
       artifacts:
         baseDirectory: apps/web/.next/standalone
         files:
