@@ -136,7 +136,7 @@
   - _Requirements: 15.1_
 
 - [ ] 5. Upload flow implementation
-- [ ] 5.1 Create UploadDropzone component
+- [ ] 5.1 Create UploadDropzone component with validation
   - Create component in apps/web/components/upload/UploadDropzone.tsx
   - Implement drag-and-drop area with visual feedback
   - Add file picker integration
@@ -145,6 +145,7 @@
   - Add hover and active states
   - Display inline error messages for validation failures
   - Create mobile-optimized version with tap-to-upload
+  - **See detailed spec**: `.kiro/specs/collectiq-frontend/image-upload-validation.md`
   - _Requirements: 2.1, 2.2, 2.3_
 
 - [ ] 5.2 Create CameraCapture component

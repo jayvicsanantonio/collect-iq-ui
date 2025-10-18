@@ -297,10 +297,23 @@ All documentation is located in `.kiro/specs/collectiq-frontend/`:
 - **requirements.md** - Updated functional requirements
 - **design.md** - Updated design document
 - **tasks.md** - Updated implementation tasks
+- **image-upload-validation.md** - Image upload validation feature spec
 - **BACKEND_INTEGRATION.md** - Complete API integration guide
 - **IMPLEMENTATION_ROADMAP.md** - Phased implementation plan
 - **QUICK_START.md** - Quick reference for developers
 - **SUMMARY.md** - This document
+
+### Additional Documentation
+
+Detailed specifications in `docs/Frontend/`:
+
+- **image-upload-spec.md** - Complete technical specification for upload validation
+- **image-upload-acceptance.md** - E2E acceptance criteria (16 groups)
+- **ui-copy.md** - All user-facing text and copy guidelines
+
+Component documentation in `apps/web/components/upload/`:
+
+- **README.md** - Upload component API, usage, and configuration
 
 ## Success Criteria
 
