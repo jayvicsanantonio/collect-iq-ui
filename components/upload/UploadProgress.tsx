@@ -32,7 +32,9 @@ export function UploadProgress({
   onRetry,
   className,
 }: UploadProgressProps) {
-  const [thumbnailUrl, setThumbnailUrl] = React.useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = React.useState<
+    string | null
+  >(null);
 
   // ============================================================================
   // Thumbnail Generation
@@ -74,6 +76,7 @@ export function UploadProgress({
       {/* Thumbnail */}
       <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-[var(--muted)]">
         {thumbnailUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={thumbnailUrl}
             alt={file.name}
@@ -88,12 +91,18 @@ export function UploadProgress({
         {/* Status overlay */}
         {isComplete && (
           <div className="absolute inset-0 flex items-center justify-center bg-green-500/80">
-            <CheckCircle2 className="h-6 w-6 text-white" aria-hidden="true" />
+            <CheckCircle2
+              className="h-6 w-6 text-white"
+              aria-hidden="true"
+            />
           </div>
         )}
         {hasError && (
           <div className="absolute inset-0 flex items-center justify-center bg-[var(--destructive)]/80">
-            <AlertCircle className="h-6 w-6 text-white" aria-hidden="true" />
+            <AlertCircle
+              className="h-6 w-6 text-white"
+              aria-hidden="true"
+            />
           </div>
         )}
       </div>
@@ -136,7 +145,10 @@ export function UploadProgress({
 
         {status === 'success' && (
           <div className="mt-2 flex items-center gap-1.5 text-xs text-green-600 dark:text-green-500">
-            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+            <CheckCircle2
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
             <span>Upload complete</span>
           </div>
         )}
@@ -192,5 +204,7 @@ function formatFileSize(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${
+    sizes[i]
+  }`;
 }

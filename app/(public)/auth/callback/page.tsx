@@ -12,10 +12,6 @@ import { isAuthenticated } from '@/lib/auth';
 export default function AuthCallbackPage() {
   const router = useRouter();
 
-  useEffect(() => {
-    handleCallback();
-  }, []);
-
   async function handleCallback() {
     // Give Amplify a moment to process the OAuth callback
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -37,11 +33,18 @@ export default function AuthCallbackPage() {
     }
   }
 
+  useEffect(() => {
+    handleCallback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
         <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-[var(--border)] border-t-[var(--holo-cyan)] mx-auto" />
-        <h2 className="text-xl font-semibold mb-2">Completing sign in...</h2>
+        <h2 className="text-xl font-semibold mb-2">
+          Completing sign in...
+        </h2>
         <p className="text-[var(--muted-foreground)]">
           Please wait while we verify your credentials
         </p>

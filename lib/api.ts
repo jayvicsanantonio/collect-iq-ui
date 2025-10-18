@@ -24,18 +24,23 @@ import {
  * Generate a UUID v4 for idempotency keys
  */
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+    /[xy]/g,
+    (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    }
+  );
 }
 
 /**
  * Generate a unique request ID for traceability
  */
 function generateRequestId(): string {
-  return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  return `req_${Date.now()}_${Math.random()
+    .toString(36)
+    .substring(2, 9)}`;
 }
 
 /**
@@ -79,27 +84,27 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
     this.requestId = problem?.requestId;
-    
+
     // Maintain proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, ApiError);
     }
   }
-  
+
   /**
    * Check if this is a specific HTTP status code
    */
   isStatus(status: number): boolean {
     return this.status === status;
   }
-  
+
   /**
    * Check if this error requires authentication
    */
   requiresAuth(): boolean {
     return this.status === 401;
   }
-  
+
   /**
    * Check if this error is retryable
    */
@@ -157,7 +162,11 @@ export async function apiRequest<T = unknown>(
     if (!accessToken) {
       // No token available - redirect to sign in
       await signIn();
-      throw new ApiError(401, 'Unauthorized', 'No access token available');
+      throw new ApiError(
+        401,
+        'Unauthorized',
+        'No access token available'
+      );
     }
     headers.set('Authorization', `Bearer ${accessToken}`);
   }
@@ -194,7 +203,10 @@ export async function apiRequest<T = unknown>(
           });
 
           if (retryResponse.ok) {
-            const data = await parseResponse<T>(retryResponse, schema);
+            const data = await parseResponse<T>(
+              retryResponse,
+              schema
+            );
             return data;
           }
 
@@ -215,12 +227,12 @@ export async function apiRequest<T = unknown>(
       // Handle other HTTP errors
       if (!response.ok) {
         const error = await parseError(response, requestId);
-        
+
         // Don't retry non-retryable errors
         if (!error.isRetryable() || !retry) {
           throw error;
         }
-        
+
         lastError = error;
         continue; // Retry
       }
@@ -242,25 +254,33 @@ export async function apiRequest<T = unknown>(
       const networkError = new ApiError(
         0,
         'Network Error',
-        error instanceof Error ? error.message : 'Unknown error occurred'
+        error instanceof Error
+          ? error.message
+          : 'Unknown error occurred'
       );
-      
+
       if (!retry) {
         throw networkError;
       }
-      
+
       lastError = networkError;
     }
   }
 
   // All retries exhausted
-  throw lastError || new ApiError(0, 'Unknown Error', 'Request failed after retries');
+  throw (
+    lastError ||
+    new ApiError(0, 'Unknown Error', 'Request failed after retries')
+  );
 }
 
 /**
  * Parse error response and create ApiError
  */
-async function parseError(response: Response, requestId: string): Promise<ApiError> {
+async function parseError(
+  response: Response,
+  requestId: string
+): Promise<ApiError> {
   const errorText = await response.text();
   let errorMessage = `API request failed: ${response.statusText}`;
   let problem: ProblemDetails | undefined;
@@ -296,17 +316,20 @@ async function parseError(response: Response, requestId: string): Promise<ApiErr
 /**
  * Parse successful response with optional schema validation
  */
-async function parseResponse<T>(response: Response, schema?: z.ZodSchema): Promise<T> {
+async function parseResponse<T>(
+  response: Response,
+  schema?: z.ZodSchema
+): Promise<T> {
   // Handle 204 No Content
   if (response.status === 204) {
     return undefined as T;
   }
 
   const contentType = response.headers.get('content-type') || '';
-  
+
   if (contentType.includes('application/json')) {
     const data = await response.json();
-    
+
     // Validate with Zod schema if provided
     if (schema) {
       const result = schema.safeParse(data);
@@ -317,10 +340,10 @@ async function parseResponse<T>(response: Response, schema?: z.ZodSchema): Promi
       }
       return result.data as T;
     }
-    
+
     return data as T;
   }
-  
+
   // Fallback to text for non-JSON responses
   const text = await response.text();
   return text as unknown as T;
@@ -333,7 +356,11 @@ const baseApi = {
   get: <T = unknown>(endpoint: string, options?: ApiRequestOptions) =>
     apiRequest<T>(endpoint, { ...options, method: 'GET' }),
 
-  post: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) =>
+  post: <T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: ApiRequestOptions
+  ) =>
     apiRequest<T>(endpoint, {
       ...options,
       method: 'POST',
@@ -342,17 +369,27 @@ const baseApi = {
       idempotencyKey: options?.idempotencyKey || generateUUID(),
     }),
 
-  put: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) =>
+  put: <T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: ApiRequestOptions
+  ) =>
     apiRequest<T>(endpoint, {
       ...options,
       method: 'PUT',
       body: body ? JSON.stringify(body) : undefined,
     }),
 
-  delete: <T = unknown>(endpoint: string, options?: ApiRequestOptions) =>
-    apiRequest<T>(endpoint, { ...options, method: 'DELETE' }),
+  delete: <T = unknown>(
+    endpoint: string,
+    options?: ApiRequestOptions
+  ) => apiRequest<T>(endpoint, { ...options, method: 'DELETE' }),
 
-  patch: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) =>
+  patch: <T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: ApiRequestOptions
+  ) =>
     apiRequest<T>(endpoint, {
       ...options,
       method: 'PATCH',
@@ -373,10 +410,14 @@ export async function getPresignedUrl(
 ): Promise<PresignResponse> {
   // Validate request
   const validatedParams = PresignRequestSchema.parse(params);
-  
-  return baseApi.post<PresignResponse>('/upload/presign', validatedParams, {
-    schema: PresignResponseSchema,
-  });
+
+  return baseApi.post<PresignResponse>(
+    '/upload/presign',
+    validatedParams,
+    {
+      schema: PresignResponseSchema,
+    }
+  );
 }
 
 /**
@@ -389,7 +430,7 @@ export async function createCard(
 ): Promise<Card> {
   // Validate request
   const validatedData = CreateCardRequestSchema.parse(data);
-  
+
   return baseApi.post<Card>('/cards', validatedData, {
     schema: CardSchema,
     idempotencyKey: idempotencyKey || generateUUID(),
@@ -408,10 +449,13 @@ export async function getCards(params?: {
   if (params?.cursor) search.set('cursor', params.cursor);
   if (params?.limit) search.set('limit', String(params.limit));
   const qs = search.toString();
-  
-  return baseApi.get<ListCardsResponse>(`/cards${qs ? `?${qs}` : ''}`, {
-    schema: ListCardsResponseSchema,
-  });
+
+  return baseApi.get<ListCardsResponse>(
+    `/cards${qs ? `?${qs}` : ''}`,
+    {
+      schema: ListCardsResponseSchema,
+    }
+  );
 }
 
 /**
@@ -443,13 +487,12 @@ export async function revalueCard(
   idempotencyKey?: string
 ): Promise<RevalueResponse> {
   const request: RevalueRequest = {
-    cardId,
     forceRefresh: options?.forceRefresh,
   };
-  
+
   // Validate request
   const validatedRequest = RevalueRequestSchema.parse(request);
-  
+
   return baseApi.post<RevalueResponse>(
     `/cards/${cardId}/revalue`,
     validatedRequest,
@@ -462,15 +505,41 @@ export async function revalueCard(
 
 // Public API client type including typed helpers
 export interface ApiClient {
-  get: <T = unknown>(endpoint: string, options?: ApiRequestOptions) => Promise<T>;
-  post: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) => Promise<T>;
-  put: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) => Promise<T>;
-  delete: <T = unknown>(endpoint: string, options?: ApiRequestOptions) => Promise<T>;
-  patch: <T = unknown>(endpoint: string, body?: unknown, options?: ApiRequestOptions) => Promise<T>;
+  get: <T = unknown>(
+    endpoint: string,
+    options?: ApiRequestOptions
+  ) => Promise<T>;
+  post: <T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: ApiRequestOptions
+  ) => Promise<T>;
+  put: <T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: ApiRequestOptions
+  ) => Promise<T>;
+  delete: <T = unknown>(
+    endpoint: string,
+    options?: ApiRequestOptions
+  ) => Promise<T>;
+  patch: <T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: ApiRequestOptions
+  ) => Promise<T>;
 
-  getPresignedUrl: (params: PresignRequest) => Promise<PresignResponse>;
-  createCard: (data: CreateCardRequest, idempotencyKey?: string) => Promise<Card>;
-  getCards: (params?: { cursor?: string; limit?: number }) => Promise<ListCardsResponse>;
+  getPresignedUrl: (
+    params: PresignRequest
+  ) => Promise<PresignResponse>;
+  createCard: (
+    data: CreateCardRequest,
+    idempotencyKey?: string
+  ) => Promise<Card>;
+  getCards: (params?: {
+    cursor?: string;
+    limit?: number;
+  }) => Promise<ListCardsResponse>;
   getCard: (cardId: string) => Promise<Card>;
   deleteCard: (cardId: string) => Promise<void>;
   revalueCard: (

@@ -10,9 +10,17 @@
 import * as React from 'react';
 import { api, ApiError } from '@/lib/api';
 import { useErrorHandler } from '@/hooks/use-error-handler';
-import { success, error as errorToast, promise } from '@/hooks/use-toast';
+import {
+  success,
+  error as errorToast,
+  promise,
+} from '@/hooks/use-toast';
 import { ErrorAlert } from '@/components/ui/error-alert';
-import { NotFoundError, ServerError, ForbiddenError } from '@/components/ui/error-states';
+import {
+  NotFoundError,
+  ServerError,
+  ForbiddenError,
+} from '@/components/ui/error-states';
 import { formatError } from '@/lib/errors';
 import type { ProblemDetails } from '@/lib/types';
 
@@ -41,11 +49,7 @@ export function SimpleErrorHandlingExample() {
     }
   }
 
-  return (
-    <button onClick={saveCard}>
-      Save Card
-    </button>
-  );
+  return <button onClick={saveCard}>Save Card</button>;
 }
 
 // ============================================================================
@@ -53,9 +57,13 @@ export function SimpleErrorHandlingExample() {
 // ============================================================================
 
 export function InlineErrorExample() {
-  const [error, setError] = React.useState<ProblemDetails | null>(null);
+  const [error, setError] = React.useState<ProblemDetails | null>(
+    null
+  );
   const [_loading, setLoading] = React.useState(false);
-  const [currentFile, setCurrentFile] = React.useState<File | null>(null);
+  const [currentFile, setCurrentFile] = React.useState<File | null>(
+    null
+  );
 
   async function uploadFile(file: File) {
     setCurrentFile(file);
@@ -89,17 +97,17 @@ export function InlineErrorExample() {
         title={formatted.title}
         message={formatted.message}
         remediation={formatted.remediation}
-        onRetry={formatted.retryable && currentFile ? () => uploadFile(currentFile) : undefined}
+        onRetry={
+          formatted.retryable && currentFile
+            ? () => uploadFile(currentFile)
+            : undefined
+        }
         onDismiss={() => setError(null)}
       />
     );
   }
 
-  return (
-    <div>
-      {/* Upload UI */}
-    </div>
-  );
+  return <div>{/* Upload UI */}</div>;
 }
 
 // ============================================================================
@@ -107,7 +115,9 @@ export function InlineErrorExample() {
 // ============================================================================
 
 export function FullPageErrorExample({ cardId }: { cardId: string }) {
-  const [error, setError] = React.useState<ProblemDetails | null>(null);
+  const [error, setError] = React.useState<ProblemDetails | null>(
+    null
+  );
   const [_card, setCard] = React.useState(null);
   const [_loading, setLoading] = React.useState(true);
 
@@ -129,6 +139,7 @@ export function FullPageErrorExample({ cardId }: { cardId: string }) {
 
   React.useEffect(() => {
     loadCard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardId]);
 
   // Handle specific error states
@@ -148,11 +159,7 @@ export function FullPageErrorExample({ cardId }: { cardId: string }) {
     return <div>Loading...</div>;
   }
 
-  return (
-    <div>
-      {/* Card display */}
-    </div>
-  );
+  return <div>{/* Card display */}</div>;
 }
 
 // ============================================================================
@@ -162,14 +169,11 @@ export function FullPageErrorExample({ cardId }: { cardId: string }) {
 export function PromiseToastExample() {
   async function deleteCard(cardId: string) {
     // Toast automatically updates based on promise state
-    await promise(
-      api.deleteCard(cardId),
-      {
-        loading: 'Deleting card...',
-        success: 'Card deleted successfully!',
-        error: 'Failed to delete card',
-      }
-    );
+    await promise(api.deleteCard(cardId), {
+      loading: 'Deleting card...',
+      success: 'Card deleted successfully!',
+      error: 'Failed to delete card',
+    });
   }
 
   return (
@@ -219,11 +223,7 @@ export function CustomErrorHandlingExample() {
     }
   }
 
-  return (
-    <div>
-      {/* Upload UI */}
-    </div>
-  );
+  return <div>{/* Upload UI */}</div>;
 }
 
 // ============================================================================
@@ -232,10 +232,13 @@ export function CustomErrorHandlingExample() {
 
 import useSWR from 'swr';
 
-export function SWRErrorHandlingExample({ cardId }: { cardId: string }) {
-  const { data, error, mutate } = useSWR(
-    `/cards/${cardId}`,
-    () => api.getCard(cardId)
+export function SWRErrorHandlingExample({
+  cardId,
+}: {
+  cardId: string;
+}) {
+  const { data, error, mutate } = useSWR(`/cards/${cardId}`, () =>
+    api.getCard(cardId)
   );
 
   // Handle error states
@@ -264,11 +267,7 @@ export function SWRErrorHandlingExample({ cardId }: { cardId: string }) {
     return <div>Loading...</div>;
   }
 
-  return (
-    <div>
-      {/* Card display */}
-    </div>
-  );
+  return <div>{/* Card display */}</div>;
 }
 
 // ============================================================================
@@ -276,8 +275,10 @@ export function SWRErrorHandlingExample({ cardId }: { cardId: string }) {
 // ============================================================================
 
 export function MultipleErrorStatesExample() {
-  const [uploadError, setUploadError] = React.useState<ProblemDetails | null>(null);
-  const [saveError, setSaveError] = React.useState<ProblemDetails | null>(null);
+  const [uploadError, setUploadError] =
+    React.useState<ProblemDetails | null>(null);
+  const [saveError, setSaveError] =
+    React.useState<ProblemDetails | null>(null);
 
   async function _handleUploadAndSave(file: File) {
     // Clear previous errors

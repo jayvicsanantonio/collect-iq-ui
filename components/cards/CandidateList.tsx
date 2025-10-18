@@ -90,6 +90,7 @@ function CandidateCard({
           {/* Card Thumbnail */}
           {candidate.imageUrl ? (
             <div className="relative h-20 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-[var(--muted)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={candidate.imageUrl}
                 alt={`${candidate.name} card`}

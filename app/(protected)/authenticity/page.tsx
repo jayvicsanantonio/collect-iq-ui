@@ -62,7 +62,8 @@ export default function AuthenticityPage() {
 
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const [rotation, setRotation] = React.useState(0);
-  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] =
+    React.useState(false);
 
   // ============================================================================
   // Fetch Authenticity Analysis
@@ -124,7 +125,8 @@ export default function AuthenticityPage() {
       toast({
         variant: 'destructive',
         title: 'Analysis failed',
-        description: 'Unable to analyze card authenticity. Please try again.',
+        description:
+          'Unable to analyze card authenticity. Please try again.',
       });
     }
   }, [s3Key, cardId, cardName, cardSet, toast]);
@@ -175,7 +177,10 @@ export default function AuthenticityPage() {
     setIsFeedbackModalOpen(false);
   };
 
-  const handleSubmitFeedback = async (reason: string, details: string) => {
+  const handleSubmitFeedback = async (
+    reason: string,
+    details: string
+  ) => {
     // TODO: Replace with actual API call when backend endpoint is ready
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -219,7 +224,8 @@ export default function AuthenticityPage() {
                 <div className="h-16 w-16 animate-spin rounded-full border-4 border-[var(--muted)] border-t-[var(--vault-blue)]" />
               </div>
               <p className="text-sm text-[var(--muted-foreground)]">
-                Analyzing visual hash, text patterns, and holographic signals...
+                Analyzing visual hash, text patterns, and holographic
+                signals...
               </p>
             </div>
           </CardContent>
@@ -233,7 +239,11 @@ export default function AuthenticityPage() {
     return (
       <div className="container mx-auto max-w-6xl px-4 py-8">
         <div className="mb-8">
-          <Button variant="ghost" onClick={handleBack} className="mb-4">
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            className="mb-4"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
@@ -252,7 +262,8 @@ export default function AuthenticityPage() {
               <div>
                 <CardTitle>Unable to Analyze Authenticity</CardTitle>
                 <CardDescription className="mt-2">
-                  {state.error || 'An error occurred during analysis.'}
+                  {state.error ||
+                    'An error occurred during analysis.'}
                 </CardDescription>
               </div>
             </div>
@@ -300,9 +311,12 @@ export default function AuthenticityPage() {
             breakdown={
               state.details
                 ? {
-                    visualHashConfidence: state.details.visualHashConfidence,
-                    textMatchConfidence: state.details.textMatchConfidence,
-                    holoPatternConfidence: state.details.holoPatternConfidence,
+                    visualHashConfidence:
+                      state.details.visualHashConfidence,
+                    textMatchConfidence:
+                      state.details.textMatchConfidence,
+                    holoPatternConfidence:
+                      state.details.holoPatternConfidence,
                   }
                 : undefined
             }
@@ -321,9 +335,10 @@ export default function AuthenticityPage() {
                   Potential Counterfeit Detected
                 </p>
                 <p className="text-sm text-[var(--muted-foreground)] mt-1">
-                  This card shows characteristics that may indicate it is not
-                  authentic. Please review the detailed analysis below and
-                  consider having the card professionally authenticated.
+                  This card shows characteristics that may indicate it
+                  is not authentic. Please review the detailed
+                  analysis below and consider having the card
+                  professionally authenticated.
                 </p>
               </div>
             </div>
@@ -346,6 +361,7 @@ export default function AuthenticityPage() {
               {/* Image Container */}
               <div className="relative bg-[var(--muted)] rounded-lg overflow-hidden aspect-[2.5/3.5] flex items-center justify-center">
                 {state.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={state.imageUrl}
                     alt={`${state.cardName} from ${state.cardSet}`}
@@ -411,7 +427,9 @@ export default function AuthenticityPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Match Confidence</span>
+                  <span className="text-sm font-medium">
+                    Match Confidence
+                  </span>
                   <span className="text-2xl font-bold">
                     {Math.round(
                       (state.details?.visualHashConfidence || 0) * 100
@@ -423,13 +441,17 @@ export default function AuthenticityPage() {
                   <div
                     className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500"
                     style={{
-                      width: `${(state.details?.visualHashConfidence || 0) * 100}%`,
+                      width: `${
+                        (state.details?.visualHashConfidence || 0) *
+                        100
+                      }%`,
                     }}
                   />
                 </div>
                 <p className="text-sm text-[var(--muted-foreground)]">
-                  Visual hash analysis compares the card&apos;s unique visual
-                  signature against our database of authentic cards.
+                  Visual hash analysis compares the card&apos;s unique
+                  visual signature against our database of authentic
+                  cards.
                 </p>
               </div>
             </CardContent>
@@ -446,7 +468,9 @@ export default function AuthenticityPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Text Match Score</span>
+                  <span className="text-sm font-medium">
+                    Text Match Score
+                  </span>
                   <span className="text-2xl font-bold">
                     {Math.round(
                       (state.details?.textMatchConfidence || 0) * 100
@@ -458,13 +482,17 @@ export default function AuthenticityPage() {
                   <div
                     className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
                     style={{
-                      width: `${(state.details?.textMatchConfidence || 0) * 100}%`,
+                      width: `${
+                        (state.details?.textMatchConfidence || 0) *
+                        100
+                      }%`,
                     }}
                   />
                 </div>
                 <p className="text-sm text-[var(--muted-foreground)]">
-                  Analyzes font characteristics, kerning, and text rendering
-                  quality to detect printing inconsistencies.
+                  Analyzes font characteristics, kerning, and text
+                  rendering quality to detect printing
+                  inconsistencies.
                 </p>
               </div>
             </CardContent>
@@ -486,7 +514,8 @@ export default function AuthenticityPage() {
                   </span>
                   <span className="text-2xl font-bold">
                     {Math.round(
-                      (state.details?.holoPatternConfidence || 0) * 100
+                      (state.details?.holoPatternConfidence || 0) *
+                        100
                     )}
                     %
                   </span>
@@ -495,13 +524,16 @@ export default function AuthenticityPage() {
                   <div
                     className="h-full bg-gradient-to-r from-cyan-500 to-teal-500 transition-all duration-500"
                     style={{
-                      width: `${(state.details?.holoPatternConfidence || 0) * 100}%`,
+                      width: `${
+                        (state.details?.holoPatternConfidence || 0) *
+                        100
+                      }%`,
                     }}
                   />
                 </div>
                 <p className="text-sm text-[var(--muted-foreground)]">
-                  Examines holographic foil patterns and light refraction to
-                  verify authentic holographic printing.
+                  Examines holographic foil patterns and light
+                  refraction to verify authentic holographic printing.
                 </p>
               </div>
             </CardContent>

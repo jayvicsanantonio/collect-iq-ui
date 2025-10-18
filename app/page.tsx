@@ -12,10 +12,6 @@ import { isAuthenticated } from '@/lib/auth';
 export default function HomePage() {
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuthAndRedirect();
-  }, []);
-
   async function checkAuthAndRedirect() {
     try {
       const authenticated = await isAuthenticated();
@@ -32,6 +28,11 @@ export default function HomePage() {
       router.replace('/landing');
     }
   }
+
+  useEffect(() => {
+    checkAuthAndRedirect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Show loading state while checking auth
   return (

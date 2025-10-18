@@ -17,7 +17,11 @@ import { cn } from '@/lib/utils';
 // ============================================================================
 
 export interface CameraError {
-  type: 'permission-denied' | 'not-supported' | 'no-camera' | 'unknown';
+  type:
+    | 'permission-denied'
+    | 'not-supported'
+    | 'no-camera'
+    | 'unknown';
   message: string;
   originalError?: Error;
 }
@@ -45,12 +49,15 @@ export function CameraCapture({
   onClose,
   isOpen = true,
 }: CameraCaptureProps) {
-  const [stream, setStream] = React.useState<MediaStream | null>(null);
-  const [isCapturing, setIsCapturing] = React.useState(false);
-  const [showPermissionDialog, setShowPermissionDialog] = React.useState(false);
-  const [facingMode, setFacingMode] = React.useState<'user' | 'environment'>(
-    'environment'
+  const [stream, setStream] = React.useState<MediaStream | null>(
+    null
   );
+  const [isCapturing, setIsCapturing] = React.useState(false);
+  const [showPermissionDialog, setShowPermissionDialog] =
+    React.useState(false);
+  const [facingMode, setFacingMode] = React.useState<
+    'user' | 'environment'
+  >('environment');
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -63,7 +70,10 @@ export function CameraCapture({
     async (mode: 'user' | 'environment' = facingMode) => {
       try {
         // Check if getUserMedia is supported
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (
+          !navigator.mediaDevices ||
+          !navigator.mediaDevices.getUserMedia
+        ) {
           onError({
             type: 'not-supported',
             message:
@@ -82,8 +92,9 @@ export function CameraCapture({
           audio: false,
         };
 
-        const mediaStream =
-          await navigator.mediaDevices.getUserMedia(constraints);
+        const mediaStream = await navigator.mediaDevices.getUserMedia(
+          constraints
+        );
 
         setStream(mediaStream);
 
@@ -127,7 +138,8 @@ export function CameraCapture({
         } else {
           onError({
             type: 'unknown',
-            message: 'An unknown error occurred while accessing the camera.',
+            message:
+              'An unknown error occurred while accessing the camera.',
           });
         }
       }
@@ -231,6 +243,7 @@ export function CameraCapture({
     return () => {
       stopCamera();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]); // Only run on mount/unmount
 
   // ============================================================================
@@ -240,7 +253,10 @@ export function CameraCapture({
   return (
     <>
       {/* Main Camera Dialog */}
-      <Dialog open={isOpen && !showPermissionDialog} onOpenChange={onClose}>
+      <Dialog
+        open={isOpen && !showPermissionDialog}
+        onOpenChange={onClose}
+      >
         <DialogContent className="max-w-4xl p-0">
           <div className="relative flex flex-col">
             {/* Header */}
@@ -326,15 +342,21 @@ export function CameraCapture({
             <DialogTitle>Camera Permission Required</DialogTitle>
             <DialogDescription className="space-y-4 pt-4">
               <p>
-                CollectIQ needs access to your camera to scan trading cards.
+                CollectIQ needs access to your camera to scan trading
+                cards.
               </p>
               <div className="rounded-lg bg-[var(--muted)] p-4 text-sm">
-                <p className="font-medium mb-2">To enable camera access:</p>
+                <p className="font-medium mb-2">
+                  To enable camera access:
+                </p>
                 <ol className="list-decimal list-inside space-y-1 text-[var(--muted-foreground)]">
                   <li>
-                    Click the camera icon in your browser&apos;s address bar
+                    Click the camera icon in your browser&apos;s
+                    address bar
                   </li>
-                  <li>Select &quot;Allow&quot; for camera permissions</li>
+                  <li>
+                    Select &quot;Allow&quot; for camera permissions
+                  </li>
                   <li>Refresh the page and try again</li>
                 </ol>
               </div>

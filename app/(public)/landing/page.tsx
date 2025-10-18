@@ -11,10 +11,6 @@ export default function LandingPage() {
   const router = useRouter();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  useEffect(() => {
-    checkAuthAndRedirect();
-  }, []);
-
   async function checkAuthAndRedirect() {
     try {
       const authenticated = await isAuthenticated();
@@ -28,6 +24,11 @@ export default function LandingPage() {
       setIsCheckingAuth(false);
     }
   }
+
+  useEffect(() => {
+    checkAuthAndRedirect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isCheckingAuth) {
     return (
@@ -51,7 +52,9 @@ export default function LandingPage() {
       </div>
 
       <Header
-        rightContent={<SignInButton variant="primary" size="default" />}
+        rightContent={
+          <SignInButton variant="primary" size="default" />
+        }
       />
 
       <main className="flex-1 relative z-10">
@@ -76,7 +79,8 @@ export default function LandingPage() {
                     className="bg-gradient-to-tr from-[var(--color-holo-cyan)] via-[var(--color-emerald-glow)] to-[var(--color-vault-blue)] bg-clip-text text-transparent"
                     style={{
                       textShadow: 'none',
-                      filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
+                      filter:
+                        'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
                     }}
                   >
                     Every Card You Own
@@ -184,8 +188,8 @@ export default function LandingPage() {
                     Clear Authenticity
                   </h3>
                   <p className="text-base lg:text-lg leading-relaxed text-[var(--muted-foreground)]">
-                    Multi-agent AI analyzes holographic patterns and visual
-                    features with transparent reasoning
+                    Multi-agent AI analyzes holographic patterns and
+                    visual features with transparent reasoning
                   </p>
                 </div>
               </div>
@@ -208,8 +212,8 @@ export default function LandingPage() {
                     Multi-Source Valuation
                   </h3>
                   <p className="text-base lg:text-lg leading-relaxed text-[var(--muted-foreground)]">
-                    Real-time pricing from eBay, TCGPlayer, and PriceCharting
-                    for accurate market value
+                    Real-time pricing from eBay, TCGPlayer, and
+                    PriceCharting for accurate market value
                   </p>
                 </div>
               </div>
@@ -232,8 +236,8 @@ export default function LandingPage() {
                     Instant Recognition
                   </h3>
                   <p className="text-base lg:text-lg leading-relaxed text-[var(--muted-foreground)] ">
-                    Snap a photo for instant card identification, set, rarity,
-                    and variant detection
+                    Snap a photo for instant card identification, set,
+                    rarity, and variant detection
                   </p>
                 </div>
               </div>
