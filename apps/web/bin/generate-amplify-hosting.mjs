@@ -75,16 +75,22 @@ async function main() {
     );
   }
 
+  const imageConfig = requiredServerFiles.config?.images ?? {};
+  const sizes = Array.from(
+    new Set([...(imageConfig.deviceSizes ?? []), ...(imageConfig.imageSizes ?? [])])
+  );
+
   const deployManifest = {
     version: 1,
     framework: { name: 'nextjs', version: nextPackage.version },
-    imageSettings: requiredServerFiles.config?.images ?? {
-      sizes: [],
-      domains: [],
-      remotePatterns: [],
-      formats: [],
-      minimumCacheTTL: 60,
-      dangerouslyAllowSVG: false,
+    imageSettings: {
+      sizes,
+      domains: imageConfig.domains ?? [],
+      remotePatterns: imageConfig.remotePatterns ?? [],
+      formats: imageConfig.formats ?? [],
+      minimumCacheTTL:
+        typeof imageConfig.minimumCacheTTL === 'number' ? imageConfig.minimumCacheTTL : 60,
+      dangerouslyAllowSVG: Boolean(imageConfig.dangerouslyAllowSVG),
     },
     routes: [
       {
@@ -111,6 +117,17 @@ async function main() {
       {
         path: '/api/*',
         target: {
+          kind: 'Compute',
+          src: 'default',
+        },
+      },
+      {
+        path: '/*.*',
+        target: {
+          kind: 'Static',
+          cacheControl: 'public, max-age=0',
+        },
+        fallback: {
           kind: 'Compute',
           src: 'default',
         },
