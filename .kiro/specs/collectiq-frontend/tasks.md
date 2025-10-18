@@ -88,8 +88,8 @@
   - Test session expiry and refresh logic
   - _Requirements: 15.4, 15.5_
 
-- [ ] 4. API client and data layer
-- [ ] 4.1 Create typed API client
+- [x] 4. API client and data layer
+- [x] 4.1 Create typed API client
   - Implement base API client in apps/web/lib/api.ts with fetch wrapper
   - Import types and schemas from @collectiq/shared
   - Add automatic credential inclusion (cookies)
@@ -99,7 +99,7 @@
   - Add request ID tracking for traceability
   - _Requirements: 11.1, 11.2_
 
-- [ ] 4.2 Set up shared schemas
+- [x] 4.2 Set up shared schemas
   - Ensure packages/shared is set up with Zod schemas (may already exist from backend setup)
   - Verify CardSchema, ValuationDataSchema, AuthenticityDetailsSchema, ProblemDetailsSchema are defined
   - Import schemas from @collectiq/shared in API client
@@ -107,7 +107,7 @@
   - Use TypeScript types exported from schemas (Card, ValuationData, etc.)
   - _Requirements: 11.1_
 
-- [ ] 4.3 Implement API endpoints
+- [x] 4.3 Implement API endpoints
   - Implement getPresignedUrl() for POST /upload/presign in apps/web/lib/api.ts
   - Implement createCard() for POST /cards with Idempotency-Key header
   - Implement getCards() for GET /cards with cursor-based pagination
@@ -119,7 +119,7 @@
   - Generate UUID for Idempotency-Key header on POST operations
   - _Requirements: 2.4, 5.8, 6.9, 7.6_
 
-- [ ] 4.4 Set up SWR for data fetching
+- [x] 4.4 Set up SWR for data fetching
   - Configure SWR with global settings
   - Create custom hooks for common queries (useCards, useCard)
   - Implement cache key strategy (user-scoped)
@@ -127,7 +127,7 @@
   - Implement cache invalidation on mutations
   - _Requirements: 6.9_
 
-- [ ] 4.5 Write API client tests
+- [x] 4.5 Write API client tests
   - Unit tests for API client methods in apps/web/lib/api.ts
   - Test error handling and ProblemDetails parsing using schemas from @collectiq/shared
   - Test retry logic with exponential backoff

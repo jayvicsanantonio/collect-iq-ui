@@ -4,8 +4,8 @@
 
 import useSWR, { type SWRConfiguration } from 'swr';
 import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
-import type { Card, ListCardsResponse } from '@collectiq/shared';
-import { getCards, getCard, deleteCard, refreshValuation } from './api';
+import type { Card, ListCardsResponse, RevalueResponse } from '@collectiq/shared';
+import { getCards, getCard, deleteCard, revalueCard } from './api';
 
 // ============================================================================
 // SWR Configuration
@@ -85,6 +85,31 @@ export function useCard(cardId: string | null) {
 // ============================================================================
 
 /**
+ * Hook to create a card
+ */
+export function useCreateCard() {
+  return useSWRMutation(
+    '/cards',
+    async (
+      _key: string,
+      { arg }: { arg: { frontS3Key: string; backS3Key?: string } }
+    ) => {
+      const { createCard } = await import('./api');
+      return createCard(arg);
+    },
+    {
+      // Revalidate cards list after creation
+      revalidate: true,
+    } as SWRMutationConfiguration<
+      Card,
+      Error,
+      string,
+      { frontS3Key: string; backS3Key?: string }
+    >
+  );
+}
+
+/**
  * Hook to delete a card with optimistic updates
  */
 export function useDeleteCard() {
@@ -92,7 +117,8 @@ export function useDeleteCard() {
     '/cards',
     async (_key: string, { arg }: { arg: string }) => {
       // arg is the cardId
-      return deleteCard(arg);
+      await deleteCard(arg);
+      return { cardId: arg };
     },
     {
       // Optimistic update: remove card from cache immediately
@@ -100,26 +126,31 @@ export function useDeleteCard() {
       revalidate: true,
       // On error, revalidate to restore correct state
       rollbackOnError: true,
-    } as SWRMutationConfiguration<{ ok: boolean }, Error, string, string>
+    } as SWRMutationConfiguration<{ cardId: string }, Error, string, string>
   );
 }
 
 /**
  * Hook to refresh card valuation
  */
-export function useRefreshValuation() {
+export function useRevalueCard() {
   return useSWRMutation(
     '/cards/revalue',
     async (
       _key: string,
       { arg }: { arg: { cardId: string; forceRefresh?: boolean } }
     ) => {
-      return refreshValuation(arg.cardId, arg.forceRefresh);
+      return revalueCard(arg.cardId, { forceRefresh: arg.forceRefresh });
     },
     {
       // Revalidate the card after refresh
       revalidate: true,
-    }
+    } as SWRMutationConfiguration<
+      RevalueResponse,
+      Error,
+      string,
+      { cardId: string; forceRefresh?: boolean }
+    >
   );
 }
 
