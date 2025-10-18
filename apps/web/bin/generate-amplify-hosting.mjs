@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable no-undef */
+
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -31,14 +33,21 @@ async function main() {
     return;
   }
 
-  await fs.rm(hostingDir, { recursive: true, force: true });
-  await fs.mkdir(computeDir, { recursive: true });
+  await fs.rm(hostingDir, {
+    recursive: true,
+    force: true,
+  });
+  await fs.mkdir(computeDir, {
+    recursive: true,
+  });
 
   await fs.cp(standaloneDir, computeDir, { recursive: true });
 
   const staticSrc = path.join(nextDir, 'static');
   if (await pathExists(staticSrc)) {
-    await fs.cp(staticSrc, path.join(hostingDir, 'static'), { recursive: true });
+    await fs.cp(staticSrc, path.join(hostingDir, 'static'), {
+      recursive: true,
+    });
   }
 
   const nextPackageJsonPath = path.join(
@@ -47,7 +56,9 @@ async function main() {
     'next',
     'package.json'
   );
-  const nextPackage = JSON.parse(await fs.readFile(nextPackageJsonPath, 'utf8'));
+  const nextPackage = JSON.parse(
+    await fs.readFile(nextPackageJsonPath, 'utf8')
+  );
 
   const requiredFilesPath = path.join(nextDir, 'required-server-files.json');
   const requiredServerFiles = JSON.parse(
