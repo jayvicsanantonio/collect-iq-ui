@@ -24,22 +24,22 @@ export function configureAmplify() {
             scopes: ['openid', 'email', 'profile'],
             redirectSignIn: redirectSignInValues,
             redirectSignOut: redirectSignOutValues,
-            responseType: 'code',
+            responseType: 'code' as const,
           },
         },
       },
     },
-    aws_project_region: env.NEXT_PUBLIC_AWS_REGION,
   };
 
   console.log('🔧 Configuring Amplify with:', {
     userPoolId: config.Auth.Cognito.userPoolId,
     userPoolClientId: config.Auth.Cognito.userPoolClientId,
     domain: config.Auth.Cognito.loginWith?.oauth?.domain,
-    region: config.aws_project_region,
+    redirectSignIn: redirectSignInValues,
+    redirectSignOut: redirectSignOutValues,
   });
 
-  Amplify.configure(config);
+  Amplify.configure(config, { ssr: true });
   console.log('✅ Amplify configured successfully');
 }
 
