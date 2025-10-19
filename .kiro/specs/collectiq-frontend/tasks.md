@@ -215,8 +215,8 @@
   - Test error handling and retry logic
   - _Requirements: 15.2, 15.5_
 
-- [ ] 6. Card processing and analysis interface
-- [ ] 6.1 Create CardProcessing component
+- [x] 6. Card processing and analysis interface
+- [x] 6.1 Create CardProcessing component
 
   - Design processing screen with status indicators
   - Display progress for: feature extraction, authenticity analysis, valuation
@@ -225,7 +225,7 @@
   - Create error state with retry option
   - _Requirements: 3.1, 3.2_
 
-- [ ] 6.2 Create card processing page
+- [x] 6.2 Create card processing page
 
   - Create /cards/{id}/processing route or use card detail with loading state
   - Poll GET /cards/{id} to check for updated analysis results
