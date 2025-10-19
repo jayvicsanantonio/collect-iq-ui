@@ -80,7 +80,6 @@ export function CardProcessing({
   const { stage, completed, error, estimatedTimeRemaining } = status;
 
   // Calculate progress percentage
-  const currentStageIndex = STAGE_ORDER.indexOf(stage);
   const completedCount = completed.length;
   const totalStages = STAGE_ORDER.length;
   const progressPercentage = Math.round(
@@ -161,7 +160,7 @@ export function CardProcessing({
 
         {/* Processing Stages */}
         <div className="space-y-4">
-          {STAGE_ORDER.map((stageName, index) => {
+          {STAGE_ORDER.map((stageName) => {
             const stageConfig = STAGE_CONFIG[stageName];
             const isCompleted = completed.includes(stageName);
             const isCurrent = stageName === stage && !error;
