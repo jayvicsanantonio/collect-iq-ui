@@ -1,227 +1,6 @@
-# CollectIQ
+# CollectIQ Web Application
 
-**AI-powered trading card intelligence — real-time valuation, authenticity detection, and collector trust at scale**
-
----
-
-## Overview
-
-CollectIQ is an enterprise-grade AI platform that transforms how collectors interact with the $400+ billion trading card and collectibles market. Using AWS-native multi-agent orchestration, computer vision, and large language models, CollectIQ delivers real-time market intelligence, authenticity verification, and portfolio management for Pokémon TCG cards.
-
-### The Problem
-
-The trading card market is plagued by information asymmetry, counterfeit risk, and fragmented pricing data. With over 75 billion Pokémon cards in circulation and an estimated market value exceeding $14 billion, collectors need automation to handle:
-
-- **Authenticity verification** — Fake cards are widespread, especially for high-value editions
-- **Real-time valuation** — Prices fluctuate across eBay, TCGPlayer, and PriceCharting with no unified view
-- **Collection management** — No integrated system for vaulting, tracking, and revaluing holdings
-- **Trust gaps** — Expensive grading services (PSA, CGC) are inaccessible to casual collectors
-
-### The Solution
-
-CollectIQ addresses these challenges through:
-
-1. **Multi-agent AI orchestration** — Specialized agents for ingestion, valuation, authenticity, and feedback
-2. **Computer vision pipeline** — Amazon Rekognition extracts visual features; perceptual hashing detects counterfeits
-3. **Explainable reasoning** — Amazon Bedrock synthesizes signals into human-readable confidence scores
-4. **Real-time data fusion** — Live pricing from multiple marketplaces with normalization and failover
-5. **Secure vault management** — User-scoped storage with JWT authentication and audit trails
-
----
-
-## Market Opportunity
-
-### Market Size
-
-- **Collectibles market**: $294B (2023) → $422B (2030) at 5.5% CAGR
-- **Trading card games**: $7.43B (2024) → $15.84B (2034) at 7.86% CAGR
-- **Authentication services**: $2.24B (2024) → $6.61B (2033) at 13.1% CAGR
-- **Pokémon cards**: 3,821% cumulative return since 2004 vs S&P 500's 483%
-
-### Market Signals
-
-- Walmart reported trading card sales up 200% (Feb 2024 → Jun 2025)
-- Pokémon card sales grew 10x year-over-year at major retailers
-- Pokémon TCG Pocket surpassed 100M downloads in February 2025
-- Active communities: r/PokemonTCG, r/PokeInvesting with millions of members
-
-### Competitive Advantage
-
-| Competitor | Limitation |
-|-----------|------------|
-| MonPrice | No authenticity scoring; struggles with holographic cards |
-| Dragon Shield Scanner | No AI-driven fraud detection |
-| Ludex | Broad scope; lacks Pokémon-specific domain depth |
-| Cardbase | Limited authenticity; basic valuation |
-| Legit App | Slow, premium service; no instant consumer tool |
-
-**CollectIQ differentiators**: Multi-agent orchestration, explainable AI scoring, real-time multi-source pricing, AWS-native scalability, transparent component signal persistence.
-
----
-
-## Architecture
-
-### High-Level Design
-
-CollectIQ implements an authentication-first, event-driven serverless architecture on AWS:
-
-```
-┌─────────────┐
-│   Client    │  Next.js 14 (App Router) + Tailwind CSS + shadcn/ui
-│  (Next.js)  │  OAuth 2.0 with PKCE via Cognito Hosted UI
-└──────┬──────┘
-       │ HTTPS + JWT
-       ▼
-┌──────────────────────────────────────────────┐
-│      Amazon API Gateway (HTTP API)           │  JWT Authorizer validates Cognito tokens
-│           + JWT Authorizer (Cognito)         │  Routes to Lambda handlers
-└──────┬───────────────────────────────────────┘
-       │
-       ├─────► Lambda: upload_presign (S3 presigned URLs)
-       ├─────► Lambda: cards_create (DynamoDB + Step Functions trigger)
-       ├─────► Lambda: cards_list (user-scoped queries)
-       ├─────► Lambda: cards_get (valuation + authenticity results)
-       └─────► Lambda: cards_delete (soft delete with audit)
-              │
-              ▼
-       ┌──────────────────────────────────────┐
-       │   AWS Step Functions Workflow        │  Orchestrates multi-agent pipeline
-       │                                      │
-       │  ┌────────────────────────────────┐ │
-       │  │  Task 1: RekognitionExtract    │ │  Visual feature extraction
-       │  │  (Lambda → Rekognition)        │ │  OCR, holo patterns, borders
-       │  └────────────┬───────────────────┘ │
-       │               │ FeatureEnvelope     │
-       │               ▼                     │
-       │  ┌────────────────────────────────┐ │
-       │  │    Parallel Execution          │ │  Concurrent agent invocation
-       │  │  ┌──────────┐  ┌─────────────┐ │ │
-       │  │  │ Pricing  │  │Authenticity │ │ │  Bedrock reasoning
-       │  │  │  Agent   │  │   Agent     │ │ │  Market analysis
-       │  │  │(Bedrock) │  │  (Bedrock)  │ │ │  Fake detection
-       │  │  └──────────┘  └─────────────┘ │ │
-       │  └────────────┬───────────────────┘ │
-       │               │                     │
-       │               ▼                     │
-       │  ┌────────────────────────────────┐ │
-       │  │  Task 3: Aggregator            │ │  Merge results
-       │  │  (Merge + Persist)             │ │  Persist to DynamoDB
-       │  └────────────────────────────────┘ │  Emit EventBridge events
-       └──────────────┬───────────────────────┘
-                      │
-                      ├─────► DynamoDB (single-table design, user-scoped)
-                      └─────► EventBridge (event-driven coordination)
-
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│   S3 Bucket  │    │   DynamoDB   │    │   Secrets    │
-│   (uploads)  │    │ (single-table)│    │   Manager    │
-└──────────────┘    └──────────────┘    └──────────────┘
-```
-
-### Multi-Agent Orchestration
-
-CollectIQ implements AWS Multi-Agent Orchestration best practices with four specialized agents:
-
-1. **Ingestion Agent** — Fetches live pricing from eBay, TCGPlayer, PriceCharting APIs with rate limiting and exponential backoff
-2. **Valuation Agent** — Computes fair market value, confidence scores, and volatility metrics using Bedrock reasoning
-3. **Authenticity Agent** — Detects fake/altered cards via perceptual hashing, holographic analysis, and font validation
-4. **Feedback Agent** — Processes user corrections to refine models and enhance reference datasets
-
-Agents operate asynchronously through AWS Step Functions with automatic retries, error handling, and dead-letter queues.
-
-### Data Architecture
-
-**Single-table DynamoDB design** with user-scoped partitions:
-
-- `PK: USER#{sub}` — Cognito user ID ensures data isolation
-- `SK: CARD#{cardId}` — Individual card records
-- `SK: PRICE#{ISO8601}` — Time-series pricing data
-
-Global Secondary Indexes:
-- `GSI1`: userId (for vault queries)
-- `GSI2`: set#rarity (for analytics)
-
-**S3 uploads** scoped to `uploads/{sub}/{uuid}` with presigned URLs expiring in 60 seconds.
-
----
-
-## Key Features
-
-### Real-Time Market Intelligence
-
-- Multi-source pricing aggregation from eBay, TCGPlayer, PriceCharting
-- Normalization layer harmonizes condition metadata and outlier detection
-- Time-windowed caching minimizes API overhead
-- Confidence scoring based on comparable sales volume and recency
-
-### Authenticity Detection
-
-**Visual Fingerprinting**:
-- Perceptual hashing (pHash) compared against reference authentic cards
-- Holographic pattern analysis using pixel variance and RGB scatter
-- Border ratio and logo alignment validation
-
-**Text & Font Validation**:
-- OCR extraction via Amazon Rekognition
-- Font family and kerning validation against known authentic samples
-- Linguistic anomaly detection (mistranslations, inconsistent terminology)
-
-**AI Judgment**:
-- Amazon Bedrock synthesizes visual and textual signals
-- Explainable authenticity scores (0.0 = likely fake, 1.0 = likely authentic)
-- Human-readable rationale for transparency
-
-### Security & Compliance
-
-- **Authentication**: Amazon Cognito with OAuth 2.0 + PKCE
-- **Authorization**: JWT validation on every API request
-- **Data encryption**: KMS at rest, TLS 1.3 in transit
-- **Token storage**: HTTP-only cookies (never localStorage)
-- **IAM roles**: Least-privilege principle with resource-based policies
-- **Audit trails**: Structured logging with requestId and userId
-- **Error handling**: RFC 7807 Problem Details for consistent API responses
-
----
-
-## Technology Stack
-
-### Frontend
-
-- **Framework**: Next.js 14 with App Router (React 18)
-- **Language**: TypeScript (non-strict mode)
-- **Styling**: Tailwind CSS v4 with @theme directive
-- **Components**: shadcn/ui built on Radix UI primitives
-- **Data fetching**: SWR for client-side caching
-- **Validation**: Zod schemas for runtime type safety
-- **Testing**: Vitest + React Testing Library + Playwright + axe-core
-
-### Backend
-
-- **Compute**: AWS Lambda (Node.js 20)
-- **Orchestration**: AWS Step Functions + EventBridge
-- **AI/ML**: Amazon Bedrock (Claude 4.0 Sonnet) + Amazon Rekognition
-- **Database**: Amazon DynamoDB (single-table design)
-- **Storage**: Amazon S3 with presigned URLs
-- **Authentication**: Amazon Cognito with Hosted UI
-- **API**: Amazon API Gateway (HTTP API) with JWT authorizer
-
-### Infrastructure
-
-- **IaC**: Terraform (modular design)
-- **CI/CD**: GitHub Actions + AWS Amplify
-- **Monitoring**: Amazon CloudWatch + X-Ray
-- **Secrets**: AWS Secrets Manager with automatic rotation
-- **Cost management**: Budgets + usage alarms
-
-### Code Quality
-
-- **Linting**: ESLint v9 (flat config) + Prettier
-- **Type checking**: TypeScript 5.x
-- **Testing**: 90%+ code coverage target
-- **Security**: Automated dependency scanning
-- **Performance**: Lighthouse CI with Web Vitals targets (LCP < 2.5s, CLS < 0.1, INP < 200ms)
-
----
+Next.js 14 frontend for CollectIQ - AI-powered trading card intelligence platform.
 
 ## Getting Started
 
@@ -235,6 +14,7 @@ Global Secondary Indexes:
 ### Installation
 
 ```bash
+<<<<<<< HEAD
 # Clone the repository
 git clone https://github.com/your-org/collect-iq.git
 cd collect-iq
@@ -291,9 +71,56 @@ terraform apply
 
 ---
 
+=======
+pnpm install
+
+````
+
+Create an `.env.local` file in the project root with the environment variables validated in `lib/env.ts`:
+
+- `NEXT_PUBLIC_AWS_REGION`
+- `NEXT_PUBLIC_COGNITO_USER_POOL_ID`
+- `NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID`
+- `NEXT_PUBLIC_COGNITO_DOMAIN`
+- `NEXT_PUBLIC_OAUTH_REDIRECT_URI`
+- `NEXT_PUBLIC_OAUTH_LOGOUT_URI`
+- `NEXT_PUBLIC_API_BASE`
+
+See [AUTHENTICATION.md](./AUTHENTICATION.md) for Cognito setup details.
+
+### Development
+
+```bash
+pnpm dev
+````
+
+The app runs at [http://localhost:3000](http://localhost:3000).
+
+### Build
+
+```bash
+pnpm build
+pnpm start
+```
+
+### Type Checking
+
+```bash
+pnpm typecheck
+```
+
+### Linting
+
+```bash
+pnpm lint
+```
+
+> > > > > > > 9fd1af9 (Squashed 'apps/web/' content from commit 56c37f3)
+
 ## Project Structure
 
 ```
+<<<<<<< HEAD
 collect-iq/
 ├── apps/
 │   └── web/                 # Next.js 14 frontend application
@@ -426,6 +253,7 @@ tsconfig.base.json
 ### Cost Efficiency
 
 **MVP scale** (~10K users, 50K images/month):
+
 - S3 storage: < $5
 - Lambda invocations: $15-30
 - Step Functions: < $10
@@ -472,4 +300,60 @@ This project is proprietary and confidential.
 
 ## Contact
 
-For questions, partnerships, or investment inquiries, please contact the CollectIQ team.
+# For questions, partnerships, or investment inquiries, please contact the CollectIQ team.
+
+collect-iq-ui/
+├── app/ # Next.js App Router
+├── components/ # React components
+│ ├── auth/ # Authentication components
+│ ├── cards/ # Card-related components
+│ ├── upload/ # Upload components
+│ ├── vault/ # Vault components
+│ └── ui/ # shadcn/ui primitives
+├── hooks/ # Custom React hooks
+├── lib/ # Utilities, API client, types
+├── public/ # Static assets (if any)
+├── styles/ # Additional styles
+└── next.config.mjs # Next.js configuration
+
+```
+
+## Technology Stack
+
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript (non-strict mode)
+- **Styling**: Tailwind CSS v4
+- **UI Components**: shadcn/ui
+- **Data Fetching**: SWR
+- **Validation**: Zod
+- **Authentication**: Amazon Cognito
+
+## Path Aliases
+
+- `@/*` - Project root
+- `@/components/*` - Components directory
+- `@/lib/*` - Library/utilities directory
+- `@/lib/types` - Shared frontend types and Zod schemas
+
+## Documentation
+
+- [AUTHENTICATION.md](./AUTHENTICATION.md) - Complete authentication guide
+- [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) - Design system and styling guide
+- [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md) - Environment configuration
+
+## AWS Amplify Hosting
+
+- Connect this repository to Amplify Hosting and set the environment variables above in the Amplify console.
+- Use the default Next.js build commands (based on [Amplify's framework build spec](https://docs.amplify.aws/nextjs/deploy-and-host/fullstack-branching/mono-and-multi-repos/)):
+  - Pre-build: `corepack enable` and `pnpm install --frozen-lockfile`
+  - Build: `pnpm run build`
+- Configure the artifact base directory as `.next` so Amplify picks up server and static assets.
+- No custom post-build packaging is required; Amplify provisions the compute layer automatically for SSR.
+
+## Learn More
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS v4](https://tailwindcss.com/docs)
+- [shadcn/ui](https://ui.shadcn.com/)
+>>>>>>> 9fd1af9 (Squashed 'apps/web/' content from commit 56c37f3)
+```
