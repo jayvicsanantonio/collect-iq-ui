@@ -76,7 +76,8 @@ export default function UploadPage() {
         // Track upload progress
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
-            const percentComplete = (event.loaded / event.total) * 100;
+            const percentComplete =
+              (event.loaded / event.total) * 100;
             setUploadState((prev) => ({
               ...prev,
               progress: percentComplete,
@@ -90,7 +91,9 @@ export default function UploadPage() {
             if (xhr.status >= 200 && xhr.status < 300) {
               resolve();
             } else {
-              reject(new Error(`Upload failed with status ${xhr.status}`));
+              reject(
+                new Error(`Upload failed with status ${xhr.status}`)
+              );
             }
           });
 
@@ -113,7 +116,7 @@ export default function UploadPage() {
           xhr.send(file);
         });
 
-        // Step 3: Upload successful
+        // Step 3: Upload successful - update state
         setUploadState((prev) => ({
           ...prev,
           progress: 100,
@@ -122,23 +125,34 @@ export default function UploadPage() {
           abortController: null,
         }));
 
-        // Step 4: Redirect to identification screen
+        // Step 4: Create card record with S3 key
         toast({
           title: 'Upload successful',
+          description: 'Creating card record...',
+        });
+
+        const card = await api.createCard({
+          frontS3Key: presignResponse.key,
+        });
+
+        // Step 5: Redirect to card detail/processing screen
+        toast({
+          title: 'Card created',
           description: 'Analyzing your card...',
         });
 
-        // Navigate to identification page with the S3 key
         setTimeout(() => {
-          const identifyUrl =
-            `/identify?key=${encodeURIComponent(presignResponse.key)}` as Route;
-          router.push(identifyUrl);
+          const cardUrl = `/cards/${card.cardId}` as Route;
+          router.push(cardUrl);
         }, 500);
       } catch (error) {
         console.error('Upload error:', error);
 
         // Check if upload was cancelled
-        if (error instanceof Error && error.message === 'Upload cancelled') {
+        if (
+          error instanceof Error &&
+          error.message === 'Upload cancelled'
+        ) {
           setUploadState({
             file: null,
             progress: 0,
@@ -150,11 +164,21 @@ export default function UploadPage() {
           return;
         }
 
-        // Handle API errors
+        // Handle API errors with specific messages
         let errorMessage = 'Failed to upload file. Please try again.';
         if (error instanceof ApiError) {
-          errorMessage =
-            error.problem?.detail || error.problem?.title || error.message;
+          // Map specific error codes to user-friendly messages
+          if (error.status === 413) {
+            errorMessage = `File is too large. Max is 12 MB.`;
+          } else if (error.status === 415) {
+            errorMessage =
+              'Unsupported format. Use JPG, PNG, or HEIC.';
+          } else {
+            errorMessage =
+              error.problem?.detail ||
+              error.problem?.title ||
+              error.message;
+          }
         } else if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -239,13 +263,15 @@ export default function UploadPage() {
   // ============================================================================
 
   React.useEffect(() => {
-    // Cleanup on unmount
+    // Cleanup on unmount - abort any ongoing uploads
     return () => {
       if (uploadState.abortController) {
         uploadState.abortController.abort();
       }
     };
   }, [uploadState.abortController]);
+
+  // Note: Object URLs for image previews are managed by UploadProgress component
 
   // ============================================================================
   // Render
@@ -258,7 +284,9 @@ export default function UploadPage() {
     <div className="container mx-auto max-w-4xl px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="mb-2 text-4xl font-bold font-display">Upload Card</h1>
+        <h1 className="mb-2 text-4xl font-bold font-display">
+          Upload Card
+        </h1>
         <p className="text-[var(--muted-foreground)]">
           Take a photo or upload an image of your trading card
         </p>
@@ -274,7 +302,9 @@ export default function UploadPage() {
             error={uploadState.error || undefined}
             onCancel={isUploading ? handleCancelUpload : undefined}
             onRetry={
-              uploadState.status === 'error' ? handleRetryUpload : undefined
+              uploadState.status === 'error'
+                ? handleRetryUpload
+                : undefined
             }
           />
         </div>

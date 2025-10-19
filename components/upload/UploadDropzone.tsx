@@ -1,8 +1,14 @@
 'use client';
 
 import * as React from 'react';
-import { Upload, Image as ImageIcon } from 'lucide-react';
+import {
+  Upload,
+  Image as ImageIcon,
+  AlertCircle,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { UPLOAD_CONFIG } from '@/lib/upload-config';
+import { validateUploadFileSync } from '@/lib/upload-validators';
 
 // ============================================================================
 // Types
@@ -15,8 +21,6 @@ export interface UploadError {
 }
 
 export interface UploadDropzoneProps {
-  accept?: string[];
-  maxSizeMB?: number;
   onSelected: (files: File[]) => void;
   onError: (error: UploadError) => void;
   disabled?: boolean;
@@ -24,43 +28,14 @@ export interface UploadDropzoneProps {
 }
 
 // ============================================================================
-// Constants
+// Validation State
 // ============================================================================
 
-const DEFAULT_ACCEPT = ['image/jpeg', 'image/png', 'image/heic'];
-const DEFAULT_MAX_SIZE_MB = 12;
-const BYTES_PER_MB = 1024 * 1024;
+type ValidationState = 'idle' | 'valid' | 'invalid';
 
-// ============================================================================
-// Validation
-// ============================================================================
-
-function validateFile(
-  file: File,
-  acceptedTypes: string[],
-  maxSizeBytes: number
-): UploadError | null {
-  // Check file type
-  if (!acceptedTypes.includes(file.type)) {
-    return {
-      type: 'file-type',
-      message: `Unsupported file type. Please use ${acceptedTypes.map((t) => t.split('/')[1].toUpperCase()).join(', ')}.`,
-      file,
-    };
-  }
-
-  // Check file size
-  if (file.size > maxSizeBytes) {
-    const maxSizeMB = Math.floor(maxSizeBytes / BYTES_PER_MB);
-    const fileSizeMB = (file.size / BYTES_PER_MB).toFixed(2);
-    return {
-      type: 'file-size',
-      message: `File too large (${fileSizeMB} MB). Maximum size is ${maxSizeMB} MB.`,
-      file,
-    };
-  }
-
-  return null;
+interface DragValidation {
+  state: ValidationState;
+  error?: string;
 }
 
 // ============================================================================
@@ -68,18 +43,21 @@ function validateFile(
 // ============================================================================
 
 export function UploadDropzone({
-  accept = DEFAULT_ACCEPT,
-  maxSizeMB = DEFAULT_MAX_SIZE_MB,
   onSelected,
   onError,
   disabled = false,
   className,
 }: UploadDropzoneProps) {
   const [isDragging, setIsDragging] = React.useState(false);
+  const [dragValidation, setDragValidation] =
+    React.useState<DragValidation>({
+      state: 'idle',
+    });
+  const [inlineError, setInlineError] = React.useState<string | null>(
+    null
+  );
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const dragCounterRef = React.useRef(0);
-
-  const maxSizeBytes = maxSizeMB * BYTES_PER_MB;
 
   // ============================================================================
   // File Handling
@@ -89,13 +67,24 @@ export function UploadDropzone({
     (files: FileList | null) => {
       if (!files || files.length === 0) return;
 
+      // Clear any previous inline errors
+      setInlineError(null);
+
       const fileArray = Array.from(files);
       const validFiles: File[] = [];
 
       // Validate each file
       for (const file of fileArray) {
-        const error = validateFile(file, accept, maxSizeBytes);
-        if (error) {
+        const result = validateUploadFileSync(file);
+        if (!result.valid) {
+          const error: UploadError = {
+            type: result.error?.includes('too large')
+              ? 'file-size'
+              : 'file-type',
+            message: result.error || 'Invalid file',
+            file,
+          };
+          setInlineError(result.error || 'Invalid file');
           onError(error);
           return; // Stop on first error
         }
@@ -107,7 +96,7 @@ export function UploadDropzone({
         onSelected(validFiles);
       }
     },
-    [accept, maxSizeBytes, onSelected, onError]
+    [onSelected, onError]
   );
 
   // ============================================================================
@@ -136,7 +125,10 @@ export function UploadDropzone({
       if (disabled) return;
 
       dragCounterRef.current += 1;
-      if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
+      if (
+        event.dataTransfer.items &&
+        event.dataTransfer.items.length > 0
+      ) {
         setIsDragging(true);
       }
     },
@@ -153,15 +145,19 @@ export function UploadDropzone({
       dragCounterRef.current -= 1;
       if (dragCounterRef.current === 0) {
         setIsDragging(false);
+        setDragValidation({ state: 'idle' });
       }
     },
     [disabled]
   );
 
-  const handleDragOver = React.useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-  }, []);
+  const handleDragOver = React.useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    []
+  );
 
   const handleDrop = React.useCallback(
     (event: React.DragEvent) => {
@@ -171,6 +167,7 @@ export function UploadDropzone({
       if (disabled) return;
 
       setIsDragging(false);
+      setDragValidation({ state: 'idle' });
       dragCounterRef.current = 0;
 
       const files = event.dataTransfer.files;
@@ -203,13 +200,21 @@ export function UploadDropzone({
     <div
       role="button"
       tabIndex={disabled ? -1 : 0}
-      aria-label="Upload card image"
+      aria-label="Upload card image. Supports JPG, PNG, HEIC. Maximum 12 MB. Best results with 2000 to 4000 pixel images."
       aria-disabled={disabled}
+      aria-invalid={inlineError ? 'true' : 'false'}
+      aria-describedby={inlineError ? 'upload-error' : undefined}
       className={cn(
         'relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all',
         'min-h-[280px] cursor-pointer',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--holo-cyan)] focus-visible:ring-offset-2',
-        isDragging && !disabled
+        dragValidation.state === 'invalid' && isDragging && !disabled
+          ? 'border-[var(--destructive)] bg-[var(--destructive)]/10 animate-shake'
+          : dragValidation.state === 'valid' &&
+            isDragging &&
+            !disabled
+          ? 'border-[var(--holo-cyan)] bg-[var(--holo-cyan)]/10 scale-[1.02]'
+          : isDragging && !disabled
           ? 'border-[var(--holo-cyan)] bg-[var(--holo-cyan)]/10 scale-[1.02]'
           : 'border-[var(--border)] hover:border-[var(--vault-blue)] hover:bg-[var(--muted)]/50',
         disabled && 'cursor-not-allowed opacity-50',
@@ -226,7 +231,7 @@ export function UploadDropzone({
       <input
         ref={fileInputRef}
         type="file"
-        accept={accept.join(',')}
+        accept={UPLOAD_CONFIG.supportedFormats.join(',')}
         onChange={handleFileInputChange}
         className="hidden"
         disabled={disabled}
@@ -237,12 +242,21 @@ export function UploadDropzone({
       <div
         className={cn(
           'mb-4 rounded-full p-4 transition-colors',
-          isDragging && !disabled
+          dragValidation.state === 'invalid' && isDragging
+            ? 'bg-[var(--destructive)]/20'
+            : dragValidation.state === 'valid' && isDragging
+            ? 'bg-[var(--holo-cyan)]/20'
+            : isDragging && !disabled
             ? 'bg-[var(--holo-cyan)]/20'
             : 'bg-[var(--muted)]'
         )}
       >
-        {isDragging ? (
+        {dragValidation.state === 'invalid' && isDragging ? (
+          <AlertCircle
+            className="h-8 w-8 text-[var(--destructive)]"
+            aria-hidden="true"
+          />
+        ) : isDragging ? (
           <ImageIcon
             className="h-8 w-8 text-[var(--holo-cyan)]"
             aria-hidden="true"
@@ -258,17 +272,40 @@ export function UploadDropzone({
       {/* Text */}
       <div className="text-center">
         <p className="mb-2 text-base font-medium text-[var(--foreground)]">
-          {isDragging
+          {dragValidation.state === 'invalid' && isDragging
+            ? 'Invalid file'
+            : isDragging
             ? 'Drop your image here'
             : 'Drag and drop your card image'}
         </p>
         <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-          or click to browse
+          {dragValidation.state === 'invalid' && isDragging
+            ? dragValidation.error
+            : 'or click to browse'}
         </p>
         <p className="text-xs text-[var(--muted-foreground)]">
-          Supports JPG, PNG, HEIC • Max {maxSizeMB} MB
+          JPG, PNG, or HEIC • Up to {UPLOAD_CONFIG.maxSizeMB} MB
+        </p>
+        <p className="mt-2 text-xs text-[var(--muted-foreground)]/70">
+          Best results: 2000–4000 px
         </p>
       </div>
+
+      {/* Inline error message */}
+      {inlineError && !isDragging && (
+        <div
+          id="upload-error"
+          className="mt-4 flex items-center gap-2 rounded-lg bg-[var(--destructive)]/10 px-4 py-2 text-sm text-[var(--destructive)]"
+          role="alert"
+          aria-live="polite"
+        >
+          <AlertCircle
+            className="h-4 w-4 flex-shrink-0"
+            aria-hidden="true"
+          />
+          <span>{inlineError}</span>
+        </div>
+      )}
 
       {/* Mobile hint */}
       <div className="mt-4 text-xs text-[var(--muted-foreground)] sm:hidden">
