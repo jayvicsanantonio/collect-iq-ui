@@ -1,11 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Upload,
-  Image as ImageIcon,
-  AlertCircle,
-} from 'lucide-react';
+import { Upload, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UPLOAD_CONFIG } from '@/lib/upload-config';
 import { validateUploadFileSync } from '@/lib/upload-validators';
@@ -28,17 +24,6 @@ export interface UploadDropzoneProps {
 }
 
 // ============================================================================
-// Validation State
-// ============================================================================
-
-type ValidationState = 'idle' | 'valid' | 'invalid';
-
-interface DragValidation {
-  state: ValidationState;
-  error?: string;
-}
-
-// ============================================================================
 // Component
 // ============================================================================
 
@@ -49,10 +34,6 @@ export function UploadDropzone({
   className,
 }: UploadDropzoneProps) {
   const [isDragging, setIsDragging] = React.useState(false);
-  const [dragValidation, setDragValidation] =
-    React.useState<DragValidation>({
-      state: 'idle',
-    });
   const [inlineError, setInlineError] = React.useState<string | null>(
     null
   );
@@ -145,7 +126,6 @@ export function UploadDropzone({
       dragCounterRef.current -= 1;
       if (dragCounterRef.current === 0) {
         setIsDragging(false);
-        setDragValidation({ state: 'idle' });
       }
     },
     [disabled]
@@ -167,7 +147,6 @@ export function UploadDropzone({
       if (disabled) return;
 
       setIsDragging(false);
-      setDragValidation({ state: 'idle' });
       dragCounterRef.current = 0;
 
       const files = event.dataTransfer.files;
@@ -202,7 +181,6 @@ export function UploadDropzone({
       tabIndex={disabled ? -1 : 0}
       aria-label="Upload card image. Supports JPG, PNG, HEIC. Maximum 12 MB. Best results with 2000 to 4000 pixel images."
       aria-disabled={disabled}
-      aria-invalid={inlineError ? 'true' : 'false'}
       aria-describedby={inlineError ? 'upload-error' : undefined}
       className={cn(
         'relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all',
@@ -268,7 +246,7 @@ export function UploadDropzone({
           </p>
           {!isDragging && (
             <p className="text-sm text-[var(--muted-foreground)] opacity-75">
-              JPG, PNG, HEIC • Max {maxSizeMB} MB
+              JPG, PNG, HEIC • Max {UPLOAD_CONFIG.maxSizeMB} MB
             </p>
           )}
         </div>

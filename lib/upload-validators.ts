@@ -34,7 +34,9 @@ function validateFileFormat(file: File): ValidationResult {
   const mimeType = file.type;
 
   // Check MIME type
-  if (!UPLOAD_CONFIG.supportedFormats.includes(mimeType as any)) {
+  const supportedFormats =
+    UPLOAD_CONFIG.supportedFormats as readonly string[];
+  if (!supportedFormats.includes(mimeType)) {
     return {
       valid: false,
       error: "That format isn't supported. Use JPG, PNG, or HEIC.",
@@ -42,10 +44,9 @@ function validateFileFormat(file: File): ValidationResult {
   }
 
   // Check extension
-  if (
-    extension &&
-    !UPLOAD_CONFIG.supportedExtensions.includes(extension as any)
-  ) {
+  const supportedExtensions =
+    UPLOAD_CONFIG.supportedExtensions as readonly string[];
+  if (extension && !supportedExtensions.includes(extension)) {
     return {
       valid: false,
       error: "That format isn't supported. Use JPG, PNG, or HEIC.",
