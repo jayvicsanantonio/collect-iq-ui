@@ -122,15 +122,18 @@ module "cognito_user_pool" {
   app_client_name = "${local.name_prefix}-web-client"
 
   # Callback URLs will be updated after Amplify deployment
-  callback_urls = [
-    "http://localhost:3000/auth/callback",
-    "https://localhost:3000/auth/callback"
-  ]
+  #callback_urls = [
+  #  "http://localhost:3000/auth/callback",
+  #  "https://localhost:3000/auth/callback"
+  #]
 
-  logout_urls = [
-    "http://localhost:3000",
-    "https://localhost:3000"
-  ]
+  #logout_urls = [
+  #  "http://localhost:3000",
+  #  "https://localhost:3000"
+  #]
+  callback_urls = [ var.amplify_oauth_redirect_uri ]
+
+  logout_urls = [ var.amplify_oauth_logout_uri ]
 
   allowed_oauth_flows  = ["code"]
   allowed_oauth_scopes = ["openid", "email", "profile"]
