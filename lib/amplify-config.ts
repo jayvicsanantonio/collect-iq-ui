@@ -6,10 +6,14 @@ import { env } from './env';
  * This should be called once at application startup.
  */
 export function configureAmplify() {
-  const redirectSignInValues = buildRedirectVariants(env.NEXT_PUBLIC_OAUTH_REDIRECT_URI);
-  const redirectSignOutValues = buildRedirectVariants(env.NEXT_PUBLIC_OAUTH_LOGOUT_URI);
+  const redirectSignInValues = buildRedirectVariants(
+    env.NEXT_PUBLIC_OAUTH_REDIRECT_URI
+  );
+  const redirectSignOutValues = buildRedirectVariants(
+    env.NEXT_PUBLIC_OAUTH_LOGOUT_URI
+  );
 
-  Amplify.configure({
+  const config = {
     Auth: {
       Cognito: {
         userPoolId: env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
@@ -26,7 +30,17 @@ export function configureAmplify() {
       },
     },
     aws_project_region: env.NEXT_PUBLIC_AWS_REGION,
+  };
+
+  console.log('🔧 Configuring Amplify with:', {
+    userPoolId: config.Auth.Cognito.userPoolId,
+    userPoolClientId: config.Auth.Cognito.userPoolClientId,
+    domain: config.Auth.Cognito.loginWith?.oauth?.domain,
+    region: config.aws_project_region,
   });
+
+  Amplify.configure(config);
+  console.log('✅ Amplify configured successfully');
 }
 
 function buildRedirectVariants(url: string): string[] {
