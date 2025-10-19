@@ -1,8 +1,14 @@
 'use client';
 
 import * as React from 'react';
-import { Upload, Image as ImageIcon } from 'lucide-react';
+import {
+  Upload,
+  Image as ImageIcon,
+  AlertCircle,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { UPLOAD_CONFIG } from '@/lib/upload-config';
+import { validateUploadFileSync } from '@/lib/upload-validators';
 
 // ============================================================================
 // Types
@@ -15,8 +21,6 @@ export interface UploadError {
 }
 
 export interface UploadDropzoneProps {
-  accept?: string[];
-  maxSizeMB?: number;
   onSelected: (files: File[]) => void;
   onError: (error: UploadError) => void;
   disabled?: boolean;
@@ -24,43 +28,14 @@ export interface UploadDropzoneProps {
 }
 
 // ============================================================================
-// Constants
+// Validation State
 // ============================================================================
 
-const DEFAULT_ACCEPT = ['image/jpeg', 'image/png', 'image/heic'];
-const DEFAULT_MAX_SIZE_MB = 12;
-const BYTES_PER_MB = 1024 * 1024;
+type ValidationState = 'idle' | 'valid' | 'invalid';
 
-// ============================================================================
-// Validation
-// ============================================================================
-
-function validateFile(
-  file: File,
-  acceptedTypes: string[],
-  maxSizeBytes: number
-): UploadError | null {
-  // Check file type
-  if (!acceptedTypes.includes(file.type)) {
-    return {
-      type: 'file-type',
-      message: `Unsupported file type. Please use ${acceptedTypes.map((t) => t.split('/')[1].toUpperCase()).join(', ')}.`,
-      file,
-    };
-  }
-
-  // Check file size
-  if (file.size > maxSizeBytes) {
-    const maxSizeMB = Math.floor(maxSizeBytes / BYTES_PER_MB);
-    const fileSizeMB = (file.size / BYTES_PER_MB).toFixed(2);
-    return {
-      type: 'file-size',
-      message: `File too large (${fileSizeMB} MB). Maximum size is ${maxSizeMB} MB.`,
-      file,
-    };
-  }
-
-  return null;
+interface DragValidation {
+  state: ValidationState;
+  error?: string;
 }
 
 // ============================================================================
@@ -68,18 +43,21 @@ function validateFile(
 // ============================================================================
 
 export function UploadDropzone({
-  accept = DEFAULT_ACCEPT,
-  maxSizeMB = DEFAULT_MAX_SIZE_MB,
   onSelected,
   onError,
   disabled = false,
   className,
 }: UploadDropzoneProps) {
   const [isDragging, setIsDragging] = React.useState(false);
+  const [dragValidation, setDragValidation] =
+    React.useState<DragValidation>({
+      state: 'idle',
+    });
+  const [inlineError, setInlineError] = React.useState<string | null>(
+    null
+  );
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const dragCounterRef = React.useRef(0);
-
-  const maxSizeBytes = maxSizeMB * BYTES_PER_MB;
 
   // ============================================================================
   // File Handling
@@ -89,13 +67,24 @@ export function UploadDropzone({
     (files: FileList | null) => {
       if (!files || files.length === 0) return;
 
+      // Clear any previous inline errors
+      setInlineError(null);
+
       const fileArray = Array.from(files);
       const validFiles: File[] = [];
 
       // Validate each file
       for (const file of fileArray) {
-        const error = validateFile(file, accept, maxSizeBytes);
-        if (error) {
+        const result = validateUploadFileSync(file);
+        if (!result.valid) {
+          const error: UploadError = {
+            type: result.error?.includes('too large')
+              ? 'file-size'
+              : 'file-type',
+            message: result.error || 'Invalid file',
+            file,
+          };
+          setInlineError(result.error || 'Invalid file');
           onError(error);
           return; // Stop on first error
         }
@@ -107,7 +96,7 @@ export function UploadDropzone({
         onSelected(validFiles);
       }
     },
-    [accept, maxSizeBytes, onSelected, onError]
+    [onSelected, onError]
   );
 
   // ============================================================================
@@ -136,7 +125,10 @@ export function UploadDropzone({
       if (disabled) return;
 
       dragCounterRef.current += 1;
-      if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
+      if (
+        event.dataTransfer.items &&
+        event.dataTransfer.items.length > 0
+      ) {
         setIsDragging(true);
       }
     },
@@ -153,15 +145,19 @@ export function UploadDropzone({
       dragCounterRef.current -= 1;
       if (dragCounterRef.current === 0) {
         setIsDragging(false);
+        setDragValidation({ state: 'idle' });
       }
     },
     [disabled]
   );
 
-  const handleDragOver = React.useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-  }, []);
+  const handleDragOver = React.useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    []
+  );
 
   const handleDrop = React.useCallback(
     (event: React.DragEvent) => {
@@ -171,6 +167,7 @@ export function UploadDropzone({
       if (disabled) return;
 
       setIsDragging(false);
+      setDragValidation({ state: 'idle' });
       dragCounterRef.current = 0;
 
       const files = event.dataTransfer.files;
@@ -203,8 +200,10 @@ export function UploadDropzone({
     <div
       role="button"
       tabIndex={disabled ? -1 : 0}
-      aria-label="Upload card image"
+      aria-label="Upload card image. Supports JPG, PNG, HEIC. Maximum 12 MB. Best results with 2000 to 4000 pixel images."
       aria-disabled={disabled}
+      aria-invalid={inlineError ? 'true' : 'false'}
+      aria-describedby={inlineError ? 'upload-error' : undefined}
       className={cn(
         'relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all',
         'min-h-[280px] cursor-pointer',
@@ -227,7 +226,7 @@ export function UploadDropzone({
       <input
         ref={fileInputRef}
         type="file"
-        accept={accept.join(',')}
+        accept={UPLOAD_CONFIG.supportedFormats.join(',')}
         onChange={handleFileInputChange}
         className="hidden"
         disabled={disabled}
