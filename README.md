@@ -179,6 +179,43 @@ collect-iq/
 └── README.md                # This file
 ```
 
+### Git Subtree: apps/web
+
+The `apps/web` directory is maintained as a **Git subtree** that mirrors the external [collect-iq-ui](https://github.com/jayvicsanantonio/collect-iq-ui) repository. This allows the UI codebase to be developed independently while remaining integrated into the monorepo.
+
+**Key Commands**:
+
+```bash
+# Pull changes from external repository
+git subtree pull --prefix=apps/web web-ui main --squash
+
+# Push changes to external repository
+git subtree push --prefix=apps/web web-ui main
+```
+
+**When to work in the monorepo vs external repo**:
+
+- Work in the monorepo when integrating with backend services or shared packages
+- Work in the external repo for isolated UI development and rapid iteration
+
+**Rollback procedure**:
+
+If you need to revert the subtree migration and restore the original `apps/web` directory:
+
+```bash
+# Return to backup branch
+git checkout backup-before-subtree-migration
+
+# Reset main to backup state
+git checkout main
+git reset --hard backup-before-subtree-migration
+
+# Remove subtree remote
+git remote remove web-ui
+```
+
+For detailed documentation on the subtree workflow, troubleshooting, rollback procedures, and best practices, see [apps/web/SUBTREE.md](apps/web/SUBTREE.md).
+
 ### Workspace configuration examples
 
 pnpm-workspace.yaml

@@ -33,14 +33,14 @@
   - Verify package.json and pnpm-workspace.yaml are correctly configured
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [-] 6. Test synchronization operations
+- [x] 6. Test synchronization operations
   - Test pull operation with `git subtree pull --prefix=apps/web web-ui main --squash` (dry-run if possible)
   - Test push operation with `git subtree push --prefix=apps/web web-ui main` (dry-run if possible)
   - Verify no errors occur during sync operations
   - Document any issues encountered
   - _Requirements: 2.1, 2.2, 2.5_
 
-- [ ] 7. Create documentation for subtree workflow
+- [x] 7. Create documentation for subtree workflow
   - Create `apps/web/SUBTREE.md` with setup explanation and common commands
   - Update root `README.md` with section explaining apps/web subtree setup
   - Document pull command: `git subtree pull --prefix=apps/web web-ui main --squash`
@@ -49,14 +49,14 @@
   - Add workflow guidance for when to work in monorepo vs external repo
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 8. Document rollback procedure
+- [x] 8. Document rollback procedure
   - Create rollback instructions in documentation
   - Document command to return to backup: `git checkout backup-before-subtree-migration`
   - Document command to reset main: `git reset --hard backup-before-subtree-migration`
   - Include verification steps after rollback
   - _Requirements: 5.2, 5.5_
 
-- [ ] 9. Final verification and cleanup
+- [x] 9. Final verification and cleanup
   - Run full test suite to ensure nothing is broken
   - Verify all monorepo commands work correctly
   - Test development workflow (make change, commit, build)
