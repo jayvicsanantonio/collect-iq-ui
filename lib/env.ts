@@ -6,7 +6,7 @@ const envSchema = z.object({
     .string()
     .min(1, 'AWS region is required (e.g., us-east-1)')
     .regex(
-      /^[a-z]{2}-[a-z]+-\d{1}$/,
+      /^[a-z]{2}-[a-z]+-\d+$/,
       'AWS region must be in format: us-east-1, eu-west-1, etc.'
     ),
 
@@ -15,7 +15,7 @@ const envSchema = z.object({
     .string()
     .min(1, 'Cognito User Pool ID is required')
     .regex(
-      /^[a-z]{2}-[a-z]+-\d{1}_[a-zA-Z0-9]+$/,
+      /^[a-z]{2}-[a-z]+-\d+_[a-zA-Z0-9]+$/,
       'Cognito User Pool ID must be in format: us-east-1_abc123XYZ'
     ),
   NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: z
@@ -25,7 +25,7 @@ const envSchema = z.object({
     .string()
     .min(1, 'Cognito Domain is required')
     .regex(
-      /^[a-z0-9-]+\.auth\.[a-z]{2}-[a-z]+-\d{1}\.amazoncognito\.com$/,
+      /^[a-z0-9-]+\.auth\.[a-z]{2}-[a-z]+-\d+\.amazoncognito\.com$/,
       'Cognito Domain must be in format: domain.auth.region.amazoncognito.com'
     ),
 
@@ -33,7 +33,9 @@ const envSchema = z.object({
   NEXT_PUBLIC_OAUTH_REDIRECT_URI: z
     .string()
     .url('OAuth Redirect URI must be a valid URL')
-    .describe('Must match Cognito callback exactly (with or without trailing slash)'),
+    .describe(
+      'Must match Cognito callback exactly (with or without trailing slash)'
+    ),
   NEXT_PUBLIC_OAUTH_LOGOUT_URI: z
     .string()
     .url('OAuth Logout URI must be a valid URL'),
@@ -43,7 +45,8 @@ const envSchema = z.object({
     .string()
     .url('API Base URL must be a valid URL')
     .refine(
-      (url) => url.startsWith('http://') || url.startsWith('https://'),
+      (url) =>
+        url.startsWith('http://') || url.startsWith('https://'),
       'API Base URL must start with http:// or https://'
     ),
 
@@ -62,14 +65,24 @@ function validateEnv(): Env {
       process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
     NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID:
       process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID,
-    NEXT_PUBLIC_COGNITO_DOMAIN: process.env.NEXT_PUBLIC_COGNITO_DOMAIN,
-    NEXT_PUBLIC_OAUTH_REDIRECT_URI: process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI,
-    NEXT_PUBLIC_OAUTH_LOGOUT_URI: process.env.NEXT_PUBLIC_OAUTH_LOGOUT_URI,
+    NEXT_PUBLIC_COGNITO_DOMAIN:
+      process.env.NEXT_PUBLIC_COGNITO_DOMAIN,
+    NEXT_PUBLIC_OAUTH_REDIRECT_URI:
+      process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI,
+    NEXT_PUBLIC_OAUTH_LOGOUT_URI:
+      process.env.NEXT_PUBLIC_OAUTH_LOGOUT_URI,
     NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE,
     FEATURE_FLAGS: process.env.FEATURE_FLAGS,
     NEXT_PUBLIC_ANALYTICS_ID: process.env.NEXT_PUBLIC_ANALYTICS_ID,
     SENTRY_DSN: process.env.SENTRY_DSN,
   };
+
+  console.log('🔍 Validating environment variables:', {
+    hasRegion: !!env.NEXT_PUBLIC_AWS_REGION,
+    hasPoolId: !!env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
+    hasClientId: !!env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID,
+    hasDomain: !!env.NEXT_PUBLIC_COGNITO_DOMAIN,
+  });
 
   const parsed = envSchema.safeParse(env);
 
@@ -81,6 +94,7 @@ function validateEnv(): Env {
     throw new Error('Invalid environment variables');
   }
 
+  console.log('✅ Environment variables validated successfully');
   return parsed.data;
 }
 
