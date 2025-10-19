@@ -4,7 +4,7 @@
 module "amplify_hosting" {
   source = "../../modules/amplify_hosting"
 
-  app_name   = "${local.name_prefix}-web"
+  app_name   = "${local.name_prefix}-ui"
   repository = var.github_repo_url
   access_token = var.github_access_token
 
