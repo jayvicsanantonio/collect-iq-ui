@@ -45,8 +45,11 @@ export function VaultCard({ card, onRefresh, onDelete, onClick }: VaultCardProps
 
   return (
     <Card
-      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+      className="overflow-hidden transition-all cursor-pointer border-[6px] border-emerald-400/70 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]"
       onClick={handleCardClick}
+      style={{
+        boxShadow: '0 6px 25px rgba(16, 185, 129, 0.5)',
+      }}
     >
       <div className="relative aspect-[2.5/3.5] bg-[var(--muted)]">
         {/* Card Image */}
@@ -107,23 +110,34 @@ export function VaultCard({ card, onRefresh, onDelete, onClick }: VaultCardProps
           </DropdownMenu>
         </div>
       </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-base truncate mb-1">{card.name || 'Unknown Card'}</h3>
-        <p className="text-sm text-[var(--muted-foreground)] truncate mb-2">
-          {card.set || 'Unknown Set'}
-          {card.number && ` #${card.number}`}
-        </p>
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-[var(--vault-blue)]">
-            {formatCurrency(card.valueMedian)}
-          </span>
-          {card.authenticityScore !== undefined && (
-            <span className="text-xs text-[var(--muted-foreground)]">
-              {Math.round(card.authenticityScore * 100)}% Auth
-            </span>
+      {/* Only show card details if we have meaningful data */}
+      {(card.name || card.set || card.valueMedian !== undefined || card.authenticityScore !== undefined) && (
+        <CardContent className="p-4">
+          {card.name && (
+            <h3 className="font-semibold text-base truncate mb-1">{card.name}</h3>
           )}
-        </div>
-      </CardContent>
+          {(card.set || card.number) && (
+            <p className="text-sm text-[var(--muted-foreground)] truncate mb-2">
+              {card.set}
+              {card.number && ` #${card.number}`}
+            </p>
+          )}
+          {(card.valueMedian !== undefined || card.authenticityScore !== undefined) && (
+            <div className="flex items-center justify-between">
+              {card.valueMedian !== undefined && (
+                <span className="text-lg font-bold text-[var(--vault-blue)]">
+                  {formatCurrency(card.valueMedian)}
+                </span>
+              )}
+              {card.authenticityScore !== undefined && (
+                <span className="text-xs text-[var(--muted-foreground)]">
+                  {Math.round(card.authenticityScore * 100)}% Auth
+                </span>
+              )}
+            </div>
+          )}
+        </CardContent>
+      )}
     </Card>
   );
 }
