@@ -73,38 +73,42 @@ export function VaultCard({ card, onRefresh, onDelete, onClick }: VaultCardProps
           />
         )}
 
-        {/* Card actions */}
+        {/* Card actions - Always visible */}
         <div className="absolute top-2 right-2 z-10">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
                 size="icon"
-                className="h-8 w-8 bg-white/90"
+                className="h-9 w-9 !bg-white hover:!bg-gray-50 shadow-md border border-gray-200 hover:border-gray-300"
                 onClick={(e) => e.stopPropagation()}
+                style={{ backgroundColor: 'white' }}
               >
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-5 w-5 text-gray-700" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent 
+              align="end" 
+              className="bg-white border border-gray-200 shadow-lg min-w-[200px]"
+            >
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   onRefresh(card.cardId);
                 }}
+                className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100 py-2.5 px-3"
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh Valuation
+                <RefreshCw className="mr-3 h-4 w-4 text-[var(--color-holo-cyan)]" />
+                <span className="text-sm font-medium">Refresh Valuation</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(card.cardId);
                 }}
-                className="text-[var(--crimson-red)]"
+                className="cursor-pointer hover:bg-red-50 focus:bg-red-50 text-red-600 py-2.5 px-3"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                <Trash2 className="mr-3 h-4 w-4" />
+                <span className="text-sm font-medium">Delete</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
