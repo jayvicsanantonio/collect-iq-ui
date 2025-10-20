@@ -321,9 +321,9 @@ export default function UploadPage() {
             </p>
           </div>
 
-          {/* Upload Progress */}
+          {/* Upload Progress - Centered and Prominent */}
           {hasUpload && (
-            <div className="mb-8 max-w-2xl mx-auto">
+            <div className="flex items-center justify-center min-h-[400px] w-full">
               <UploadProgress
                 file={uploadState.file!}
                 progress={uploadState.progress}
@@ -333,6 +333,7 @@ export default function UploadPage() {
                 onRetry={
                   uploadState.status === 'error' ? handleRetryUpload : undefined
                 }
+                className="shadow-2xl"
               />
             </div>
           )}
