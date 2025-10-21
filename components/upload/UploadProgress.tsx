@@ -24,13 +24,58 @@ export function UploadProgress({
   onRetry,
   className,
 }: UploadProgressProps) {
-  const [thumbnailUrl, setThumbnailUrl] = React.useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = React.useState<
+    string | null
+  >(null);
+  const [isConverting, setIsConverting] = React.useState(false);
 
   React.useEffect(() => {
-    const url = URL.createObjectURL(file);
-    setThumbnailUrl(url);
+    let objectUrl: string | null = null;
+
+    const loadThumbnail = async () => {
+      try {
+        const fileName = file.name.toLowerCase();
+        const isHeicFile =
+          fileName.endsWith('.heic') || fileName.endsWith('.heif');
+
+        if (isHeicFile) {
+          // Convert HEIC to JPEG for preview
+          setIsConverting(true);
+
+          // Dynamically import heic2any only on client side
+          const heic2any = (await import('heic2any')).default;
+
+          const convertedBlob = await heic2any({
+            blob: file,
+            toType: 'image/jpeg',
+            quality: 0.7, // Lower quality for preview (faster)
+          });
+
+          // heic2any can return Blob or Blob[], handle both cases
+          const blob = Array.isArray(convertedBlob)
+            ? convertedBlob[0]
+            : convertedBlob;
+          objectUrl = URL.createObjectURL(blob);
+          setThumbnailUrl(objectUrl);
+          setIsConverting(false);
+        } else {
+          // For JPEG/PNG, create object URL directly
+          objectUrl = URL.createObjectURL(file);
+          setThumbnailUrl(objectUrl);
+        }
+      } catch (err) {
+        console.error('Failed to load thumbnail:', err);
+        setIsConverting(false);
+        // Keep thumbnailUrl as null to show loading state
+      }
+    };
+
+    loadThumbnail();
+
     return () => {
-      URL.revokeObjectURL(url);
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
     };
   }, [file]);
 
@@ -61,8 +106,13 @@ export function UploadProgress({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <div className="h-12 w-12 animate-pulse rounded bg-gray-300 dark:bg-gray-700" />
+            <div className="flex h-full w-full flex-col items-center justify-center gap-3">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 dark:border-gray-600 border-t-emerald-500" />
+              {isConverting && (
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                  Converting...
+                </span>
+              )}
             </div>
           )}
 
@@ -91,7 +141,9 @@ export function UploadProgress({
             <div className="space-y-3">
               <div className="flex items-center justify-between text-lg">
                 <span className="text-gray-700 dark:text-gray-200 font-semibold">
-                  {status === 'idle' ? 'Preparing...' : 'Uploading...'}
+                  {status === 'idle'
+                    ? 'Preparing...'
+                    : 'Uploading...'}
                 </span>
                 <span className="font-bold text-emerald-600 dark:text-emerald-400 text-2xl">
                   {Math.round(progressPercent)}%
@@ -120,7 +172,9 @@ export function UploadProgress({
           {status === 'error' && error && (
             <div className="flex items-start gap-3 text-lg text-red-600 dark:text-red-400">
               <AlertCircle className="h-8 w-8 flex-shrink-0 mt-0.5" />
-              <span className="break-words font-semibold">{error}</span>
+              <span className="break-words font-semibold">
+                {error}
+              </span>
             </div>
           )}
         </div>
@@ -159,5 +213,7 @@ function formatFileSize(bytes: number): string {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${
+    sizes[i]
+  }`;
 }
