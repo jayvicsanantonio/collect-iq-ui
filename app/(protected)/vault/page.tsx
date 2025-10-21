@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { type Card } from '@/lib/types';
 import { EmptyVault } from '@/components/vault/EmptyVault';
 import { VaultGrid } from '@/components/vault/VaultGrid';
