@@ -2,7 +2,12 @@
 
 import * as React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 // ============================================================================
 // Types
@@ -49,36 +54,54 @@ function formatDate(dateString: string): string {
 
 /**
  * Custom tooltip component for the chart
+ * @deprecated - Reserved for future use
  */
-function CustomTooltip({ active, payload, label }: any) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ value: number }>;
+  label?: string;
+}) {
   if (!active || !payload || !payload.length) {
     return null;
   }
 
   return (
     <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-3 shadow-lg">
-      <p className="text-sm font-semibold mb-2">{formatDate(label)}</p>
+      <p className="text-sm font-semibold mb-2">
+        {formatDate(label)}
+      </p>
       <div className="space-y-1 text-xs">
         <div className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-red-500" />
             Low
           </span>
-          <span className="font-medium">{formatCurrency(payload[0].value)}</span>
+          <span className="font-medium">
+            {formatCurrency(payload[0].value)}
+          </span>
         </div>
         <div className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-[var(--vault-blue)]" />
             Median
           </span>
-          <span className="font-medium">{formatCurrency(payload[1].value)}</span>
+          <span className="font-medium">
+            {formatCurrency(payload[1].value)}
+          </span>
         </div>
         <div className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-green-500" />
             High
           </span>
-          <span className="font-medium">{formatCurrency(payload[2].value)}</span>
+          <span className="font-medium">
+            {formatCurrency(payload[2].value)}
+          </span>
         </div>
       </div>
     </div>
@@ -106,7 +129,10 @@ export function ValuationHistoryChart({
   data,
   className,
 }: ValuationHistoryChartProps) {
-  const [ChartComponent, setChartComponent] = React.useState<React.ComponentType<{ data: ValuationHistoryDataPoint[] }> | null>(null);
+  const [ChartComponent, setChartComponent] =
+    React.useState<React.ComponentType<{
+      data: ValuationHistoryDataPoint[];
+    }> | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   // Lazy-load the chart component
@@ -131,7 +157,9 @@ export function ValuationHistoryChart({
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-[320px] text-[var(--muted-foreground)]">
-            <p className="text-sm">No historical data available yet</p>
+            <p className="text-sm">
+              No historical data available yet
+            </p>
           </div>
         </CardContent>
       </Card>
