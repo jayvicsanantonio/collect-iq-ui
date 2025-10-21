@@ -208,6 +208,7 @@ export default function CardPage() {
         pollingIntervalRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.type]); // Only depend on state.type, not fetchCard
 
   // ============================================================================
