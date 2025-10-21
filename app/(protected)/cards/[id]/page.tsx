@@ -198,7 +198,7 @@ export default function CardPage() {
     if (state.type === 'processing') {
       pollingIntervalRef.current = setInterval(() => {
         fetchCard();
-      }, 15000); // Poll every 15 seconds
+      }, 10000); // Poll every 10 seconds
     }
 
     // Cleanup on unmount
