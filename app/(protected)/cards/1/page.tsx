@@ -300,9 +300,26 @@ export default function Card1Page() {
     }
   }, [cardId, state, isRefreshing, toast]);
 
-  const handleManualRefresh = React.useCallback(() => {
-    fetchCard();
-  }, [fetchCard]);
+  const handleManualRefresh = React.useCallback(async () => {
+    try {
+      toast({
+        title: 'Re-evaluating card',
+        description: 'Requesting updated analysis...',
+      });
+
+      await api.revalueCard(cardId, { forceRefresh: true });
+      
+      // Fetch the updated card data
+      fetchCard();
+    } catch (error) {
+      console.error('Failed to re-evaluate card:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Re-evaluation failed',
+        description: error instanceof ApiError ? error.message : 'Failed to re-evaluate card. Please try again.',
+      });
+    }
+  }, [cardId, fetchCard, toast]);
 
   const handleDelete = React.useCallback(async () => {
     if (!confirm('Are you sure you want to delete this card?')) {
@@ -403,7 +420,7 @@ export default function Card1Page() {
                   className="gap-2"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Refresh
+                  Re-evaluate
                 </Button>
                 <Button
                   variant="outline"
