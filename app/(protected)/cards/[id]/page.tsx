@@ -422,7 +422,16 @@ export default function CardPage() {
   // ============================================================================
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="min-h-screen flex flex-col relative bg-[var(--background)] text-[var(--foreground)]">
+      {/* Gradient Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 landing-gradient" />
+      </div>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 landing-radials" />
+      </div>
+
+      <div className="container mx-auto max-w-4xl px-4 py-8 relative z-10">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <Button
@@ -525,6 +534,7 @@ export default function CardPage() {
           onRetry={state.canRetry ? handleManualRefresh : undefined}
         />
       )}
+      </div>
     </div>
   );
 }
